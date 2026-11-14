@@ -304,3 +304,31 @@ The Customers screen design is grounded in these source rules:
 - Customer 360 activity includes public support conversation, but excludes internal ticket notes and raw security/payment-provider identifiers.
 
 The Customers prototype keeps these boundaries visible and links to Academy, Revenue and Platform for canonical record work.
+
+
+## 12. Revenue record and lifecycle contract
+
+Revenue screen design is grounded in these distinctions:
+
+- PaymentIntent is the transaction snapshot; Refund is a separate append-only ledger row. A refunded PaymentIntent retains its original successful status.
+- A simulated PaymentIntent success is not money collected.
+- Partial refund leaves the associated application access unchanged under the current policy. A cumulative full refund cancels the relevant paid Subscription or revokes a direct course entitlement through the canonical service.
+- A full manual refund record is available today only through a Django Admin PaymentIntent action and must be used after the provider refund has already been processed. It does not initiate a Stripe/Razorpay refund. The current Admin Desk finance page remains read-only.
+- Subscription is an application access record, not proof of a payment. Its purchased price/currency snapshot is immutable. Product-level active subscription rules are distinct from CourseEntitlement.
+- Plan and price configuration are currently managed through Django Admin. Country-specific GeoPlanPrice overrides region overrides, which override global base PlanPrice. Geo pricing is not a second base price; one active global base row per Plan+interval is allowed.
+- Invoice is an immutable snapshot generated from a verified payment. Changing BillingSettings affects future invoices only.
+- Dispute is a separate case state machine linked to PaymentIntent. Opening or funds-withdrawn events are not final outcomes and do not revoke access.
+- Won clears chargeback state and leaves access unchanged. Confirmed Lost/Accepted calls the canonical exactly-once chargeback action, which cancels the affected Subscription or revokes the affected course entitlement. Do not add a second independent revoke button.
+- Dispute evidence packages are content-hashed; a submitted package is immutable. The application's submit action records an external provider submission reference. It does not upload evidence to the PSP.
+- BillingSettings tax calculation is currently a single fixed percentage, not a jurisdiction-aware GST/place-of-supply engine. Tax is disabled by default and the first enable requires explicit accountant confirmation.
+
+### Revenue end-to-end validation sequence
+
+1. Academy CourseOffer → Revenue dedicated hidden Plan/one-time price → PaymentIntent → provider verification → Academy CourseEntitlement.
+2. Revenue membership Plan/price → PaymentIntent → Subscription → Academy membership access where supported → Platform provisioning if configured.
+3. Provider-side refund → Refund ledger row → full/partial policy → affected Subscription/Entitlement consequence → reconciliation where required.
+4. PaymentIntent dispute flag → Dispute evidence case → external submission reference → final outcome → exactly-once access effect only for confirmed Lost/Accepted.
+5. Revenue Plan/price configuration → later checkout uses country/region/global resolution → PaymentIntent/Subscription preserve the selected historical price snapshot.
+6. BillingSettings updates → future invoice snapshots only; existing invoices remain unchanged.
+
+All hand-offs must open the canonical record. Customer 360 may show permission-safe context; it does not replace Revenue detail.
