@@ -332,3 +332,37 @@ Revenue screen design is grounded in these distinctions:
 6. BillingSettings updates → future invoice snapshots only; existing invoices remain unchanged.
 
 All hand-offs must open the canonical record. Customer 360 may show permission-safe context; it does not replace Revenue detail.
+
+
+## 13. Growth record and lifecycle contract
+
+Growth has its own acquisition/conversion and communication provenance, but it does not own the underlying learner payment, subscription, course or access records.
+
+Key contracts:
+- `SignupAttribution` is first-touch UTM + optional referring Campaign; first touch wins.
+- Last-touch email credit is the most recent marketing `Delivery` in SENT state before purchase, linked through CampaignRecipient or AutomationRun. It is not proof of message read or causality.
+- `CampaignRecipient` is the frozen schedule-time audience snapshot. `Campaign` model state and recipient state are not the same as a provider's Delivery state.
+- G2 send sweep uses provider=stub and marks Delivery SENT. This must not be interpreted as real provider send or delivery. Telegram/in-product CampaignAction records are staged and not wired into the campaign send sweep.
+- `Coupon` is checkout eligibility/configuration; `CouponRedemption` records the discount/base/final/currency snapshot after successful activation. Revenue PaymentIntent remains the transaction record.
+- ReferralCode/Referral are attribution relationships. Referee checkout discount, referrer ReferralReward and optional referee bonus are separate benefits.
+- ReferralReward is a currency-bearing bucket. UI totals must remain separated by currency; do not sum cents across INR/USD/EUR.
+- Reward unlocking currently checks PaymentIntent statuses that do not exist in the PaymentIntent choice set; this requires a source fix before treating automatic unlock as authoritative. Missing triggering subscription leaves reward pending.
+- Optional referee bonus helper currently logs only and does not persist an amount or ledger entry. Do not state that the bonus was credited.
+- GiftInvite is the intended-recipient claim token lifecycle; resulting Subscription is Revenue-owned. Invite/email success and subscription state are separate.
+- MarketingPreference opt-in defaults false; any global unsubscribe/bounce/complaint suppression overrides opt-in. Transactional EmailLog is not governed by the same marketing preference gate.
+- G1 Delivery and legacy EmailLog are separate ledgers. Resend webhook updates Delivery, not EmailLog.
+- TemplateVersion is an immutable snapshot; Campaign and Automation reference the frozen version.
+- AffiliateCommission is Growth accounting, not a payment. Its Paid state is not proof of an external transfer.
+
+### Growth end-to-end validation sequence
+
+1. First-touch UTM/referring Campaign → SignupAttribution → campaign/affiliate attribution context → Customers learner record.
+2. Campaign schedule → frozen CampaignRecipient snapshot → stub or real provider Delivery depending on verified provider → last-touch attribution → purchase.completed Event → Revenue PaymentIntent/Subscription.
+3. Referral code capture → Referral pending → eligible paid subscription purchase → Referral completed → referee discount snapshot and referrer reward bucket → unlock validation → per-currency credited reward → FIFO debit/subscription extension.
+4. Coupon eligibility → authoritative SignupAttribution campaign scope, plan tier, validity and stack caps → PaymentIntent coupon snapshot → CouponRedemption after successful activation.
+5. Gift created → GiftSubscription + token GiftInvite → transactional EmailLog send result → email-matched claim → Revenue Subscription → Customers Customer 360.
+6. Marketing opt-in check + global suppression → G1 Delivery eligibility; transactional EmailLog remains separately governed.
+7. Durable Event → AutomationRun → delayed fire-time eligibility re-check → immutable TemplateVersion → idempotent Delivery.
+8. Affiliate first-touch attribution → canonical Revenue PaymentIntent → one AffiliateCommission per affiliate/payment → controlled internal state transitions; payout rail is not verified.
+
+All cross-links must open the canonical record in Customers, Revenue, Academy or Platform. Growth may display source-backed context but must not create duplicate editable copies.
