@@ -5,12 +5,12 @@
 **Planning branch:** admin-desk-redesign-planning  
 **Application source branch:** my-new-branch  
 **Phase:** 0 — Revalidate the operating baseline  
-**Implementation status:** NOT AUTHORISED  
-**Audit status:** Source/deployment baseline and initial authenticated learner/admin tests verified; specialist-role and object-scope matrix remains outstanding.
+**Implementation status:** Security remediation merged to source branch; staging deployment pending Render workspace confirmation  
+**Audit status:** Source remediation merged and CI passed on Python 3.11/3.12; fixes are not yet active in staging because manual deployment is pending workspace confirmation. Specialist-role and object-scope matrix remains outstanding.
 
 ## 1. Executive finding
 
-The Admin Desk redesign is **not yet implementation-ready**. The current source and Render Academy deployment are tied to the same commit. Authenticated staging checks now include a server-verified non-staff learner session and a server-verified admin/staff session. The learner route-denial checks exposed a high-priority Growth referral rewards access-control failure; the admin baseline successfully loaded the core staff routes and six selected account/ticket detail pages, while the Growth analytics endpoint returned HTTP 500. The specialist-role matrix, true Django superuser verification and cross-persona object-level negative tests remain outstanding.
+The Admin Desk redesign is **not yet implementation-ready**. The source branch now contains a merged security remediation, validated by the current Academy backend CI and Verify Django Academy backend workflows on Python 3.11 and 3.12. The Render Academy staging service has not yet deployed that commit; the deploy requires confirmation of the Render workspace before an explicit trigger. Historical authenticated staging runs exposed Growth referral data to a learner, exposed user-administration POST endpoints to generic staff, allowed generic staff into Gift/Disputes workflows, and found an analytics HTTP 500. These are fixed in source but not yet live-verified. The specialist-role matrix, true Django superuser verification and cross-persona object-level tests remain outstanding.
 
 The current application is a collection of existing staff routes, permission-gated views, Django Admin model surfaces and custom staff endpoints. It is not yet the approved unified six-domain operating shell. Some proposed workspace screens are new presentation layers over existing models; others would require new staff pages or service capabilities.
 
@@ -851,3 +851,56 @@ The test account is currently a useful generic Django-staff persona, but its app
 **Next sequence:** map role/Group/model permissions from source and close the three high-priority server-side defects (Growth referral page, staff approvals/ban/unban boundary, analytics report) under an explicit implementation approval. Then create isolated staging test personas with distinct permissions/assignments and perform GET-only cross-persona/object-scope tests. Keep POST tests separate. No staff account creation/deletion or account-role adjustment was performed by this audit.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.**
+
+
+## 22. Security remediation merged — 14 November 2026
+
+### Source branch and pull request
+
+- **Merged PR:** [#67 — Security: tighten staff, Growth and Disputes permissions](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/67)
+- **Source branch:** `my-new-branch`
+- **Merged commit / current source HEAD:** `294c173e8dd084c31595ac2d5aeab93d64f31481`
+- **Fix branch head before squash merge:** `87a5972a2f2006bf5c845c2ba5c7e3f99b22b673`
+- PR was merged by squash only after both current-head backend workflows passed.
+
+### Fixes delivered in source
+
+1. **User administration APIs:** `IsRoleAdmin` now requires an active authenticated application Admin (`role=admin`) or Django superuser. Generic Django `is_staff=true` does not grant access to staff approvals, ban or unban endpoints.
+2. **Growth referral rewards overview:** requires `growth.view_referralreward` and `growth.view_referralsettings` for departmental Growth staff; application Admin/superusers retain access.
+3. **Gift creation:** requires `growth.add_giftinvite`, `subscriptions.add_giftsubscription` and `subscriptions.view_plan`, matching the actual GiftInvite/GiftSubscription creation and Plan selection side effects.
+4. **Growth analytics:** the report requires explicit view grants for Events, Deliveries, Campaigns, CouponRedemptions and ReferralRewards. The missing `Sum` ORM import in the promotion aggregation is fixed.
+5. **Disputes:** dashboard/detail require `disputes.view_dispute`; all actions require both `disputes.view_dispute` and `disputes.change_dispute`. Existing dispute services are retained.
+6. Added regression tests for learner denial, generic staff denial, positive domain-permission access, user-admin API denial, Gift side-effect permissions, analytics aggregation and permissions, and Disputes read/action permissions.
+
+### CI evidence on the exact merged PR head
+
+Current-head PR commit: `87a5972a2f2006bf5c845c2ba5c7e3f99b22b673`.
+
+- Academy backend CI run [43623494874](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43623494874): passed on Python 3.11 and 3.12, plus Tiptap compatibility job.
+- Python 3.11 Academy backend suite: **1,338 passed, 1 skipped, 186 subtests passed**.
+- Python 3.12 Academy backend suite: **1,338 passed, 1 skipped, 186 subtests passed**.
+- Verify Django Academy backend run [43623494896](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43623494896): passed on Python 3.11 and 3.12.
+- Python 3.11 Verify suite: **1,338 passed, 1 skipped, 534 warnings, 186 subtests passed**.
+- Python 3.12 Verify suite: **1,338 passed, 1 skipped, 534 warnings, 186 subtests passed**.
+- Tiptap bundle/DOM compatibility suite passed. The PR does not make Tiptap the default production Course Builder.
+
+### Render staging state — not deployed yet
+
+- Academy service: `tradethesis-academy-staging`, ID `srv-db9ioke1egvs73feb8ag`.
+- Configured source branch remains `my-new-branch`; auto-deploy remains disabled.
+- The live deployment observed immediately after merge still points to old SHA `8832ecf9cc979747dc2715a39ecfeb7a292e55ee`.
+- Render lists one workspace: **Roger Rose's Workspace**, ID `tea-cspa923gbbvc73bakhj0`.
+- The Render deploy action rejected the first request because no workspace was selected. No deploy was triggered and no Render setting changed. The owner must confirm that exact workspace before the staging deploy can be issued.
+
+**Status distinction:** The access-control and analytics defects are fixed in merged source and CI-tested. They are **not yet verified in live staging**, because the new commit is not deployed there.
+
+### Deferred / still-open governance gates
+
+- Global Django Admin remains accessible to active Django staff under Django's built-in staff boundary. It was not globally locked in this PR: owner decisions require superuser-only target access but workflow-by-workflow removal of ordinary staff access only after replacement parity. Continue the Admin Desk parity/cutover plan before changing this.
+- The promoted account currently represents generic Django staff (`role=user`, `is_staff=true`). No separate Support, Academy, Revenue, Growth or Platform personas were created or modified. Future departmental access should be granted with explicit Groups/model permissions.
+- The Support ticket reviewer fallback for plans with no ticket approvers remains part of the existing scope model and still needs an explicit policy decision/test.
+- Live verification after deployment remains required: ordinary learner denial on Growth referrals; generic staff denial on user-admin, Gift, Disputes and Growth analytics routes; positive access for authorised Admin/Growth/Gift/Disputes permission profiles; and confirmation that existing Command Centre/Operations/Support routes still work.
+- POST actions were not exercised against staging. They must not be manually invoked with real data as a smoke test.
+- True Django superuser status for the admin baseline account remains unverified; the API serializer does not expose `is_superuser`.
+
+**Phase 0 remains open until the merged commit is deployed to Academy staging and the read-only learner/generic-staff regression audit is repeated.** No production deployment was made.
