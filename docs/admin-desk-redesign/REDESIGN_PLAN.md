@@ -573,3 +573,38 @@ The following source files informed this planning brief:
 - `backend/templates/base.html`
 
 This is a source-level baseline. Before finalising screen specifications, verify the current deployed HEAD, inspect the live authenticated UI, confirm staff roles/permissions and test the relevant routes with appropriately authorised accounts.
+
+
+## 12. Progress snapshot — 14 November 2026
+
+This is a planning-only progress record. It does not alter the original approval gates.
+
+| Workstream | Current progress | Remaining |
+|---|---|---|
+| Unified operating workspace | Top-level six-domain model approved | Child destinations and role visibility still under review |
+| Command Centre | V2 shell and three overview concepts prototyped | Confirm queue composition, priority logic, notifications vs work |
+| Visual direction | V2 forest-green / warm-ivory template selected | Finish tokens, accessible contrast, keyboard and screen-reader review |
+| Domain architecture | Six-domain blueprint and cross-domain ownership model documented | Owner review of detailed child structure and journeys |
+| Route map | Source-level route-to-workspace inventory created | Recheck deployed HEAD and inspect authenticated live pages / role-specific access |
+| Academy | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
+| Customers | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
+| Revenue | High-level ownership/relationships documented | Screen-level design not started |
+| Growth | High-level ownership/relationships documented | Screen-level design not started |
+| Platform | High-level ownership/relationships documented | Screen-level design not started |
+| Handoff and resumption | Dedicated `HANDOFF_AND_RESUME.md` created | Update it after each major design pass |
+
+### Phase status
+
+- **Phase 0 — Baseline capture and route audit:** source-level inventory is substantially documented; authenticated live visual and role audit remains outstanding.
+- **Phase 1 — User jobs, roles and task prioritisation:** initial operating model recorded; complete staff/persona and permission matrix remains open.
+- **Phase 2 — Information architecture:** six top-level domains and order approved; child navigation is proposed and remains reviewable.
+- **Phase 3 — Command Centre concepts:** three concepts prototyped; final composition and prioritisation rules remain open.
+- **Phase 4 — Screen-level wireframes:** Academy and Customers V1 screens/specs drafted; Revenue, Growth and Platform remain.
+- **Phase 5 — Visual design system:** common V2 visual direction selected; complete component tokens and accessibility validation remain.
+- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy and Customers static prototypes created and smoke-tested; end-to-end holistic prototype remains.
+- **Phase 7 — Review and validation:** owner review is pending for the domain mockups; accessibility and authenticated staging parity remain.
+- **Phase 8 — Implementation handoff:** not started; only begins after the user approves the design and technical plan.
+
+### Current implementation boundary
+
+No application code, migrations, routes, permissions, API contracts, tests, Render settings or deployments have been changed by this planning branch. Do not begin implementation until the owner explicitly approves the design handoff.
