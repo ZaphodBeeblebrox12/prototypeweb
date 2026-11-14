@@ -1,6 +1,5 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -9,12 +8,32 @@ from . import services
 from .models import Dispute
 
 
+def _has_dispute_permissions(user, permissions):
+    if not getattr(user, "is_authenticated", False) or not getattr(user, "is_active", False):
+        return False
+    if getattr(user, "is_superuser", False) or getattr(user, "role", None) == "admin":
+        return True
+    return bool(
+        getattr(user, "is_staff", False)
+        and user.has_perms(permissions)
+    )
+
+
+def dispute_permission_required(*permissions):
+    """Require the relevant Disputes model permission(s), not generic staff."""
+    return user_passes_test(
+        lambda user: _has_dispute_permissions(user, permissions),
+        login_url="/accounts/login/",
+        raise_exception=True,
+    )
+
+
 def _visible(user):
     return Dispute.objects.select_related(
         "payment_intent__user", "payment_intent__plan", "assigned_to")
 
 
-@staff_member_required
+@dispute_permission_required("disputes.view_dispute")
 def dashboard(request):
     qs = _visible(request.user)
     now = timezone.now()
@@ -41,7 +60,7 @@ def dashboard(request):
                    "now": now})
 
 
-@staff_member_required
+@dispute_permission_required("disputes.view_dispute")
 def detail(request, pk):
     dispute = get_object_or_404(_visible(request.user), pk=pk)
     intent = dispute.payment_intent
@@ -71,7 +90,7 @@ def detail(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def add_note(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     note = request.POST.get("note", "").strip()
