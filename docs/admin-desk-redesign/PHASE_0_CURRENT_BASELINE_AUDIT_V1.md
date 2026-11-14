@@ -531,6 +531,10 @@ The 18 source-only commits since the planning branch merge base still touch only
 
 The newest three commits add the `Pause`, `Interpret` and `Apply` notebook migration described in Section 3.1. No Admin Desk route, view, permission or test file changed in this source-only delta. Add explicit checks for: repeated Builder load idempotence; exact Trading Path lesson matching; preserving target notebook title/metadata and saved Q&A; removing only the Key takeaways section while retaining surrounding lesson content; and no mutation of published Course records.
 
+A static scan of the current import JSON found five modules and 48 lessons. Twenty-seven lessons have exactly three non-empty notebook prompts labelled `Pause`, `Interpret` and `Apply` in that order; the other 21 have no populated prompt array. None of the 48 source lesson bodies currently contains a Markdown `Key takeaways` heading. Thus, the source JSON demonstrates the 27 available notebook payloads but does not exercise removal of a legacy Key takeaways section from a saved target draft.
+
+**Conditional cleanup edge case:** `stripKeyTakeawaysContent()` stops at the next Markdown heading of any level, not the next heading at the same or a higher level. If a saved target's Key takeaways section contains nested subheadings, the helper may remove the section title and preceding text but leave the nested subsection content behind. Whether any actual target draft has that structure is not verified. Add fixtures for nested headings and compare the result against saved draft content before signing off this migration.
+
 ### 13.3 CI on the current deployed source SHA
 
 GitHub Actions **Academy backend CI**, run [1891](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43616758224), for commit `8832ecf9cc979747dc2715a39ecfeb7a292e55ee`, completed with conclusion **success**:
