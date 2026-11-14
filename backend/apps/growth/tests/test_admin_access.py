@@ -46,11 +46,6 @@ class ReferralRewardsOverviewAccessTests(TestCase):
 
     def test_growth_staff_with_both_read_permissions_is_allowed(self):
         staff = make_user("growth-staff", is_staff=True)
-        grant(
-            staff,
-            GiftInvite,
-            "view_giftinvite",
-        )
         from apps.growth.models import ReferralReward, ReferralSettings
 
         grant(staff, ReferralReward, "view_referralreward")
