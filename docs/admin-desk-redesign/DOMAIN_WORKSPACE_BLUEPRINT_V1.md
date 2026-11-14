@@ -24,7 +24,7 @@ The design must distinguish three things:
 - **Proposed Admin Desk experience:** a new way to organise or present existing capability inside the shared shell.
 - **Unverified or future capability:** something that needs further source/role audit or a separately approved product decision. A mockup must not present it as live.
 
-The visual shell is selected as the common template. The content hierarchy, operational rules, detailed actions and screen layouts remain subject to review.
+The V2 shell is the selected shared visual template for all six domains. The content hierarchy, operational rules, detailed actions and screen layouts remain subject to review.
 
 ## 2. The operating model
 
@@ -501,7 +501,7 @@ Recommended list/detail fields:
 
 The detail page should show the commercial snapshot used for the transaction, not recompute a historical price using today's Plan configuration.
 
-A failed payment is not proof that access was granted. A successful payment does not by itself prove external community provisioning completed. Surface payment, entitlement and provisioning as linked but separate states.
+The course-purchase fulfilment path is source-verified: `payment_confirm` calls `activate_paid_subscription`; when the PaymentIntent maps to a CourseOffer, that path dispatches to `activate_course_payment`, which atomically claims the verified payment and calls the course-entitlement grant service. A failed or merely pending payment is not proof that access was granted. A successful course entitlement or membership subscription still does not prove external community provisioning completed. Surface payment, application access and external provisioning as linked but separate states.
 
 Refund and dispute actions must use existing payment services and provider/webhook rules. The detailed action inventory, approval/confirmation and permission requirements must be verified before building a writable finance screen.
 
@@ -1007,3 +1007,16 @@ Before this blueprint becomes an implementation specification:
 - Record open issues and explicit owner approval.
 
 This document is a design blueprint, not an implementation authorisation.
+
+
+## 15. Workspace map and prototype artefacts
+
+The first clickable six-domain navigation and relationship board is maintained as a standalone HTML planning artefact:
+
+- `tradethesis_admin_six_domain_workspaces_v1.html`
+- It uses the selected V2 visual template and provides a clickable overview and child destination for every proposed tab.
+- Every page explains its workspace responsibility, records, lifecycle/hand-off, connected domains, source/proposal status and preservation rule.
+- Records and activity are illustrative; it does not call live APIs or mutate records.
+- This is an architecture review board, not the final visual design of every production screen.
+
+The next screen-level design passes should turn each destination into a focused wireframe/prototype, beginning with Command Centre and Academy, then test the same fictional records through Customers and Revenue before extending the journeys into Growth and Platform.
