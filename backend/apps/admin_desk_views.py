@@ -2540,7 +2540,11 @@ def admin_desk_search(request):
                 "Customers",
                 "Support ticket",
                 f"Ticket #{ticket.short_id} · {ticket.user.username}",
-                f"{ticket.get_category_display()} · {ticket.get_status_display()} · {ticket.get_priority_display()} priority",
+                (
+                    f"{ticket.get_category_display()} · "
+                    f"{ticket.get_status_display()} · "
+                    f"{ticket.get_priority_display()} priority"
+                ),
                 reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
             )
 
@@ -2567,7 +2571,10 @@ def admin_desk_search(request):
                     "Academy",
                     "Course",
                     course.title,
-                    f"{course.get_status_display()} · Updated {timezone.localtime(course.updated_at):%d %b %Y, %H:%M}",
+                    (
+                        f"{course.get_status_display()} · Updated "
+                        f"{timezone.localtime(course.updated_at):%d %b %Y, %H:%M}"
+                    ),
                     course_list_url,
                 )
 
@@ -2646,7 +2653,10 @@ def admin_desk_search(request):
                     "Revenue",
                     "Invoice",
                     invoice.invoice_number,
-                    f"{customer} · {invoice.description} · {invoice.currency} {invoice.total_cents / 100:,.2f}",
+                    (
+                        f"{customer} · {invoice.description} · "
+                        f"{invoice.currency} {invoice.total_cents / 100:,.2f}"
+                    ),
                     reverse("staff_admin_desk_invoice_detail", args=[invoice.pk]),
                 )
 
@@ -2715,7 +2725,10 @@ def admin_desk_search(request):
                     "Growth",
                     "Gift invitation",
                     "Gift invitation",
-                    f"{invite.get_status_display()} · Expires {timezone.localtime(invite.expires_at):%d %b %Y}",
+                    (
+                        f"{invite.get_status_display()} · Expires "
+                        f"{timezone.localtime(invite.expires_at):%d %b %Y}"
+                    ),
                     invite_url,
                 )
 
@@ -2733,7 +2746,10 @@ def admin_desk_search(request):
                     "Platform",
                     "Background job",
                     f"Job #{job.pk} · {job.kind}",
-                    f"{job.status.title()} · Updated {timezone.localtime(job.updated_at):%d %b %Y, %H:%M}",
+                    (
+                        f"{job.status.title()} · Updated "
+                        f"{timezone.localtime(job.updated_at):%d %b %Y, %H:%M}"
+                    ),
                     reverse("staff_admin_desk_operations_job", args=[job.pk]),
                 )
 
