@@ -341,7 +341,7 @@ class AdminDeskTests(TestCase):
             name="Needle Payment Plan",
             tier=Plan.Tier.ENTERPRISE,
         )
-        payment = PaymentIntent.objects.create(
+        PaymentIntent.objects.create(
             user=member,
             plan=payment_plan,
             provider=PaymentIntent.Provider.RAZORPAY,
@@ -357,7 +357,10 @@ class AdminDeskTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200, response.content)
-        groups = {group["name"]: group["results"] for group in response.context["search_groups"]}
+        groups = {
+            group["name"]: group["results"]
+            for group in response.context["search_groups"]
+        }
         self.assertIn("Customers", groups)
         self.assertIn("Academy", groups)
         self.assertIn("Revenue", groups)
