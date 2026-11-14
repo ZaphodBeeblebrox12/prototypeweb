@@ -278,7 +278,6 @@
 .tt-admin-desk-layout.is-collapsed .tt-desk-brand-copy,
 .tt-admin-desk-layout.is-collapsed .tt-desk-workspace,
 .tt-admin-desk-layout.is-collapsed .tt-desk-nav-group h2,
-.tt-admin-desk-layout.is-collapsed .tt-desk-nav-link span,
 .tt-admin-desk-layout.is-collapsed .tt-desk-sidebar-foot,
 .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link .tt-desk-external {
   display: none;
@@ -297,6 +296,18 @@
 .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link > .bi:first-child {
   font-size: 16px;
 }
+/* Keep collapsed link names available to screen readers. */
+.tt-admin-desk-layout.is-collapsed .tt-desk-nav-link span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link--advanced {
   margin-top: 5px;
 }
@@ -314,6 +325,9 @@
   }
   .tt-admin-desk-layout .page-context {
     margin-bottom: 17px;
+  }
+  body.tt-desk-drawer-open {
+    overflow: hidden;
   }
   .tt-desk-sidebar {
     position: fixed;
@@ -366,10 +380,20 @@
   .tt-admin-desk-layout.is-collapsed .tt-desk-brand-copy,
   .tt-admin-desk-layout.is-collapsed .tt-desk-workspace,
   .tt-admin-desk-layout.is-collapsed .tt-desk-nav-group h2,
-  .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link span,
   .tt-admin-desk-layout.is-collapsed .tt-desk-sidebar-foot,
   .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link .tt-desk-external {
     display: revert;
+  }
+  .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link span {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    border: 0;
   }
   .tt-admin-desk-layout.is-collapsed .tt-desk-nav-link {
     justify-content: flex-start;
