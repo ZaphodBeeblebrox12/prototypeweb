@@ -368,7 +368,12 @@ class AdminDeskTests(TestCase):
                 "view_paymentintent",
                 "staff_admin_desk_revenue",
                 {"payment_summary"},
-                {"invoice_summary", "subscription_summary", "dispute_summary", "business_url"},
+                {
+                    "invoice_summary",
+                    "subscription_summary",
+                    "dispute_summary",
+                    "business_url",
+                },
             ),
             (
                 "growth-specialist",
@@ -376,7 +381,13 @@ class AdminDeskTests(TestCase):
                 "view_event",
                 "staff_admin_desk_growth",
                 {"purchase_report"},
-                {"email_report", "campaign_report", "promotion_report", "referral_report", "gift_summary"},
+                {
+                    "email_report",
+                    "campaign_report",
+                    "promotion_report",
+                    "referral_report",
+                    "gift_summary",
+                },
             ),
             (
                 "platform-specialist",
@@ -384,11 +395,23 @@ class AdminDeskTests(TestCase):
                 "view_job",
                 "staff_admin_desk_platform",
                 {"job_summary"},
-                {"provisioning_summary", "scheduler_summary", "audit_summary", "security_summary"},
+                {
+                    "provisioning_summary",
+                    "scheduler_summary",
+                    "audit_summary",
+                    "security_summary",
+                },
             ),
         )
 
-        for username, app_label, codename, route_name, allowed_keys, denied_keys in scenarios:
+        for (
+            username,
+            app_label,
+            codename,
+            route_name,
+            allowed_keys,
+            denied_keys,
+        ) in scenarios:
             with self.subTest(username=username):
                 operator = staff_with_permission(username, app_label, codename)
                 self.client.force_login(operator)
