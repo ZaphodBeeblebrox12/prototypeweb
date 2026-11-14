@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Platform | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Platform{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-platform{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--line-soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-platform *{box-sizing:border-box}
+  .tt-platform a{color:#315b43;text-underline-offset:3px}
+  .tt-platform .head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:4px 0 19px}
+  .tt-platform .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-platform h1{margin:0;color:var(--ink);font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-platform .intro{max-width:760px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+  .tt-platform .button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 12px;color:#fff;border:1px solid var(--green);border-radius:4px;background:var(--green);font-size:11px;font-weight:750;text-decoration:none}
+  .tt-platform .button.secondary{color:var(--green);background:var(--surface)}
+  .tt-platform .section{margin:13px 0}
+  .tt-platform .panel{min-width:0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-platform .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .tt-platform .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-platform .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-platform .panel-body{padding:13px 15px}
+  .tt-platform .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+  .tt-platform .stat{min-width:0;padding:12px;border:1px solid var(--line-soft);border-radius:4px;background:#fff}
+  .tt-platform .stat strong{display:block;color:var(--ink);font:600 23px/1 Georgia,"Times New Roman",serif;font-variant-numeric:tabular-nums}
+  .tt-platform .stat span{display:block;margin-top:6px;color:var(--muted);font-size:10px}
+  .tt-platform .stat.alert strong{color:#9b4b40}
+  .tt-platform .table-wrap{overflow:auto}
+  .tt-platform table{width:100%;border-collapse:collapse;min-width:600px}
+  .tt-platform th,.tt-platform td{padding:10px 9px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-platform th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+  .tt-platform tr:last-child td{border-bottom:0}
+  .tt-platform .muted{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.4}
+  .tt-platform .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750;white-space:nowrap}
+  .tt-platform .pill.failed,.tt-platform .pill.unknown,.tt-platform .pill.error{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-platform .pill.pending,.tt-platform .pill.running{border-color:#e7d6b8;background:#fbf4e8;color:#835f30}
+  .tt-platform .empty{padding:20px 8px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-platform .note{margin:0;color:var(--muted);font-size:10px;line-height:1.55}
+  .tt-platform .policy-list{display:grid;gap:9px;margin:12px 0 0;padding:0;list-style:none}
+  .tt-platform .policy-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--line-soft);font-size:10px}
+  .tt-platform .policy-list li:last-child{padding-bottom:0;border-bottom:0}
+  .tt-platform .link-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  @media(max-width:900px){.tt-platform .stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){.tt-platform h1{font-size:27px}.tt-platform .head{align-items:flex-start}.tt-platform .head .button{width:100%}.tt-platform .panel-head{align-items:flex-start;flex-direction:column}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-platform">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Platform / Service operations</p>
+      <h1>Platform overview</h1>
+      <p class="intro">A permission-scoped view of background work, community provisioning, scheduler runs and audit signals. This page reports stored system state; it does not claim an external provider is healthy or complete merely because a record exists.</p>
+    </div>
+    <a class="button secondary" href="{{ operations_url }}">Open operations timeline →</a>
+  </header>
+
+  {% if job_summary %}
+  <section class="panel section" aria-labelledby="platform-jobs-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-jobs-heading">Background jobs</h2><p>Durable job records · read-only summary</p></div>
+      <a href="{{ job_summary.url }}">Open job register →</a>
+    </div>
+    <div class="panel-body">
+      <div class="stats">
+        <div class="stat"><strong>{{ job_summary.pending }}</strong><span>Pending</span></div>
+        <div class="stat"><strong>{{ job_summary.running }}</strong><span>Running</span></div>
+        <div class="stat alert"><strong>{{ job_summary.failed_7d }}</strong><span>Failed · last 7 days</span></div>
+        <div class="stat alert"><strong>{{ job_summary.stalled }}</strong><span>Open jobs · 3+ attempts</span></div>
+      </div>
+      <div class="table-wrap" style="margin-top:13px">
+        <table>
+          <thead><tr><th>Job</th><th>Status</th><th>Attempts</th><th>Updated</th><th></th></tr></thead>
+          <tbody>
+            {% for item in job_incidents %}
+            <tr>
+              <td><strong>{{ item.job.kind }}</strong><span class="muted">Created {{ item.job.created_at|date:"j M Y, H:i" }}</span></td>
+              <td><span class="pill {% if item.job.status == 'failed' %}failed{% elif item.job.status == 'pending' %}pending{% elif item.job.status == 'running' %}running{% endif %}">{{ item.job.get_status_display }}</span></td>
+              <td>{{ item.job.attempts }} / {{ item.job.max_attempts }}</td>
+              <td>{{ item.job.updated_at|date:"j M Y, H:i" }}</td>
+              <td><a href="{{ item.url }}">Details →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty">No failed, stalled or long-running job incidents were found in this view.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:9px">No retry control is exposed here. Use the supported job workflow only after its retry semantics and permissions have been verified.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if provisioning_summary %}
+  <section class="panel section" aria-labelledby="platform-provisioning-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-provisioning-heading">Provisioning &amp; integrations</h2><p>Persisted external side-effect state · last 7 days for exceptions</p></div>
+      <a href="{{ operations_url }}">Operations timeline →</a>
+    </div>
+    <div class="panel-body">
+      <div class="stats">
+        <div class="stat"><strong>{{ provisioning_summary.active }}</strong><span>In-progress operations</span></div>
+        <div class="stat alert"><strong>{{ provisioning_summary.failed }}</strong><span>Failed · last 7 days</span></div>
+        <div class="stat alert"><strong>{{ provisioning_summary.unknown }}</strong><span>Unknown external state · last 7 days</span></div>
+      </div>
+      <div class="table-wrap" style="margin-top:13px">
+        <table>
+          <thead><tr><th>Operation</th><th>Stored state</th><th>Attempts</th><th>Updated</th><th></th></tr></thead>
+          <tbody>
+            {% for item in provisioning_incidents %}
+            <tr>
+              <td><strong>{{ item.operation.get_operation_display }}</strong></td>
+              <td><span class="pill {% if item.operation.state == 'failed' %}failed{% elif item.operation.state == 'unknown_external_state' %}unknown{% endif %}">{{ item.operation.get_state_display }}</span></td>
+              <td>{{ item.operation.attempts }}</td>
+              <td>{{ item.operation.updated_at|date:"j M Y, H:i" }}</td>
+              <td><a href="{{ item.url }}">Details →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty">No failed or unknown provisioning operations were recorded in this period.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:9px">An unknown external state needs investigation before another side effect is attempted. This overview does not retry grants, revocations or provider calls.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if scheduler_summary %}
+  <section class="panel section" aria-labelledby="platform-scheduler-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-scheduler-heading">Periodic scheduler</h2><p>Configured lightweight recurring jobs</p></div>
+      <a href="{{ scheduler_summary.url }}">Scheduler register →</a>
+    </div>
+    <div class="panel-body">
+      <div class="stats">
+        <div class="stat"><strong>{{ scheduler_summary.enabled }}</strong><span>Enabled schedules</span></div>
+        <div class="stat alert"><strong>{{ scheduler_summary.errors }}</strong><span>Last run reported error</span></div>
+        <div class="stat"><strong>{{ scheduler_summary.never_run }}</strong><span>Enabled · never run</span></div>
+      </div>
+      <div class="table-wrap" style="margin-top:13px">
+        <table>
+          <thead><tr><th>Schedule</th><th>Enabled</th><th>Last run</th><th>Last status</th></tr></thead>
+          <tbody>
+            {% for item in scheduler_items %}
+            <tr>
+              <td><strong>{{ item.name }}</strong></td>
+              <td>{% if item.enabled %}Yes{% else %}No{% endif %}</td>
+              <td>{{ item.last_run_at|date:"j M Y, H:i"|default:"Not run" }}</td>
+              <td>{% if item.last_status %}<span class="pill {% if item.last_status == 'error' %}error{% endif %}">{{ item.get_last_status_display }}</span>{% else %}—{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="empty">No periodic schedules are configured.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if policy_readiness %}
+  <section class="panel section" aria-labelledby="platform-policy-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-policy-heading">Policies &amp; readiness</h2><p>Versioned public sales policies</p></div>
+      <a href="{{ policy_readiness.url }}">Policy register →</a>
+    </div>
+    <div class="panel-body">
+      {% if policy_readiness.ready %}
+      <span class="pill">Required policy versions present</span>
+      <p class="note" style="margin-top:8px">This is a database readiness check, not a legal review or an end-to-end checkout test.</p>
+      {% else %}
+      <span class="pill failed">Checkout consent blocked</span>
+      <ul class="policy-list">
+        {% for item in policy_readiness.items %}
+        {% if not item.ready %}
+        <li><span>{{ item.label }}{% if item.version %} · v{{ item.version }}{% endif %}<span class="muted">{{ item.reason }}</span></span><span class="pill error">Needs review</span></li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if audit_summary %}
+  <section class="panel section" aria-labelledby="platform-audit-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-audit-heading">Audit trail</h2><p>Application audit records · last 7 days</p></div>
+      <a href="{{ audit_summary.url }}">Open audit register →</a>
+    </div>
+    <div class="panel-body">
+      <div class="stats" style="grid-template-columns:minmax(0,180px)">
+        <div class="stat"><strong>{{ audit_summary.recent }}</strong><span>Recent audit records</span></div>
+      </div>
+      <div class="table-wrap" style="margin-top:13px">
+        <table>
+          <thead><tr><th>Action</th><th>Record type</th><th>Actor</th><th>When</th></tr></thead>
+          <tbody>
+            {% for item in audit_items %}
+            <tr>
+              <td><strong>{{ item.action }}</strong></td>
+              <td>{{ item.object_type|default:"—" }}</td>
+              <td>{% if item.user %}{{ item.user.get_username }}{% else %}System{% endif %}</td>
+              <td>{{ item.created_at|date:"j M Y, H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="empty">No audit entries were recorded in this period.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:9px">Metadata and payload fields are intentionally omitted from this overview; use the authorised audit register for deeper review.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if security_summary %}
+  <section class="panel section" aria-labelledby="platform-security-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-security-heading">Security events</h2><p>Event type and timestamp only</p></div>
+    </div>
+    <div class="panel-body">
+      <div class="stats" style="grid-template-columns:minmax(0,180px)">
+        <div class="stat"><strong>{{ security_summary.recent }}</strong><span>Events · last 7 days</span></div>
+      </div>
+      <div class="table-wrap" style="margin-top:13px">
+        <table>
+          <thead><tr><th>Event</th><th>Occurred</th></tr></thead>
+          <tbody>
+            {% for item in security_items %}
+            <tr><td>{{ item.get_event_type_display }}</td><td>{{ item.occurred_at|date:"j M Y, H:i" }}</td></tr>
+            {% empty %}
+            <tr><td colspan="2" class="empty">No security events were recorded in this period.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:9px">Raw IP addresses, user agents and event detail are not rendered on this screen.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not has_platform_records %}
+  <section class="panel section"><div class="panel-body"><p class="note">No Platform record panels are available for your current permissions. The operations timeline remains available for staff-level support signals.</p></div></section>
+  {% endif %}
+  <p class="note">Read-only workspace. It reports persisted records and status fields; it does not expose unverified retry controls or imply provider-side completion.</p>
+</div>
+{% endblock %}

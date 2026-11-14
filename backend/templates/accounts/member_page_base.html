@@ -10,13 +10,25 @@
   <link rel="stylesheet" href="{% static 'css/member-pages.css' %}">
   <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
   <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css">
+  {% if user.is_authenticated and user.is_staff %}
+  <link rel="stylesheet" href="{% static 'css/admin-desk-shell.css' %}">
+  {% endif %}
   {% block extra_css %}{% endblock %}
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   {% include "partials/sitewide_nav.html" %}
+  {% if user.is_authenticated and user.is_staff %}
+  <div class="tt-admin-desk-layout" data-admin-desk-shell>
+    {% include "admin/desk_sidebar.html" %}
+    <main class="content tt-admin-desk-main" id="main-content" tabindex="-1">
+      <button class="tt-desk-mobile-trigger" type="button" data-desk-mobile-toggle aria-expanded="false" aria-controls="ttDeskSidebar">
+        <i class="bi bi-list" aria-hidden="true"></i> Admin Desk navigation
+      </button>
+  {% else %}
   <div class="app">
     <main class="content" id="main-content" tabindex="-1">
+  {% endif %}
       <div class="member-desk-context">
         <span class="kicker">TRADETHESIS · MEMBER AREA</span>
         {% if user.is_authenticated %}<span class="member-signed-in">Signed in as {{ user.email|default:user.username }}</span>{% else %}<a class="member-signed-in" href="{% url 'account_login' %}">Sign in to your member area ↗</a>{% endif %}
@@ -28,6 +40,7 @@
           {% endfor %}
         </div>
       {% endif %}
+      {% if not user.is_authenticated or not user.is_staff %}
       <nav class="member-section-nav" aria-label="Member area">
         <a class="member-section-tab{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}" href="{% url 'dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Overview</a>
         <a class="member-section-tab{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'profile' %}"{% if request.resolver_match.url_name == 'profile' %} aria-current="page"{% endif %}>Profile &amp; security</a>
@@ -36,6 +49,7 @@
         <a class="member-section-tab{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' or request.resolver_match.url_name == 'upgrade-page' %} active{% endif %}" href="{% url 'manage-subscription' %}"{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' or request.resolver_match.url_name == 'upgrade-page' %} aria-current="page"{% endif %}>Billing &amp; invoices</a>
         <a class="member-section-tab{% if request.resolver_match.namespace == 'support' or request.resolver_match.url_name == 'support' %} active{% endif %}" href="{% url 'support:my_tickets' %}"{% if request.resolver_match.namespace == 'support' or request.resolver_match.url_name == 'support' %} aria-current="page"{% endif %}>Help &amp; support</a>
       </nav>
+      {% endif %}
       <section class="page active member-page">
         <header class="page-head">
           <div class="member-page-heading">
@@ -49,8 +63,13 @@
       </section>
     </main>
   </div>
+  {% if not user.is_authenticated or not user.is_staff %}
   {% include "partials/sitewide_footer.html" %}
+  {% endif %}
   <script src="{% static 'js/sitewide-nav.js' %}" defer></script>
+  {% if user.is_authenticated and user.is_staff %}
+  <script src="{% static 'js/admin-desk-shell.js' %}" defer></script>
+  {% endif %}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

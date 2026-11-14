@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Revenue | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Revenue{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-revenue{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--line-soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-revenue *{box-sizing:border-box}
+  .tt-revenue a{color:#315b43;text-underline-offset:3px}
+  .tt-revenue .head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:4px 0 19px}
+  .tt-revenue .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-revenue h1{margin:0;color:var(--ink);font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-revenue .intro{max-width:790px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+  .tt-revenue .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tt-revenue .panel{min-width:0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-revenue .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .tt-revenue .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-revenue .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-revenue .panel-body{padding:13px 15px}
+  .tt-revenue .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .tt-revenue .stat{min-width:0;padding:11px;border:1px solid var(--line-soft);border-radius:4px;background:#fff}
+  .tt-revenue .stat strong{display:block;color:var(--ink);font:600 23px/1 Georgia,"Times New Roman",serif;font-variant-numeric:tabular-nums}
+  .tt-revenue .stat span{display:block;margin-top:6px;color:var(--muted);font-size:9px;line-height:1.35}
+  .tt-revenue .stat.alert strong{color:#9b4b40}
+  .tt-revenue .table-wrap{overflow:auto;margin-top:12px}
+  .tt-revenue table{width:100%;border-collapse:collapse;min-width:420px}
+  .tt-revenue th,.tt-revenue td{padding:9px 8px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-revenue th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+  .tt-revenue tr:last-child td{border-bottom:0}
+  .tt-revenue .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+  .tt-revenue .empty{padding:17px 8px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-revenue .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750}
+  .tt-revenue .pill.alert{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-revenue .workflow-links{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-revenue .workflow-link{display:inline-flex;align-items:center;gap:7px;min-height:33px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-revenue .workflow-link:hover{background:#f0f4ee;border-color:#bdcbbd}
+  .tt-revenue .empty-access{padding:22px 15px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-size:11px}
+  @media(max-width:900px){.tt-revenue .grid{grid-template-columns:1fr}}
+  @media(max-width:600px){.tt-revenue h1{font-size:27px}.tt-revenue .head{align-items:flex-start}.tt-revenue .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-revenue .panel-head{align-items:flex-start;flex-direction:column}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-revenue">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Revenue / Payments &amp; commercial operations</p>
+      <h1>Revenue overview</h1>
+      <p class="intro">A permission-scoped view of payments, invoices, subscriptions and disputes. Simulated payments are excluded from payment counts; amounts remain separated by currency. This page reports source records and does not create refunds or change financial state.</p>
+    </div>
+  </header>
+
+  {% if payment_summary or invoice_summary or subscription_summary or dispute_summary or business_url %}
+  <div class="grid">
+    {% if payment_summary %}
+    <section class="panel" aria-labelledby="revenue-payments-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-payments-heading">Payments</h2><p>Non-simulated payment intents · last {{ period_days }} days</p></div>
+        <a href="{{ payment_summary.url }}">Payments register →</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ payment_summary.successful }}</strong><span>Successful</span></div>
+          <div class="stat"><strong>{{ payment_summary.pending }}</strong><span>Pending</span></div>
+          <div class="stat alert"><strong>{{ payment_summary.failed }}</strong><span>Failed</span></div>
+        </div>
+        {% if payment_summary.successful_by_currency %}
+        <div class="table-wrap">
+          <table><thead><tr><th>Currency</th><th>Payments</th><th>Amount · cents</th></tr></thead><tbody>
+            {% for row in payment_summary.successful_by_currency %}
+            <tr><td>{{ row.currency }}</td><td>{{ row.payments }}</td><td>{{ row.amount_cents }}</td></tr>
+            {% endfor %}
+          </tbody></table>
+        </div>
+        {% else %}
+        <p class="empty">No successful non-simulated payments were recorded in this period.</p>
+        {% endif %}
+        <p class="note">Amounts are stored in minor currency units (cents). Currencies are not combined or converted.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if invoice_summary %}
+    <section class="panel" aria-labelledby="revenue-invoices-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-invoices-heading">Invoices</h2><p>Issued invoice snapshots · last {{ period_days }} days</p></div>
+        <a href="{{ invoice_summary.url }}">Invoice register →</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats" style="grid-template-columns:minmax(0,180px)">
+          <div class="stat"><strong>{{ invoice_summary.issued }}</strong><span>Invoices issued</span></div>
+        </div>
+        <p class="note">Invoice records are immutable snapshots of the issued sale details; updates to business settings do not rewrite existing invoices.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if subscription_summary %}
+    <section class="panel" aria-labelledby="revenue-subscriptions-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-subscriptions-heading">Subscriptions &amp; plans</h2><p>Current subscription state</p></div>
+        <a href="{{ subscription_summary.url }}">Subscription workspace →</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ subscription_summary.active }}</strong><span>Active access</span></div>
+          <div class="stat"><strong>{{ subscription_summary.pending }}</strong><span>Pending</span></div>
+          <div class="stat alert"><strong>{{ subscription_summary.expiring_soon }}</strong><span>Expire in next 72 hours</span></div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if dispute_summary %}
+    <section class="panel" aria-labelledby="revenue-disputes-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-disputes-heading">Disputes</h2><p>Chargeback case lifecycle and response deadlines</p></div>
+        <a href="{{ dispute_summary.url }}">Disputes workspace →</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ dispute_summary.open }}</strong><span>Open cases</span></div>
+          <div class="stat"><strong>{{ dispute_summary.needs_response }}</strong><span>Need response / review</span></div>
+          <div class="stat alert"><strong>{{ dispute_summary.overdue }}</strong><span>Past provider deadline</span></div>
+        </div>
+        <p class="note">{{ dispute_summary.deadline_72h }} active case{{ dispute_summary.deadline_72h|pluralize }} have a deadline within 72 hours or already past due.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if business_url %}
+    <section class="panel" aria-labelledby="revenue-business-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-business-heading">Business &amp; tax settings</h2><p>Seller identity, invoice details and fixed-rate tax configuration</p></div>
+        <a href="{{ business_url }}">Business settings →</a>
+      </div>
+      <div class="panel-body">
+        <p class="note">Tax settings are a single fixed percentage configuration, not a jurisdiction-aware tax engine. Confirm the treatment with an accountant before enabling tax.</p>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="empty-access">No Revenue panels are available for the permissions assigned to this account.</div>
+  {% endif %}
+
+  <section class="panel" style="margin-top:13px" aria-labelledby="revenue-workflows-heading">
+    <div class="panel-head"><h2 id="revenue-workflows-heading">Financial workflow boundaries</h2><span class="pill">Canonical ownership</span></div>
+    <div class="panel-body">
+      <p class="note" style="margin-top:0">Payment records are owned by Payments, subscription access by Subscriptions, and chargeback states by Disputes. A support or customer action must not create a second financial ledger.</p>
+      <p class="note">No staff-initiated provider refund action is exposed in this overview. Use the existing refund workflow only where provider processing and reconciliation are supported.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}
