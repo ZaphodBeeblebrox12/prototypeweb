@@ -96,6 +96,7 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **M24 artefact:** `tradethesis_admin_six_domain_workspaces_v1.html` — clickable architecture board covering all six domains and proposed child destinations.
 - **Supporting specification:** `DOMAIN_WORKSPACE_BLUEPRINT_V1.md` — each domain's responsibility, landing-page hierarchy, tab detail, records, actions, source/proposal boundary and connections.
 - **Cross-domain contract:** `CROSS_DOMAIN_CONNECTIONS_V1.md` — canonical record ownership, relationship matrix, lifecycle distinctions and integrated workflow tests.
-- **Validation:** Desktop preview inspected; child navigation interaction smoke-tested. Mobile menu interaction and accessibility/contrast validation remain to be completed in the detailed screen review.
+- **Route map:** `ROUTE_TO_WORKSPACE_MAP_V1.md` — existing Admin Desk routes, non-Desk routes/APIs, Django Admin boundaries and proposed destinations.
+- **Validation:** Desktop preview inspected; all 32 navigation destinations passed a click-through smoke test; mobile drawer opens, navigates and closes; mobile viewport has no horizontal overflow. Accessibility, keyboard-only navigation, contrast measurement and screen-reader review remain open.
 - **Data safety:** Sample people, IDs, amounts, states and counts are fictional. The prototype is static and does not call live services or perform writes.
 - **Important verified flow:** one-time CourseOffer payment fulfilment is dispatched through `activate_paid_subscription` to `activate_course_payment`, which atomically claims the verified PaymentIntent and grants the direct CourseEntitlement.
