@@ -2443,3 +2443,347 @@ def admin_desk_invoice_detail(request, invoice_id):
         "back_url": f"{reverse('staff_admin_desk_finance')}?tab=invoices",
         "desk_nav": _nav(request),
     })
+
+
+
+@login_required
+@require_GET
+def admin_desk_search(request):
+    """Permission-filtered global search across canonical Admin Desk records.
+
+    Search results are deliberately read-only shortcuts. Each item routes to
+    the existing owner workflow, and every source queryset is independently
+    permission- or reviewer-scope-filtered before searching.
+    """
+    _guard(request)
+    from urllib.parse import urlencode
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    query = (request.GET.get("q") or "").strip()[:120]
+    groups = {
+        "Customers": [],
+        "Academy": [],
+        "Revenue": [],
+        "Growth": [],
+        "Platform": [],
+    }
+
+    def add_result(domain, kind, title, detail, url):
+        if url and domain in groups:
+            groups[domain].append({
+                "kind": kind,
+                "title": title,
+                "detail": detail,
+                "url": url,
+            })
+
+    if len(query) >= 2:
+        User = get_user_model()
+
+        # Account results exclude internal staff and superuser accounts.
+        if _allowed(request.user, "accounts.view_user"):
+            learners = User.objects.filter(
+                is_staff=False,
+                is_superuser=False,
+            ).filter(
+                Q(username__icontains=query)
+                | Q(email__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(nickname__icontains=query)
+            ).only(
+                "id", "username", "first_name", "last_name",
+                "is_active", "is_banned",
+            ).order_by("-date_joined")[:5]
+            for learner in learners:
+                full_name = learner.get_full_name().strip()
+                title = full_name or learner.username
+                if full_name and full_name != learner.username:
+                    title = f"{title} · {learner.username}"
+                state = (
+                    "Banned" if learner.is_banned
+                    else "Active" if learner.is_active
+                    else "Inactive"
+                )
+                add_result(
+                    "Customers",
+                    "Learner account",
+                    title,
+                    state,
+                    reverse("staff_admin_desk_account_detail", args=[learner.pk]),
+                )
+
+        # Support results use the same per-plan reviewer scope as the queue
+        # and detail page. Search excludes admin_notes and private messages.
+        support_queryset = reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.select_related("user", "plan", "affiliate_link"),
+        )
+        support_filter = (
+            Q(user__username__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(user__first_name__icontains=query)
+            | Q(user__last_name__icontains=query)
+            | Q(message__icontains=query)
+        )
+        try:
+            from uuid import UUID
+            exact_ticket_id = UUID(query)
+        except (TypeError, ValueError, AttributeError):
+            exact_ticket_id = None
+        if exact_ticket_id is not None:
+            support_filter |= Q(pk=exact_ticket_id)
+        tickets = support_queryset.filter(support_filter).order_by("-created_at")[:5]
+        for ticket in tickets:
+            add_result(
+                "Customers",
+                "Support ticket",
+                f"Ticket #{ticket.short_id} · {ticket.user.username}",
+                f"{ticket.get_category_display()} · {ticket.get_status_display()} · {ticket.get_priority_display()} priority",
+                reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
+            )
+
+        # Academy course search is available only to staff who can view the
+        # canonical Course records. The link remains the existing admin list
+        # until a dedicated course-detail workflow is migrated.
+        if _allowed(request.user, "academy.view_course"):
+            from apps.academy.models import Course
+
+            courses = Course.objects.filter(
+                Q(title__icontains=query)
+                | Q(slug__icontains=query)
+                | Q(summary__icontains=query)
+            ).only(
+                "title", "slug", "status", "updated_at"
+            ).order_by("title")[:5]
+            course_list_url = (
+                reverse("admin:academy_course_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for course in courses:
+                add_result(
+                    "Academy",
+                    "Course",
+                    course.title,
+                    f"{course.get_status_display()} · Updated {timezone.localtime(course.updated_at):%d %b %Y, %H:%M}",
+                    course_list_url,
+                )
+
+        # Course-import review entries are restricted to the existing content
+        # administrator role and only include submissions currently awaiting review.
+        from apps.academy.permissions import is_course_content_admin
+        if is_course_content_admin(request.user):
+            from apps.academy.models import CourseImport
+
+            imports = CourseImport.objects.filter(
+                status=CourseImport.Status.REVIEW,
+                title__icontains=query,
+            ).only("id", "title", "imported_at").order_by("-imported_at")[:5]
+            for item in imports:
+                add_result(
+                    "Academy",
+                    "Course submission",
+                    item.title,
+                    "Awaiting authorised review",
+                    reverse("staff_admin_desk_course_review", args=[item.pk]),
+                )
+
+        if _allowed(request.user, "payments.view_paymentintent"):
+            from apps.payments.models import PaymentIntent
+
+            payment_filter = (
+                Q(user__username__icontains=query)
+                | Q(user__email__icontains=query)
+                | Q(plan__name__icontains=query)
+                | Q(provider_reference__icontains=query)
+                | Q(provider_payment_id__icontains=query)
+            )
+            payments = PaymentIntent.objects.filter(
+                payment_filter
+            ).select_related("user", "plan").only(
+                "user__username", "plan__name", "status", "amount",
+                "currency", "is_simulated", "created_at",
+            ).order_by("-created_at")[:5]
+            finance_url = (
+                reverse("staff_admin_desk_finance")
+                + "?"
+                + urlencode({"q": query, "tab": "payments"})
+            )
+            for payment in payments:
+                amount = f"{payment.currency} {payment.amount / 100:,.2f}"
+                state = payment.get_status_display()
+                if payment.is_simulated:
+                    state = f"{state} · Simulation — no money collected"
+                add_result(
+                    "Revenue",
+                    "Payment record",
+                    f"{payment.user.username} · {payment.plan.name}",
+                    f"{state} · {amount}",
+                    finance_url,
+                )
+
+        if _allowed(request.user, "payments.view_invoice"):
+            from apps.payments.models import Invoice
+
+            invoices = Invoice.objects.filter(
+                Q(invoice_number__icontains=query)
+                | Q(customer_name__icontains=query)
+                | Q(customer_email__icontains=query)
+                | Q(description__icontains=query)
+                | Q(transaction_reference__icontains=query)
+                | Q(payment_intent__provider_reference__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+                | Q(payment_intent__user__email__icontains=query)
+            ).only(
+                "id", "invoice_number", "customer_name", "customer_email",
+                "description", "total_cents", "currency", "issue_date",
+            ).order_by("-issue_date", "-issued_at")[:5]
+            for invoice in invoices:
+                customer = invoice.customer_name or invoice.customer_email or "Customer"
+                add_result(
+                    "Revenue",
+                    "Invoice",
+                    invoice.invoice_number,
+                    f"{customer} · {invoice.description} · {invoice.currency} {invoice.total_cents / 100:,.2f}",
+                    reverse("staff_admin_desk_invoice_detail", args=[invoice.pk]),
+                )
+
+        if _allowed(request.user, "subscriptions.view_subscription"):
+            from apps.subscriptions.models import Subscription
+
+            subscriptions = Subscription.objects.filter(
+                Q(user__username__icontains=query)
+                | Q(user__email__icontains=query)
+                | Q(plan__name__icontains=query)
+            ).select_related("user", "plan").only(
+                "id", "user__username", "plan__name", "status",
+                "is_active", "expires_at",
+            ).order_by("-created_at")[:5]
+            subscriptions_url = (
+                reverse("staff_admin_desk_subscriptions")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for subscription in subscriptions:
+                state = (
+                    "Active access" if subscription.is_active
+                    else subscription.get_status_display()
+                )
+                add_result(
+                    "Revenue",
+                    "Subscription",
+                    f"{subscription.user.username} · {subscription.plan.name}",
+                    state,
+                    subscriptions_url,
+                )
+
+        if _allowed(request.user, "campaigns.view_campaign"):
+            from apps.campaigns.models import Campaign
+
+            campaigns = Campaign.objects.filter(
+                name__icontains=query
+            ).only("name", "state", "created_at").order_by("-created_at")[:5]
+            campaign_url = (
+                reverse("admin:campaigns_campaign_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for campaign in campaigns:
+                add_result(
+                    "Growth",
+                    "Campaign",
+                    campaign.name,
+                    f"{campaign.get_state_display()} · Campaign register",
+                    campaign_url,
+                )
+
+        if _allowed(request.user, "growth.view_giftinvite"):
+            from apps.growth.models import GiftInvite
+
+            invites = GiftInvite.objects.filter(
+                recipient_email__icontains=query
+            ).only("id", "status", "expires_at").order_by("-created_at")[:5]
+            invite_url = (
+                reverse("admin:growth_giftinvite_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for invite in invites:
+                add_result(
+                    "Growth",
+                    "Gift invitation",
+                    "Gift invitation",
+                    f"{invite.get_status_display()} · Expires {timezone.localtime(invite.expires_at):%d %b %Y}",
+                    invite_url,
+                )
+
+        if _allowed(request.user, "jobs.view_job"):
+            from apps.jobs.models import Job
+
+            job_filter = Q(kind__icontains=query)
+            if query.isdecimal():
+                job_filter |= Q(pk=int(query))
+            jobs = Job.objects.filter(job_filter).only(
+                "id", "kind", "status", "updated_at"
+            ).order_by("-updated_at")[:5]
+            for job in jobs:
+                add_result(
+                    "Platform",
+                    "Background job",
+                    f"Job #{job.pk} · {job.kind}",
+                    f"{job.status.title()} · Updated {timezone.localtime(job.updated_at):%d %b %Y, %H:%M}",
+                    reverse("staff_admin_desk_operations_job", args=[job.pk]),
+                )
+
+        if _allowed(request.user, "jobs.view_provisioningoperation"):
+            from apps.jobs.models import ProvisioningOperation
+
+            provisioning_filter = Q(operation__icontains=query)
+            try:
+                from uuid import UUID
+                exact_operation_id = UUID(query)
+            except (TypeError, ValueError, AttributeError):
+                exact_operation_id = None
+            if exact_operation_id is not None:
+                provisioning_filter |= Q(operation_id=exact_operation_id)
+            operations = ProvisioningOperation.objects.filter(
+                provisioning_filter
+            ).only("id", "operation", "state", "attempts", "updated_at").order_by(
+                "-updated_at"
+            )[:5]
+            for operation in operations:
+                state = (
+                    "Needs verification"
+                    if operation.state == ProvisioningOperation.ST_UNKNOWN
+                    else operation.state.replace("_", " ").title()
+                )
+                add_result(
+                    "Platform",
+                    "Provisioning operation",
+                    f"{operation.operation.title()} operation",
+                    f"{state} · {operation.attempts} attempts",
+                    reverse(
+                        "staff_admin_desk_operations_provisioning",
+                        args=[operation.pk],
+                    ),
+                )
+
+    search_groups = [
+        {"name": name, "results": items}
+        for name, items in groups.items()
+        if items
+    ]
+    total_results = sum(len(group["results"]) for group in search_groups)
+    return render(
+        request,
+        "admin/desk_search.html",
+        {
+            "query": query,
+            "searched": len(query) >= 2,
+            "search_groups": search_groups,
+            "total_results": total_results,
+            "desk_nav": _nav(request),
+        },
+    )
