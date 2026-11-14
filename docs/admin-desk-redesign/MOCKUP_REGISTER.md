@@ -32,7 +32,8 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M20 | Policies / audit / security | Readiness, policy versions, audit timeline, permission-scoped security views | P1 | Not started |
 | M21 | Responsive design board | Tablet, mobile navigation, dense tables, ticket actions, drawers and dialogs | P0 | Not started |
 | M22 | Component and visual system | Typography, spacing, tables, statuses, forms, menus, dialogs, toasts, empty/error states | P0 | Not started |
-| M23 | Clickable prototype | End-to-end priority journeys using clearly labelled illustrative data | P0 | Not started |
+| M23 | Clickable prototype | End-to-end priority journeys using clearly labelled illustrative data | P0 | Architecture prototype to follow after screen review |
+| M24 | Six-domain workspace map | Clickable top-level and child navigation; responsibilities, canonical records, cross-domain links and workflow hand-offs | P0 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -87,3 +88,14 @@ The owner preferred the visual language in the supplied Customer 360 screenshot 
 - Preserve the six approved top-level domains and all M01/M02 interactions.
 
 The supplied Customer 360 screenshot is a visual reference, not an instruction to copy its page content or to treat all displayed sample data as live. M01/M02 v2 is a refinement for review; the visual system is not yet frozen.
+
+
+## Holistic workspace architecture pass — 14 November 2026
+
+- **Selected template:** V2 shell based on the supplied Customer 360 visual reference: forest-green sidebar, warm-ivory workspace, terracotta/sage accents and editorial typography.
+- **M24 artefact:** `tradethesis_admin_six_domain_workspaces_v1.html` — clickable architecture board covering all six domains and proposed child destinations.
+- **Supporting specification:** `DOMAIN_WORKSPACE_BLUEPRINT_V1.md` — each domain's responsibility, landing-page hierarchy, tab detail, records, actions, source/proposal boundary and connections.
+- **Cross-domain contract:** `CROSS_DOMAIN_CONNECTIONS_V1.md` — canonical record ownership, relationship matrix, lifecycle distinctions and integrated workflow tests.
+- **Validation:** Desktop preview inspected; child navigation interaction smoke-tested. Mobile menu interaction and accessibility/contrast validation remain to be completed in the detailed screen review.
+- **Data safety:** Sample people, IDs, amounts, states and counts are fictional. The prototype is static and does not call live services or perform writes.
+- **Important verified flow:** one-time CourseOffer payment fulfilment is dispatched through `activate_paid_subscription` to `activate_course_payment`, which atomically claims the verified PaymentIntent and grants the direct CourseEntitlement.
