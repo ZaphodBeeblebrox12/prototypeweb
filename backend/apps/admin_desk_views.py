@@ -2936,10 +2936,15 @@ def admin_desk_search(request):
             from apps.payments.models import WebhookEvent
 
             webhooks = WebhookEvent.objects.filter(
-                Q(provider__icontains=query) | Q(event_type__icontains=query)
+                event_type__icontains=query
             ).only(
                 "provider", "event_type", "status", "received_at", "processed_at"
             ).order_by("-received_at")[:5]
+            webhook_register_url = (
+                reverse("admin:payments_webhookevent_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
             for webhook in webhooks:
                 add_result(
                     "Platform",
@@ -2949,7 +2954,7 @@ def admin_desk_search(request):
                         f"{webhook.get_status_display()} · Received "
                         f"{timezone.localtime(webhook.received_at):%d %b %Y, %H:%M}"
                     ),
-                    reverse("admin:payments_webhookevent_changelist"),
+                    webhook_register_url,
                 )
 
     search_groups = [
