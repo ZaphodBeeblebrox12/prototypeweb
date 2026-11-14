@@ -17,6 +17,7 @@ from django.conf import settings
 from .services.rewards import ReferralRewardService, SubscriptionCreditService, UserRewardBalance
 from .services.referrals import ReferralService
 from .models import ReferralCode, ReferralReward, Referral, ReferralSettings
+from .permissions import GrowthPermissionRequiredMixin
 
 logger = logging.getLogger(__name__)
 
@@ -303,8 +304,12 @@ class ReferralRewardsAPIView(LoginRequiredMixin, View):
         })
 
 
-class AdminReferralRewardsView(LoginRequiredMixin, TemplateView):
-    """Admin view for managing referral rewards."""
+class AdminReferralRewardsView(GrowthPermissionRequiredMixin, TemplateView):
+    """Admin view for managing referral rewards and global reward settings."""
+    permission_required = (
+        "growth.view_referralreward",
+        "growth.view_referralsettings",
+    )
     template_name = "growth/admin/referral_rewards_overview.html"
 
     def get_context_data(self, **kwargs):
