@@ -67,10 +67,12 @@ Read these in order:
 Screen-level specifications:
 - `ACADEMY_WORKSPACE_SPEC_V1.md`
 - `CUSTOMERS_WORKSPACE_SPEC_V1.md`
+- `REVENUE_WORKSPACE_SPEC_V1.md`
 
 Review notes:
 - `M01_M02_REVIEW_NOTES.md`
 - `CUSTOMERS_REVIEW_NOTES_V1.md`
+- `REVENUE_REVIEW_NOTES_V1.md`
 
 ## 5. Completed design work
 
@@ -119,6 +121,36 @@ Specification:
 
 Prototype artifact:
 - `tradethesis_admin_academy_workspace_v1.html`
+
+### Revenue — M14/M15 and M29–M33
+Screen types:
+- Revenue Overview.
+- Payments & Refunds register and Payment Detail.
+- Subscriptions.
+- Plans & Pricing.
+- Invoices and Invoice Detail.
+- Disputes and Dispute Detail.
+- Business & Finance.
+
+Source boundaries preserved:
+- PaymentIntent is read-only financial evidence; provider verification controls state.
+- Refund is a separate append-only ledger. Partial refund leaves access unchanged; full refund cancels affected subscription or revokes course entitlement through the existing policy.
+- Manual full refund record exists in Django Admin only and must be used after provider-side refund. It does not initiate a PSP refund.
+- Subscription grants/extensions/cancellations use the current audited services and permission/reason constraints; price snapshots are immutable.
+- Plan/base/geo pricing configuration remains Django Admin today; proposed unified Revenue editor is not live.
+- Invoice snapshots are immutable and printable.
+- Disputes remain on their existing staff route; funds withdrawn is not a final loss; Won keeps access, confirmed Lost/Accepted triggers exactly-once access action.
+- Dispute evidence submit records external reference; does not upload evidence to PSP.
+- Tax is a fixed percentage today, not a jurisdiction-aware GST engine; first enable requires accountant confirmation.
+
+Specification:
+- `REVENUE_WORKSPACE_SPEC_V1.md`
+
+Review notes:
+- `REVENUE_REVIEW_NOTES_V1.md`
+
+Prototype artifact:
+- `tradethesis_admin_revenue_workspace_v1.html`
 
 ### Customers — M10–M13, M27 and M28
 Screen types:
@@ -186,10 +218,10 @@ Do not mark a mockup as approved because it was created or smoke-tested. Record 
 
 1. Review the Customers prototype and specification with the owner; record requested changes and decisions.
 2. Revise M10/M11/M12/M13/M27/M28 where necessary.
-3. Design Revenue next, using the same fictional learner and related course purchases/subscription/tickets so Customers, Academy and Revenue stay coherent.
-4. Then design Growth and Platform workspaces.
+3. Review the Revenue prototype/specification; revise the action hierarchy and record relationships from owner feedback.
+4. Design Growth next, then Platform, using the same fictional learner/payment/course/subscription/ticket records.
 5. Walk through cross-domain journeys again using the same stable fictional record set.
-6. Complete role/permission matrix and Django Admin migration inventory.
+6. Complete role/permission matrix and Django Admin migration inventory, including the PaymentIntent manual full-refund and Plan/price configuration actions.
 7. Perform authenticated staging visual/role audit before producing an implementation handoff.
 8. Obtain explicit implementation approval before changing application code.
 
@@ -200,8 +232,9 @@ The current conversation includes downloadable HTML prototypes:
 - `tradethesis_admin_six_domain_workspaces_v1.html`
 - `tradethesis_admin_academy_workspace_v1.html`
 - `tradethesis_admin_customers_workspace_v1.html`
+- `tradethesis_admin_revenue_workspace_v1.html`
 
-The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v1.zip` was also created in the design review conversation with the four current prototypes and PNG previews. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
+The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v2.zip` was also created in the design review conversation with the four current prototypes and PNG previews. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
 
 ## 10. Safety and scope checklist for the next chat
 
