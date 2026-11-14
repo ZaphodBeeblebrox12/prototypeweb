@@ -766,3 +766,88 @@ The owner clarified that there are currently no staff members/accounts available
 No staff/test accounts were created as part of this audit. No application code or access permissions were changed.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.**
+
+
+## 21. Promoted ordinary-staff browser audit — 14 November 2026 17:34 UTC
+
+**Test host:** Academy staging  
+**Session label:** Promoted staff account  
+**Method:** consolidated GET-only browser audit; no state changes  
+**Server identity:** `GET /api/auth/me/` returned HTTP 200 with:
+- `role=user`
+- `is_staff=true`
+- `is_admin=false`
+
+The user is therefore a Django staff-enabled account, but **not** an application `Role.STAFF` account according to the current Role field. The identity serializer omits `is_staff_approved`; the script's `null` is an unavailable serialized field, not evidence that the database value is NULL or false. Source inspection confirms the custom User model has Role values `admin`, `staff`, `user` and a separate `is_staff_approved` flag. The custom Django UserAdmin does not add `role` or `is_staff_approved` to its fieldsets, so the usual user edit form does not currently expose those custom fields.
+
+### Live GET results
+
+20 primary endpoint checks:
+- **11 HTTP 200**: identity, health, Admin Desk Command Centre, Operations, Support queue, staff approvals API, Growth referral rewards, own notifications, Django Admin index, Gift send form and Disputes dashboard route.
+- **8 HTTP 403**: learner Accounts directory, Academy review, Academy SEO, legacy Course Builder, Tiptap preview, Finance, Subscriptions and Business settings.
+- **1 HTTP 500**: `/api/analytics/overview/`.
+
+Five saved Support ticket detail paths also returned HTTP 200. There were five new ticket fixtures discovered; no account detail fixtures were discovered in this run. The script did not retain page body content or the ticket's plan/approver assignment metadata. This is positive read-access evidence for those five exact tickets, not proof that all ticket records should be visible to this staff role.
+
+### Interpretation of denied routes
+
+The observed denials are consistent with the existing source gates:
+- Accounts list requires `accounts.view_user`.
+- Academy review, SEO and Builder require superuser or application `role=admin`; `is_staff=true` alone does not satisfy `is_course_content_admin()`.
+- Finance requires PaymentIntent or Invoice view permissions; Subscription and Business pages have their own model-permission checks.
+
+Do not promote this account to application `role=admin` just to make these routes pass. The current run is useful precisely because it shows the boundaries between generic Django staff access and domain permissions.
+
+### High-priority authorization issue: staff approvals / user administration API
+
+The endpoint `GET /api/admin/staff-approvals/` returned HTTP 200 for this account where `role=user`, `is_staff=true`, `is_admin=false`.
+
+Source inspection of `backend/apps/accounts/admin_views.py` confirms:
+- `IsRoleAdmin.has_permission()` allows an authenticated user if `role=ADMIN` **or** `is_superuser` **or** `is_staff`.
+- `StaffApprovalListView`, `StaffApprovalActionView`, `BanUserView` and `UnbanUserView` all use that same permission class.
+- The staff-approval POST action can set a target user's role to `STAFF`, `is_staff=true`, `is_staff_approved=true`, or reject/demote them to USER with staff access disabled.
+- Ban/unban POST actions are likewise available behind the same broad permission class (with a narrower ban-target exclusion for application admins/superusers).
+
+The GET test did **not** submit any POST, so no mutation was attempted or demonstrated. However, the same source permission gate protects those mutation handlers. This is a **high-priority source-verified privilege-boundary defect**: any authenticated Django staff user appears to qualify for staff-approval and ban/unban actions, despite the permission class's stated requirement for application Admin.
+
+**Required remediation:** narrow the server-side permission class to the intended application Admin/superuser capability (or split read and write permissions with explicit dedicated model permissions). Add negative tests for a regular `is_staff=true, role=user` account against both GET and POST, plus positive tests for the intended administrator. Do not test the mutation endpoints manually in staging until a disposable-target test plan exists. No source code was changed.
+
+### Other broad staff-only entry points to review
+
+The promoted account also received HTTP 200 for:
+- `/admin/`: consistent with Django Admin's built-in `is_staff` gate. This does not prove `is_superuser=true`; model-level permissions may still restrict individual records/actions. The approved target is eventual superuser-only Django Admin access, with workflow-by-workflow migration.
+- `/admin/growth/send-gift/`: source uses `staff_member_required` on the class dispatch, including POST. The POST path creates a gift subscription and sends a gift email. The source describes it as a non-technical staff workflow, so this may be intentional, but confirm the allowed operator set and financial limits before redesign migration. No POST was sent.
+- `/admin-disputes/`: source dashboard uses `staff_member_required` and queries all disputes, while action POSTs use `disputes.change_dispute`. The ordinary staff route returned HTTP 200; confirm that broad dispute-list visibility is intended for all Django staff. The response title was the generic base title, so visually inspect the heading before treating the UI as fully rendered.
+- `/api/analytics/overview/`: source uses DRF `IsAdminUser`, which accepts Django staff users; this run hit the same HTTP 500. After the analytics code defect is fixed, ensure broad all-staff access to global Growth/marketing metrics is intentional.
+- `/growth/admin/referral-rewards/`: still only uses `LoginRequiredMixin`; this remains accessible to all logged-in users, including the previously tested ordinary learner, and provides global aggregates/recent reward data. The staff run's HTTP 200 is not a pass for learner authorization.
+
+### Support scope
+
+The Support queue and all five saved ticket detail paths returned HTTP 200 for this staff account. Source `reviewable_ticket_queryset()` requires active Django staff, gives superusers all tickets, and scopes other staff by plan/affiliate-plan ticket approvers. Its existing fallback permits any staff member when the relevant plan has no ticket approvers. Since this browser batch did not capture record assignments or response content, retain the five positive checks but do not sign off the intended Support assignment boundary yet.
+
+### Account-role setup note
+
+The test account is currently a useful generic Django-staff persona, but its application Role remains `user`. The model's `approve_staff()` helper sets `is_staff_approved` and `is_staff` without changing Role; the staff-approval API sets Role to `STAFF` as well. The built-in UserAdmin form does not expose the custom Role/approval fields. Do not use the currently broad staff-approval POST to promote accounts until its authorization is corrected. If a separate `role=staff` test persona is required, use an approved admin-controlled staging fixture/database procedure after the permission boundary has been fixed.
+
+### Phase 0 assessment after promoted-staff test
+
+| Area | Status |
+|---|---|
+| Non-staff learner baseline | Verified; referral overview exposed |
+| Generic Django staff baseline | Verified (`role=user`, `is_staff=true`) |
+| Command Centre and Operations entry | HTTP 200 |
+| Support queue and five ticket details | HTTP 200; object assignment scope still needs review |
+| Accounts directory | 403, consistent with missing view permission |
+| Academy workflows | 403, consistent with role gate |
+| Revenue workflows | 403, consistent with model-permission gates |
+| Staff approval API | HTTP 200; broad shared permission is a high-priority source risk |
+| Django Admin | HTTP 200 for staff; eventual superuser-only boundary unresolved |
+| Gift sending | HTTP 200 for staff; allowed operator policy needs confirmation |
+| Disputes | HTTP 200 for staff; global list scope needs confirmation |
+| Analytics overview | HTTP 500; missing `Sum` import still present |
+| True Django superuser | Not independently verified |
+| Temporary departmental personas | Not created |
+
+**Next sequence:** map role/Group/model permissions from source and close the three high-priority server-side defects (Growth referral page, staff approvals/ban/unban boundary, analytics report) under an explicit implementation approval. Then create isolated staging test personas with distinct permissions/assignments and perform GET-only cross-persona/object-scope tests. Keep POST tests separate. No staff account creation/deletion or account-role adjustment was performed by this audit.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.**
