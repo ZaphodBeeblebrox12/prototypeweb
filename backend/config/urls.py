@@ -26,7 +26,7 @@ from apps.academy.course_builder_api import (
 from apps.academy.google_drive_oauth import google_drive_oauth_start, google_drive_oauth_callback
 from apps.academy.catalogue_api import public_course_catalogue
 from apps.admin_desk_views import (
-    admin_desk_accounts, admin_desk_account_detail, admin_desk_account_action,
+    admin_desk_accounts, admin_desk_account_detail, admin_desk_account_action, admin_desk_my_work,
     admin_desk_subscriptions, admin_desk_subscription_action,
     admin_desk_business, admin_desk_finance, admin_desk_invoice_detail,
     admin_desk_course_reviews, admin_desk_course_review, admin_desk_course_asset,
@@ -34,7 +34,7 @@ from apps.admin_desk_views import (
     admin_desk_course_import_cleanup, admin_desk_course_import_delete,
     admin_desk_support_tickets, admin_desk_support_ticket,
     admin_desk_support_ticket_action, admin_desk_customer_360,
-    admin_desk_operations_timeline,
+    admin_desk_customers, admin_desk_academy, admin_desk_platform, admin_desk_growth, admin_desk_revenue, admin_desk_operations_timeline,
     admin_desk_operations_job, admin_desk_operations_provisioning,
 )
 from apps.core.views import health_check
@@ -61,6 +61,7 @@ urlpatterns = [
     path("staff/course-builder/", course_builder_preview, name="staff_course_builder_preview"),
     path("api/academy/catalogue/", public_course_catalogue, name="academy_public_catalogue"),
     path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
+    path("staff/admin-desk/my-work/", admin_desk_my_work, name="staff_admin_desk_my_work"),
     path("staff/admin-desk/courses/review/", admin_desk_course_reviews, name="staff_admin_desk_course_reviews"),
     path("staff/admin-desk/courses/review/<uuid:import_id>/", admin_desk_course_review, name="staff_admin_desk_course_review"),
     path("staff/admin-desk/courses/review/<uuid:import_id>/assets/<uuid:asset_id>/", admin_desk_course_asset, name="staff_admin_desk_course_asset"),
@@ -68,6 +69,11 @@ urlpatterns = [
     path("staff/admin-desk/courses/review/<uuid:import_id>/return/", admin_desk_course_reject, name="staff_admin_desk_course_reject"),
     path("staff/admin-desk/courses/import-cleanup/", admin_desk_course_import_cleanup, name="staff_admin_desk_course_import_cleanup"),
     path("staff/admin-desk/courses/imports/<uuid:import_id>/delete/", admin_desk_course_import_delete, name="staff_admin_desk_course_import_delete"),
+    path("staff/admin-desk/academy/", admin_desk_academy, name="staff_admin_desk_academy"),
+    path("staff/admin-desk/customers/", admin_desk_customers, name="staff_admin_desk_customers"),
+    path("staff/admin-desk/platform/", admin_desk_platform, name="staff_admin_desk_platform"),
+    path("staff/admin-desk/growth/", admin_desk_growth, name="staff_admin_desk_growth"),
+    path("staff/admin-desk/revenue/", admin_desk_revenue, name="staff_admin_desk_revenue"),
     path("staff/admin-desk/support/tickets/", admin_desk_support_tickets, name="staff_admin_desk_support_tickets"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/", admin_desk_support_ticket, name="staff_admin_desk_support_ticket"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/action/", admin_desk_support_ticket_action, name="staff_admin_desk_support_ticket_action"),

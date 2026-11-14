@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Growth | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Growth{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-growth{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--line-soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-growth *{box-sizing:border-box}
+  .tt-growth a{color:#315b43;text-underline-offset:3px}
+  .tt-growth .head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:4px 0 19px}
+  .tt-growth .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-growth h1{margin:0;color:var(--ink);font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-growth .intro{max-width:790px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+  .tt-growth .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tt-growth .panel{min-width:0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-growth .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .tt-growth .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-growth .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-growth .panel-body{padding:13px 15px}
+  .tt-growth .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .tt-growth .stat{min-width:0;padding:11px;border:1px solid var(--line-soft);border-radius:4px;background:#fff}
+  .tt-growth .stat strong{display:block;color:var(--ink);font:600 23px/1 Georgia,"Times New Roman",serif;font-variant-numeric:tabular-nums}
+  .tt-growth .stat span{display:block;margin-top:6px;color:var(--muted);font-size:9px;line-height:1.35}
+  .tt-growth .stat.alert strong{color:#9b4b40}
+  .tt-growth .table-wrap{overflow:auto;margin-top:12px}
+  .tt-growth table{width:100%;border-collapse:collapse;min-width:470px}
+  .tt-growth th,.tt-growth td{padding:9px 8px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-growth th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+  .tt-growth tr:last-child td{border-bottom:0}
+  .tt-growth .muted{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.4}
+  .tt-growth .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+  .tt-growth .empty{padding:17px 8px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-growth .status{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750}
+  .tt-growth .workflow-links{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-growth .workflow-link{display:inline-flex;align-items:center;gap:7px;min-height:33px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-growth .workflow-link:hover{background:#f0f4ee;border-color:#bdcbbd}
+  .tt-growth .empty-access{padding:22px 15px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-size:11px}
+  @media(max-width:900px){.tt-growth .grid{grid-template-columns:1fr}}
+  @media(max-width:600px){.tt-growth h1{font-size:27px}.tt-growth .head{align-items:flex-start}.tt-growth .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-growth .panel-head{align-items:flex-start;flex-direction:column}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-growth">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Growth / Acquisition &amp; engagement</p>
+      <h1>Growth overview</h1>
+      <p class="intro">Permission-scoped reporting across purchase events, email delivery, campaigns, coupon redemptions and referrals. These are read-only summaries of recorded system state, not forecasts or proof of unrecorded provider delivery.</p>
+    </div>
+  </header>
+
+  {% if has_growth_data %}
+  <div class="grid">
+    {% if purchase_report %}
+    <section class="panel" aria-labelledby="growth-purchase-heading">
+      <div class="panel-head">
+        <div><h2 id="growth-purchase-heading">Purchase activity</h2><p>Recorded purchase.completed events · last {{ purchase_report.period_days }} days</p></div>
+        <a href="{{ events_url }}">Event register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats" style="grid-template-columns:minmax(0,1fr)">
+          <div class="stat"><strong>{{ purchase_report.total_purchases }}</strong><span>Recorded purchases</span></div>
+        </div>
+        {% if purchase_report.purchases_per_day %}
+        <div class="table-wrap">
+          <table><thead><tr><th>Date</th><th>Purchases</th></tr></thead><tbody>
+            {% for day in purchase_report.purchases_per_day|slice:"-7:" %}
+            <tr><td>{{ day.day }}</td><td>{{ day.purchases }}</td></tr>
+            {% endfor %}
+          </tbody></table>
+        </div>
+        {% else %}
+        <p class="empty">No purchase.completed events were recorded in this period.</p>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if email_report %}
+    <section class="panel" aria-labelledby="growth-email-heading">
+      <div class="panel-head">
+        <div><h2 id="growth-email-heading">Email delivery</h2><p>Stored Delivery states · last {{ email_report.period_days }} days</p></div>
+        <a href="{{ email_url }}">Delivery register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ email_report.sent }}</strong><span>Sent</span></div>
+          <div class="stat alert"><strong>{{ email_report.failed }}</strong><span>Failed</span></div>
+          <div class="stat alert"><strong>{{ email_report.bounced }}</strong><span>Bounced</span></div>
+          <div class="stat alert"><strong>{{ email_report.complained }}</strong><span>Complained</span></div>
+          <div class="stat"><strong>{{ email_report.suppressed }}</strong><span>Suppressed</span></div>
+        </div>
+        <p class="note">Counts reflect stored Delivery state values. A Sent state is not presented as provider-confirmed Delivered.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_campaigns %}
+    <section class="panel" aria-labelledby="growth-campaign-heading">
+      <div class="panel-head">
+        <div><h2 id="growth-campaign-heading">Campaign performance</h2><p>Stored campaign counters</p></div>
+        <a href="{{ campaign_url }}">Campaign register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="table-wrap" style="margin-top:0">
+          <table><thead><tr><th>Campaign</th><th>Total</th><th>Sent</th><th>Failed</th></tr></thead><tbody>
+            {% for campaign in campaign_report %}
+            <tr><td>{{ campaign.campaign }}</td><td>{{ campaign.total }}</td><td>{{ campaign.sent }}</td><td>{{ campaign.failed }}</td></tr>
+            {% empty %}
+            <tr><td colspan="4" class="empty">No campaign metrics are available yet.</td></tr>
+            {% endfor %}
+          </tbody></table>
+        </div>
+        <p class="note">Additional non-email channel actions may be staged on a campaign; their delivery automation is not wired into the campaign send sweep yet.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_promotions %}
+    <section class="panel" aria-labelledby="growth-promotion-heading">
+      <div class="panel-head">
+        <div><h2 id="growth-promotion-heading">Coupon redemptions</h2><p>Recorded redemption aggregates</p></div>
+        <a href="{{ promotion_url }}">Redemption register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="table-wrap" style="margin-top:0">
+          <table><thead><tr><th>Coupon</th><th>Redemptions</th><th>Discount total · cents</th></tr></thead><tbody>
+            {% for row in promotion_report %}
+            <tr><td><strong>{{ row.code }}</strong></td><td>{{ row.redemptions }}</td><td>{{ row.total_discount_cents }}</td></tr>
+            {% empty %}
+            <tr><td colspan="3" class="empty">No coupon redemptions have been recorded.</td></tr>
+            {% endfor %}
+          </tbody></table>
+        </div>
+        <p class="note">Discount totals are displayed in stored cents; this view does not assume a single display currency.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if referral_report %}
+    <section class="panel" aria-labelledby="growth-referral-heading">
+      <div class="panel-head">
+        <div><h2 id="growth-referral-heading">Referral programme</h2><p>Current referral and reward states</p></div>
+        {% if can_view_referrals %}<a href="{{ referrals_url }}">Referral rewards →</a>{% endif %}
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ referral_report.referrals_completed }}</strong><span>Completed referrals</span></div>
+          <div class="stat"><strong>{{ referral_report.rewards_pending }}</strong><span>Rewards pending</span></div>
+          <div class="stat"><strong>{{ referral_report.rewards_credited }}</strong><span>Rewards credited</span></div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if gift_summary %}
+    <section class="panel" aria-labelledby="growth-gift-heading">
+      <div class="panel-head">
+        <div><h2 id="growth-gift-heading">Gift invites</h2><p>Persisted invitation states</p></div>
+        <a href="{{ gift_summary.url }}">Gift register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ gift_summary.pending }}</strong><span>Pending</span></div>
+          <div class="stat"><strong>{{ gift_summary.claimed }}</strong><span>Claimed</span></div>
+          <div class="stat"><strong>{{ gift_summary.expired }}</strong><span>Expired</span></div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="empty-access">No Growth reporting panels are available for the permissions assigned to this account.</div>
+  {% endif %}
+
+  {% if can_view_referrals or can_send_gifts or can_view_campaigns or can_view_email or can_view_promotions %}
+  <section class="panel" style="margin-top:13px" aria-labelledby="growth-workflows-heading">
+    <div class="panel-head"><h2 id="growth-workflows-heading">Growth workflows</h2><span class="status">Permission gated</span></div>
+    <div class="panel-body">
+      <div class="workflow-links">
+        {% if can_view_referrals %}<a class="workflow-link" href="{{ referrals_url }}">Referrals &amp; Rewards →</a>{% endif %}
+        {% if can_send_gifts %}<a class="workflow-link" href="/admin/growth/send-gift/">Send a gift →</a>{% endif %}
+        {% if can_view_campaigns %}<a class="workflow-link" href="{{ campaign_url }}">Campaigns ↗</a>{% endif %}
+        {% if can_view_email %}<a class="workflow-link" href="{{ email_url }}">Email delivery ↗</a>{% endif %}
+        {% if can_view_promotions %}<a class="workflow-link" href="{{ promotion_url }}">Coupon redemptions ↗</a>{% endif %}
+      </div>
+      <p class="note">Mutations continue through the owning Growth, Campaigns, Emailing and Promotions services. This overview does not create gifts, edit rewards or send communications.</p>
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

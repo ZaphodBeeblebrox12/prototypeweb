@@ -1,142 +1,204 @@
 {% extends "base.html" %}
 
-{% block title %}Notifications - {% endblock %}
-
+{% block title %}Notifications | TradeThesis{% endblock %}
 {% block page_title %}Notifications{% endblock %}
+{% block page_context %}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-notifications{max-width:980px;margin:8px auto 36px;color:#26342f}
+  .tt-notifications .panel{overflow:hidden;border:1px solid #dedfd5;border-radius:5px;background:#fffefa}
+  .tt-notifications .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #dedfd5}
+  .tt-notifications h1{margin:0;font:600 18px Georgia,"Times New Roman",serif}
+  .tt-notifications .panel-body{padding:14px 16px}
+  .tt-notifications .notification-item{padding:13px 12px;border-bottom:1px solid #ecece5;border-left:3px solid transparent}
+  .tt-notifications .notification-item:last-child{border-bottom:0}
+  .tt-notifications .notification-item.unread{border-left-color:#c66b50;background:#fbf8f1}
+  .tt-notifications .notification-item.read{opacity:.78}
+  .tt-notifications .notification-title{margin:0 0 5px;font-size:12px;font-weight:800}
+  .tt-notifications .notification-message{margin:0;color:#68736c;font-size:11px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+  .tt-notifications .notification-date{display:block;margin-top:6px;color:#7b857e;font-size:9px}
+  .tt-notifications .notification-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .tt-notifications .notification-copy{min-width:0;flex:1}
+  .tt-notifications .button{min-height:32px;padding:7px 10px;border:1px solid #456653;border-radius:4px;background:#456653;color:#fff;font-size:10px;font-weight:750}
+  .tt-notifications .button.secondary{background:#fffefa;color:#456653}
+  .tt-notifications .button:disabled{opacity:.55;cursor:wait}
+  .tt-notifications .empty,.tt-notifications .error{padding:30px 12px;color:#68736c;font-size:11px;text-align:center}
+  .tt-notifications .error{color:#934b40}
+  @media(max-width:560px){.tt-notifications .panel-head{align-items:flex-start;flex-direction:column}.tt-notifications .notification-row{flex-direction:column}.tt-notifications .button{width:100%}}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Your Notifications</h5>
-                    <button id="mark-all-read" class="btn btn-sm btn-outline-primary">Mark All as Read</button>
-                </div>
-                <div class="card-body" id="notifications-container">
-                    <div class="text-center py-5">
-                        <div class="spinner-border" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tt-notifications">
+  <section class="panel" aria-labelledby="notifications-heading">
+    <header class="panel-head">
+      <h1 id="notifications-heading">Your Notifications</h1>
+      <button id="mark-all-read" class="button secondary" type="button">Mark all as read</button>
+    </header>
+    <div class="panel-body" id="notifications-container" aria-live="polite" aria-busy="true">
+      <p class="empty">Loading notifications…</p>
     </div>
+  </section>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    loadNotifications();
-    document.getElementById('mark-all-read').addEventListener('click', markAllAsRead);
-});
+(function () {
+  "use strict";
 
-async function loadNotifications() {
-    try {
-        const response = await fetch('/api/notifications/');
-        if (!response.ok) throw new Error('Failed to load notifications');
-        const data = await response.json();
-        renderNotifications(data.results || []);
-    } catch (error) {
-        document.getElementById('notifications-container').innerHTML = 
-            '<div class="alert alert-danger">Failed to load notifications</div>';
+  const container = document.getElementById("notifications-container");
+  const markAllButton = document.getElementById("mark-all-read");
+  if (!container || !markAllButton) return;
+
+  function csrfToken() {
+    const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }
+
+  function showMessage(message, className) {
+    container.replaceChildren();
+    const element = document.createElement("p");
+    element.className = className;
+    element.textContent = message;
+    container.appendChild(element);
+    container.setAttribute("aria-busy", "false");
+  }
+
+  function renderNotifications(notifications) {
+    container.replaceChildren();
+    if (!notifications.length) {
+      showMessage("No notifications.", "empty");
+      return;
     }
-}
 
-function renderNotifications(notifications) {
-    const container = document.getElementById('notifications-container');
-    if (notifications.length === 0) {
-        container.innerHTML = '<div class="text-center py-5 text-muted">No notifications</div>';
-        return;
-    }
-    container.innerHTML = notifications.map(n => `
-        <div class="notification-item ${n.is_read ? 'read' : 'unread'} mb-3 p-3 border-bottom" data-id="${n.id}">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h6 class="mb-1">${n.title}</h6>
-                    <p class="mb-1 text-muted">${n.message}</p>
-                    <small class="text-muted">${new Date(n.created_at).toLocaleString()}</small>
-                </div>
-                ${!n.is_read ? `<button class="btn btn-sm btn-outline-secondary mark-read" onclick="markAsRead('${n.id}')">Mark as read</button>` : ''}
-            </div>
-        </div>
-    `).join('');
-}
+    notifications.forEach(function (notification) {
+      const item = document.createElement("article");
+      item.className = "notification-item " + (notification.is_read ? "read" : "unread");
+      item.dataset.id = notification.id;
 
-async function markAsRead(notificationId) {
-    try {
-        const response = await fetch(`/api/notifications/${notificationId}/read/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
+      const row = document.createElement("div");
+      row.className = "notification-row";
+      const copy = document.createElement("div");
+      copy.className = "notification-copy";
+
+      const title = document.createElement("h2");
+      title.className = "notification-title";
+      title.textContent = notification.title || "Notification";
+
+      const message = document.createElement("p");
+      message.className = "notification-message";
+      message.textContent = notification.message || "";
+
+      const date = document.createElement("time");
+      date.className = "notification-date";
+      const created = new Date(notification.created_at);
+      date.dateTime = Number.isNaN(created.getTime()) ? "" : created.toISOString();
+      date.textContent = Number.isNaN(created.getTime())
+        ? "Date unavailable"
+        : created.toLocaleString();
+
+      copy.append(title, message, date);
+      row.appendChild(copy);
+
+      if (!notification.is_read) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "button secondary";
+        button.textContent = "Mark as read";
+        button.addEventListener("click", function () {
+          markAsRead(notification.id, button);
         });
-        if (response.ok) {
-            loadNotifications();
-            updateUnreadCount();
-        }
-    } catch (error) {
-        console.error('Failed to mark as read:', error);
-    }
-}
+        row.appendChild(button);
+      }
 
-async function markAllAsRead() {
+      item.appendChild(row);
+      container.appendChild(item);
+    });
+
+    container.setAttribute("aria-busy", "false");
+  }
+
+  async function loadNotifications() {
+    container.setAttribute("aria-busy", "true");
     try {
-        const response = await fetch('/api/notifications/read-all/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
-        });
-        if (response.ok) {
-            loadNotifications();
-            updateUnreadCount();
-        }
+      const response = await fetch("/api/notifications/", {
+        credentials: "same-origin",
+        headers: { "Accept": "application/json" }
+      });
+      if (!response.ok) throw new Error("Notification request failed");
+      const data = await response.json();
+      renderNotifications(Array.isArray(data.results) ? data.results : []);
     } catch (error) {
-        console.error('Failed to mark all as read:', error);
+      showMessage("Notifications could not be loaded. Refresh the page to try again.", "error");
     }
-}
+  }
 
-function updateUnreadCount() {
-    fetch('/api/notifications/unread-count/')
-        .then(r => r.json())
-        .then(data => {
-            const badge = document.querySelector('.badge.bg-danger');
-            if (badge) {
-                if (data.unread_count > 0) {
-                    badge.textContent = data.unread_count;
-                    badge.style.display = 'inline';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        });
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+  async function markAsRead(notificationId, button) {
+    button.disabled = true;
+    try {
+      const response = await fetch("/api/notifications/" + encodeURIComponent(notificationId) + "/read/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "X-CSRFToken": csrfToken(),
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: "{}"
+      });
+      if (!response.ok) throw new Error("Could not update notification");
+      await loadNotifications();
+      updateUnreadCount();
+    } catch (error) {
+      button.disabled = false;
+      showMessage("This notification could not be marked as read. Please try again.", "error");
     }
-    return cookieValue;
-}
+  }
+
+  async function markAllAsRead() {
+    markAllButton.disabled = true;
+    try {
+      const response = await fetch("/api/notifications/read-all/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "X-CSRFToken": csrfToken(),
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: "{}"
+      });
+      if (!response.ok) throw new Error("Could not update notifications");
+      await loadNotifications();
+      updateUnreadCount();
+    } catch (error) {
+      showMessage("Notifications could not be marked as read. Please try again.", "error");
+    } finally {
+      markAllButton.disabled = false;
+    }
+  }
+
+  function updateUnreadCount() {
+    fetch("/api/notifications/unread-count/", {
+      credentials: "same-origin",
+      headers: { "Accept": "application/json" }
+    }).then(function (response) {
+      if (!response.ok) return null;
+      return response.json();
+    }).then(function (data) {
+      if (!data) return;
+      const badge = document.querySelector(".badge.bg-danger");
+      if (!badge) return;
+      badge.textContent = String(data.unread_count || 0);
+      badge.style.display = data.unread_count > 0 ? "inline" : "none";
+    }).catch(function () {
+      // The notification page remains usable if the global badge refresh fails.
+    });
+  }
+
+  markAllButton.addEventListener("click", markAllAsRead);
+  loadNotifications();
+})();
 </script>
-
-<style>
-.notification-item.unread {
-    background-color: #f8f9ff;
-}
-.notification-item.read {
-    opacity: 0.7;
-}
-</style>
 {% endblock %}

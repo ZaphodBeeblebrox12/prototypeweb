@@ -1,0 +1,182 @@
+{% load static %}
+<aside class="tt-desk-sidebar" id="ttDeskSidebar" aria-label="Admin Desk navigation">
+  <div class="tt-desk-brand">
+    <span class="tt-desk-brand-mark" aria-hidden="true">T</span>
+    <span class="tt-desk-brand-copy"><strong>TradeThesis</strong><small>Admin Desk</small></span>
+    <button class="tt-desk-collapse" type="button" data-desk-collapse aria-label="Collapse Admin Desk navigation" aria-expanded="true" title="Collapse navigation">
+      <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="tt-desk-workspace">
+    <span class="tt-desk-kicker">Workspace</span>
+    <span class="tt-desk-workspace-name"><span class="tt-desk-workspace-dot" aria-hidden="true"></span>Administration</span>
+  </div>
+
+  <nav class="tt-desk-nav">
+    <section class="tt-desk-nav-group" aria-labelledby="tt-nav-command">
+      <h2 id="tt-nav-command">Command Centre</h2>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk' %} is-active{% endif %}" href="{% url 'staff_admin_desk' %}"{% if request.resolver_match.url_name == 'staff_admin_desk' %} aria-current="page"{% endif %}>
+        <i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Overview</span>
+      </a>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_my_work' %} is-active{% endif %}" href="{% url 'staff_admin_desk_my_work' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_my_work' %} aria-current="page"{% endif %}>
+        <i class="bi bi-inbox" aria-hidden="true"></i><span>My Work</span>
+      </a>
+      <a class="tt-desk-nav-link{% if request.path|slice:':14' == '/notifications' %} is-active{% endif %}" href="/notifications/"{% if request.path|slice:':14' == '/notifications' %} aria-current="page"{% endif %}>
+        <i class="bi bi-bell" aria-hidden="true"></i><span>Notifications &amp; Alerts</span>
+      </a>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_operations_timeline' %} is-active{% endif %}" href="{% url 'staff_admin_desk_operations_timeline' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_operations_timeline' %} aria-current="page"{% endif %}>
+        <i class="bi bi-activity" aria-hidden="true"></i><span>Operations Timeline</span>
+      </a>
+    </section>
+
+    {% if user.is_superuser or user.role == "admin" or perms.academy.view_course or perms.academy.view_courseoffer or perms.academy.view_courseentitlement %}
+    <section class="tt-desk-nav-group" aria-labelledby="tt-nav-academy">
+      <h2 id="tt-nav-academy">Academy</h2>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_academy' %} is-active{% endif %}" href="{% url 'staff_admin_desk_academy' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_academy' %} aria-current="page"{% endif %}>
+        <i class="bi bi-mortarboard" aria-hidden="true"></i><span>Overview</span>
+      </a>
+      {% if perms.academy.view_course %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:academy_course_changelist' %}" aria-label="Course catalogue in Advanced Administration">
+        <i class="bi bi-journals" aria-hidden="true"></i><span>Course Catalogue</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+      {% if user.is_superuser or user.role == "admin" %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_course_reviews' or request.resolver_match.url_name == 'staff_admin_desk_course_review' %} is-active{% endif %}" href="{% url 'staff_admin_desk_course_reviews' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_course_reviews' or request.resolver_match.url_name == 'staff_admin_desk_course_review' %} aria-current="page"{% endif %}>
+        <i class="bi bi-check2-square" aria-hidden="true"></i><span>Course Approvals</span>
+      </a>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_course_builder_preview' %} is-active{% endif %}" href="{% url 'staff_course_builder_preview' %}"{% if request.resolver_match.url_name == 'staff_course_builder_preview' %} aria-current="page"{% endif %}>
+        <i class="bi bi-pencil-square" aria-hidden="true"></i><span>Course Builder</span>
+      </a>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_seo' %} is-active{% endif %}" href="{% url 'staff_admin_desk_seo' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_seo' %} aria-current="page"{% endif %}>
+        <i class="bi bi-search" aria-hidden="true"></i><span>SEO &amp; Discoverability</span>
+      </a>
+      {% endif %}
+      {% if perms.academy.view_courseoffer %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:academy_courseoffer_changelist' %}" aria-label="Course offers in Advanced Administration">
+        <i class="bi bi-tag" aria-hidden="true"></i><span>Offers &amp; Pricing</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+      {% if perms.academy.view_courseentitlement %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:academy_courseentitlement_changelist' %}" aria-label="Learner course entitlements in Advanced Administration">
+        <i class="bi bi-key" aria-hidden="true"></i><span>Learner Entitlements</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="tt-desk-nav-group" aria-labelledby="tt-nav-customers">
+      <h2 id="tt-nav-customers">Customers</h2>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_customers' %} is-active{% endif %}" href="{% url 'staff_admin_desk_customers' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_customers' %} aria-current="page"{% endif %}>
+        <i class="bi bi-people" aria-hidden="true"></i><span>Overview</span>
+      </a>
+      {% if perms.accounts.view_user %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_accounts' or request.resolver_match.url_name == 'staff_admin_desk_account_detail' %} is-active{% endif %}" href="{% url 'staff_admin_desk_accounts' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_accounts' or request.resolver_match.url_name == 'staff_admin_desk_account_detail' %} aria-current="page"{% endif %}>
+        <i class="bi bi-people" aria-hidden="true"></i><span>Learners &amp; Accounts</span>
+      </a>
+      {% endif %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_support_tickets' or request.resolver_match.url_name == 'staff_admin_desk_support_ticket' %} is-active{% endif %}" href="{% url 'staff_admin_desk_support_tickets' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_support_tickets' or request.resolver_match.url_name == 'staff_admin_desk_support_ticket' %} aria-current="page"{% endif %}>
+        <i class="bi bi-chat-square-text" aria-hidden="true"></i><span>Support Tickets</span>
+      </a>
+    </section>
+
+    {% if user.is_superuser or user.role == "admin" or perms.payments.view_paymentintent or perms.payments.view_invoice or perms.subscriptions.view_subscription or perms.payments.change_billingsettings or perms.payments.add_billingsettings or desk_nav.business or desk_access.business or perms.disputes.view_dispute %}
+    <section class="tt-desk-nav-group" aria-labelledby="tt-nav-revenue">
+      <h2 id="tt-nav-revenue">Revenue</h2>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_revenue' %} is-active{% endif %}" href="{% url 'staff_admin_desk_revenue' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_revenue' %} aria-current="page"{% endif %}>
+        <i class="bi bi-currency-exchange" aria-hidden="true"></i><span>Overview</span>
+      </a>
+      {% if perms.payments.view_paymentintent or perms.payments.view_invoice %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_finance' or request.resolver_match.url_name == 'staff_admin_desk_invoice_detail' %} is-active{% endif %}" href="{% url 'staff_admin_desk_finance' %}{% if not perms.payments.view_paymentintent and perms.payments.view_invoice %}?tab=invoices{% endif %}"{% if request.resolver_match.url_name == 'staff_admin_desk_finance' or request.resolver_match.url_name == 'staff_admin_desk_invoice_detail' %} aria-current="page"{% endif %}>
+        <i class="bi bi-wallet2" aria-hidden="true"></i><span>Payments &amp; Invoices</span>
+      </a>
+      {% endif %}
+      {% if user.is_superuser or user.role == "admin" or perms.disputes.view_dispute %}
+      <a class="tt-desk-nav-link{% if request.path|slice:':15' == '/admin-disputes' %} is-active{% endif %}" href="/admin-disputes/">
+        <i class="bi bi-shield-exclamation" aria-hidden="true"></i><span>Disputes</span>
+      </a>
+      {% endif %}
+      {% if perms.subscriptions.view_subscription or desk_nav.subscriptions %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_subscriptions' %} is-active{% endif %}" href="{% url 'staff_admin_desk_subscriptions' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_subscriptions' %} aria-current="page"{% endif %}>
+        <i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>Subscriptions &amp; Plans</span>
+      </a>
+      {% endif %}
+      {% if desk_nav.business or desk_access.business or perms.payments.change_billingsettings or perms.payments.add_billingsettings %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_business' %} is-active{% endif %}" href="{% url 'staff_admin_desk_business' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_business' %} aria-current="page"{% endif %}>
+        <i class="bi bi-building" aria-hidden="true"></i><span>Business &amp; Tax</span>
+      </a>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if user.is_superuser or user.role == "admin" or perms.events.view_event or perms.emailing.view_delivery or perms.campaigns.view_campaign or perms.promotions.view_couponredemption or perms.growth.view_referralreward or perms.growth.view_giftinvite or perms.growth.add_giftinvite and perms.subscriptions.add_giftsubscription and perms.subscriptions.view_plan %}
+    <section class="tt-desk-nav-group" aria-labelledby="tt-nav-growth">
+      <h2 id="tt-nav-growth">Growth</h2>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_growth' %} is-active{% endif %}" href="{% url 'staff_admin_desk_growth' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_growth' %} aria-current="page"{% endif %}>
+        <i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Overview &amp; Analytics</span>
+      </a>
+      {% if user.is_superuser or user.role == "admin" or perms.growth.view_referralreward and perms.growth.view_referralsettings %}
+      <a class="tt-desk-nav-link{% if request.path|slice:':30' == '/growth/admin/referral-rewards' %} is-active{% endif %}" href="/growth/admin/referral-rewards/">
+        <i class="bi bi-gift" aria-hidden="true"></i><span>Referrals &amp; Rewards</span>
+      </a>
+      {% endif %}
+      {% if perms.growth.view_giftinvite %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:growth_giftinvite_changelist' %}" aria-label="Gift invites in Advanced Administration">
+        <i class="bi bi-ticket-perforated" aria-hidden="true"></i><span>Gift Invites</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+      {% if user.is_superuser or user.role == "admin" or perms.growth.add_giftinvite and perms.subscriptions.add_giftsubscription and perms.subscriptions.view_plan %}
+      <a class="tt-desk-nav-link{% if request.path|slice:':23' == '/admin/growth/send-gift' %} is-active{% endif %}" href="/admin/growth/send-gift/">
+        <i class="bi bi-send" aria-hidden="true"></i><span>Send a Gift</span>
+      </a>
+      {% endif %}
+      {% if perms.campaigns.view_campaign %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:campaigns_campaign_changelist' %}" aria-label="Campaigns in Advanced Administration">
+        <i class="bi bi-megaphone" aria-hidden="true"></i><span>Campaigns</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+      {% if perms.emailing.view_delivery %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:emailing_delivery_changelist' %}" aria-label="Email delivery records in Advanced Administration">
+        <i class="bi bi-envelope" aria-hidden="true"></i><span>Email Delivery</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+      {% if perms.promotions.view_couponredemption %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:promotions_couponredemption_changelist' %}" aria-label="Coupon redemptions in Advanced Administration">
+        <i class="bi bi-tags" aria-hidden="true"></i><span>Coupon Redemptions</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="tt-desk-nav-group" aria-labelledby="tt-nav-platform">
+      <h2 id="tt-nav-platform">Platform</h2>
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_platform' %} is-active{% endif %}" href="{% url 'staff_admin_desk_platform' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_platform' %} aria-current="page"{% endif %}>
+        <i class="bi bi-hdd-stack" aria-hidden="true"></i><span>Overview</span>
+      </a>
+      {% if perms.jobs.view_job %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:jobs_job_changelist' %}">
+        <i class="bi bi-cpu" aria-hidden="true"></i><span>Background Jobs</span>
+      </a>
+      {% endif %}
+      {% if perms.jobs.view_periodicjob %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:jobs_periodicjob_changelist' %}">
+        <i class="bi bi-clock-history" aria-hidden="true"></i><span>Scheduler</span>
+      </a>
+      {% endif %}
+      {% if perms.audit.view_auditlog %}
+      <a class="tt-desk-nav-link" href="{% url 'admin:audit_auditlog_changelist' %}">
+        <i class="bi bi-journal-check" aria-hidden="true"></i><span>Audit Trail</span>
+      </a>
+      {% endif %}
+      <a class="tt-desk-nav-link tt-desk-nav-link--advanced" href="{% url 'admin:index' %}">
+        <i class="bi bi-sliders" aria-hidden="true"></i><span>Advanced Administration</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      </a>
+    </section>
+  </nav>
+
+  <div class="tt-desk-sidebar-foot">
+    <span>Conviction before execution</span>
+    <span>Operating workspace</span>
+  </div>
+</aside>
+<button class="tt-desk-backdrop" type="button" data-desk-backdrop aria-label="Close Admin Desk navigation" tabindex="-1"></button>

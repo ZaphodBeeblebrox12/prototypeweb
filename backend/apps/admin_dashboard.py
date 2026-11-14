@@ -465,4 +465,94 @@ def staff_admin_desk(request):
         course_links["imports"] = context["course_review_queue_url"]
         context["course_links"] = course_links
 
+    # Build a compact action-first queue from verified operational signals.
+    # Each item routes to its canonical owning workflow; no duplicate task records
+    # or inferred provider/business states are introduced.
+    action_items = []
+    support = context.get("support_tickets") or {}
+    if support.get("overdue_sla", 0):
+        action_items.append({
+            "severity": "Critical",
+            "severity_key": "critical",
+            "title": "First response overdue",
+            "count": support["overdue_sla"],
+            "detail": "Reviewer-visible support tickets have passed their first-response deadline.",
+            "url": support.get("links", {}).get("active", ""),
+            "destination": "Support",
+        })
+
+    policy = context.get("policy_readiness") or {}
+    if policy and not policy.get("ready", False):
+        policy_items = policy.get("items") or []
+        action_items.append({
+            "severity": "Critical",
+            "severity_key": "critical",
+            "title": "Sales policy readiness blocked",
+            "count": len(policy_items),
+            "detail": "Checkout remains blocked while required policy versions are missing or contain placeholders.",
+            "url": policy.get("url", ""),
+            "destination": "Platform / Policies",
+        })
+
+    jobs = context.get("jobs") or {}
+    failed_jobs = int(jobs.get("failed", 0) or 0)
+    stalled_jobs = int(jobs.get("stalled", 0) or 0)
+    if failed_jobs or stalled_jobs:
+        job_parts = []
+        if failed_jobs:
+            job_parts.append(f"{failed_jobs} failed in the last 7 days")
+        if stalled_jobs:
+            job_parts.append(f"{stalled_jobs} stalled after 3+ attempts")
+        action_items.append({
+            "severity": "Critical" if stalled_jobs else "Warning",
+            "severity_key": "critical" if stalled_jobs else "warning",
+            "title": "Background jobs need investigation",
+            "count": failed_jobs + stalled_jobs,
+            "detail": "; ".join(job_parts) + ".",
+            "url": jobs.get("links", {}).get(
+                "stalled" if stalled_jobs else "failed", ""
+            ),
+            "destination": "Platform / Jobs",
+        })
+
+    if context.get("course_metrics", {}).get("imports_awaiting_review", 0):
+        count = context["course_metrics"]["imports_awaiting_review"]
+        action_items.append({
+            "severity": "Warning",
+            "severity_key": "warning",
+            "title": "Course submissions awaiting review",
+            "count": count,
+            "detail": "Course imports are waiting for an authorised Academy reviewer.",
+            "url": context.get("course_review_queue_url", ""),
+            "destination": "Academy",
+        })
+
+    business = context.get("business_readiness") or {}
+    if business and not business.get("ready", False):
+        missing = business.get("items") or []
+        action_items.append({
+            "severity": "Warning",
+            "severity_key": "warning",
+            "title": "Business and invoice setup incomplete",
+            "count": len(missing),
+            "detail": "Required seller and invoice fields need review before issuing real invoices.",
+            "url": business.get("url", ""),
+            "destination": "Revenue",
+        })
+
+    telegram = context.get("telegram") or {}
+    if telegram.get("recent_failed", 0):
+        action_items.append({
+            "severity": "Warning",
+            "severity_key": "warning",
+            "title": "Failed community-access operations",
+            "count": telegram["recent_failed"],
+            "detail": "Telegram/Discord access audit records have failed in the last 7 days.",
+            "url": telegram.get("links", {}).get("failed", ""),
+            "destination": "Platform / Provisioning",
+        })
+
+    context["action_items"] = action_items
+    context["action_item_count"] = sum(int(item.get("count", 0) or 0) for item in action_items)
+
     return render(request, "admin/desk.html", context)

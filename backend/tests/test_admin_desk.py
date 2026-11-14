@@ -1,4 +1,5 @@
 """Tests for the permission-aware, read-only TradeThesis Admin Desk."""
+from datetime import timedelta
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
@@ -7,8 +8,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.academy.models import Course, CourseModule, Lesson
+from apps.notifications.models import Notification
 from apps.support.models import SupportTicket
 
 User = get_user_model()
@@ -134,6 +137,216 @@ class AdminDeskTests(TestCase):
         self.assertEqual(detail_response.status_code, 200)
         self.assertContains(detail_response, "Conversation")
         self.assertContains(detail_response, "Assignment &amp; priority")
+
+    def test_customers_overview_uses_live_reviewer_scoped_ticket_counts(self):
+        owner = User.objects.create_superuser(
+            username="customers-overview-owner",
+            email="customers-overview-owner@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=owner, email=owner.email, verified=True, primary=True
+        )
+        learner = User.objects.create_user(
+            username="customers-overview-learner",
+            email="customers-overview-learner@example.test",
+            first_name="Taylor",
+            last_name="Trader",
+        )
+        ticket = SupportTicket.objects.create(
+            user=learner,
+            category=SupportTicket.Category.BILLING,
+            message="Please check my payment and course access.",
+        )
+        SupportTicket.objects.filter(pk=ticket.pk).update(
+            first_response_due_at=timezone.now() - timedelta(hours=1)
+        )
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("staff_admin_desk_customers"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(response.context["can_view_accounts"])
+        self.assertEqual(response.context["active_learners"], 1)
+        self.assertEqual(response.context["support_summary"]["open"], 1)
+        self.assertEqual(response.context["support_summary"]["overdue"], 1)
+        self.assertEqual(response.context["support_summary"]["unassigned"], 1)
+        self.assertContains(response, ticket.short_id)
+        self.assertContains(
+            response,
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
+        )
+        self.assertContains(response, "Customer 360")
+        self.assertNotContains(response, "Ananya Rao")
+
+    def test_generic_staff_customers_overview_does_not_expose_learner_register(self):
+        operator = User.objects.create_user(
+            username="customers-overview-support",
+            email="customers-overview-support@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        learner = User.objects.create_user(
+            username="customers-overview-member",
+            email="customers-overview-member@example.test",
+        )
+        ticket = SupportTicket.objects.create(
+            user=learner,
+            category=SupportTicket.Category.TECHNICAL,
+            message="I cannot connect to the community.",
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_customers"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertFalse(response.context["can_view_accounts"])
+        self.assertIsNone(response.context["active_learners"])
+        self.assertEqual(response.context["support_summary"]["open"], 1)
+        self.assertContains(response, ticket.short_id)
+        self.assertNotContains(response, reverse("staff_admin_desk_accounts"))
+        self.assertNotContains(response, "Active learner accounts")
+
+    def test_my_work_is_limited_to_current_staff_assignments_and_notifications(self):
+        operator = User.objects.create_user(
+            username="my-work-operator",
+            email="my-work-operator@example.test",
+            is_staff=True,
+        )
+        other_operator = User.objects.create_user(
+            username="my-work-other-operator",
+            email="my-work-other-operator@example.test",
+            is_staff=True,
+        )
+        assigned_member = User.objects.create_user(
+            username="my-work-assigned-member",
+            email="my-work-assigned-member@example.test",
+        )
+        other_member = User.objects.create_user(
+            username="my-work-other-member",
+            email="my-work-other-member@example.test",
+        )
+        own_ticket = SupportTicket.objects.create(
+            user=assigned_member,
+            category=SupportTicket.Category.BILLING,
+            message="Assigned billing request.",
+            assigned_to=operator,
+        )
+        other_ticket = SupportTicket.objects.create(
+            user=other_member,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Another reviewer's technical request.",
+            assigned_to=other_operator,
+        )
+        Notification.objects.create(
+            user=operator,
+            title="Your assignment changed",
+            message="A support request is assigned to you.",
+        )
+        Notification.objects.create(
+            user=other_operator,
+            title="Private notification",
+            message="This belongs to another staff member.",
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_my_work"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["support_count"], 1)
+        self.assertEqual(response.context["notification_count"], 1)
+        self.assertEqual(response.context["unread_notification_count"], 1)
+        self.assertContains(response, own_ticket.short_id)
+        self.assertNotContains(response, other_ticket.short_id)
+        self.assertContains(response, "Your assignment changed")
+        self.assertNotContains(response, "Private notification")
+
+    def test_domain_overviews_render_for_superuser(self):
+        owner = User.objects.create_superuser(
+            username="domain-overview-owner",
+            email="domain-overview-owner@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=owner, email=owner.email, verified=True, primary=True
+        )
+        Course.objects.create(
+            title="Overview Draft Course",
+            slug="overview-draft-course",
+            status=Course.Status.DRAFT,
+        )
+        self.client.force_login(owner)
+
+        academy = self.client.get(reverse("staff_admin_desk_academy"))
+        self.assertEqual(academy.status_code, 200, academy.content)
+        self.assertEqual(academy.context["course_summary"]["draft"], 1)
+        self.assertTrue(academy.context["can_review_courses"])
+
+        for route_name in (
+            "staff_admin_desk_revenue",
+            "staff_admin_desk_growth",
+            "staff_admin_desk_platform",
+        ):
+            with self.subTest(route=route_name):
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.content)
+
+    def test_staff_domain_overviews_do_not_expose_unpermitted_panels(self):
+        operator = User.objects.create_user(
+            username="domain-overview-staff",
+            email="domain-overview-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        self.client.force_login(operator)
+
+        expectations = {
+            "staff_admin_desk_academy": (
+                "course_summary", "review_summary", "offer_summary",
+                "entitlement_summary",
+            ),
+            "staff_admin_desk_revenue": (
+                "payment_summary", "invoice_summary", "subscription_summary",
+                "dispute_summary",
+            ),
+            "staff_admin_desk_growth": (
+                "purchase_report", "email_report", "campaign_report",
+                "promotion_report", "referral_report", "gift_summary",
+            ),
+            "staff_admin_desk_platform": (
+                "job_summary", "provisioning_summary", "scheduler_summary",
+                "audit_summary", "security_summary",
+            ),
+        }
+        for route_name, forbidden_context_keys in expectations.items():
+            with self.subTest(route=route_name):
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.content)
+                for key in forbidden_context_keys:
+                    self.assertNotIn(key, response.context)
+
+    def test_staff_notifications_render_untrusted_message_as_text(self):
+        operator = User.objects.create_user(
+            username="notification-render-staff",
+            email="notification-render-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get("/notifications/")
+
+        self.assertEqual(response.status_code, 200, response.content)
+        page = response.content.decode("utf-8")
+        self.assertIn("title.textContent = notification.title;", page)
+        self.assertIn("message.textContent = notification.message;", page)
+        self.assertNotIn("innerHTML", page)
 
     def test_non_staff_user_is_forbidden(self):
         learner = User.objects.create_user(

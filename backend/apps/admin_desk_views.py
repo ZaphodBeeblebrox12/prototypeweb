@@ -10,7 +10,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q, Count, Max, Sum
+from django.db.models import Q, Count, Max, Sum, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -1315,6 +1315,600 @@ def admin_desk_support_ticket_action(request, ticket_id):
 
     messages.error(request, "Choose a valid support-ticket action.")
     return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+
+
+@login_required
+@require_GET
+def admin_desk_customers(request):
+    """Permission-aware Customers landing page using canonical account and ticket records."""
+    _guard(request)
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    now = timezone.now()
+    since = now - timedelta(days=7)
+    visible_tickets = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.select_related(
+            "user", "plan", "affiliate_link", "assigned_to"
+        ),
+    )
+    actionable_statuses = (
+        SupportTicket.Status.PENDING,
+        SupportTicket.Status.IN_PROGRESS,
+    )
+    actionable = visible_tickets.filter(status__in=actionable_statuses)
+    needs_response = actionable.filter(first_response_at__isnull=True)
+    active = visible_tickets.filter(status__in=SupportTicket.ACTIVE_STATUSES)
+    overdue_filter = {
+        "status__in": SupportTicket.ACTIVE_STATUSES,
+        "first_response_at__isnull": True,
+        "first_response_due_at__lt": now,
+    }
+
+    # Triage is based only on fields already maintained by the support workflow:
+    # first-response deadline, priority, assignment and current status.
+    # Do not infer a "new member reply" without an explicit source signal.
+    attention = actionable.annotate(
+        _sla_order=Case(
+            When(
+                first_response_at__isnull=True,
+                first_response_due_at__lt=now,
+                then=Value(0),
+            ),
+            default=Value(1),
+            output_field=IntegerField(),
+        ),
+        _priority_order=Case(
+            When(priority=SupportTicket.Priority.URGENT, then=Value(0)),
+            When(priority=SupportTicket.Priority.HIGH, then=Value(1)),
+            When(priority=SupportTicket.Priority.NORMAL, then=Value(2)),
+            When(priority=SupportTicket.Priority.LOW, then=Value(3)),
+            default=Value(4),
+            output_field=IntegerField(),
+        ),
+        _assignment_order=Case(
+            When(assigned_to__isnull=True, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        ),
+    ).order_by("_sla_order", "_priority_order", "_assignment_order", "-created_at")[:8]
+
+    can_view_accounts = _allowed(request.user, "accounts.view_user")
+    learner_count = None
+    if can_view_accounts:
+        User = get_user_model()
+        learner_count = User.objects.filter(
+            is_staff=False,
+            is_superuser=False,
+            is_active=True,
+            is_banned=False,
+        ).count()
+
+    return render(
+        request,
+        "admin/desk_customers.html",
+        {
+            "can_view_accounts": can_view_accounts,
+            "current_time": now,
+            "active_learners": learner_count,
+            "support_summary": {
+                "open": active.count(),
+                "needs_response": needs_response.count(),
+                "overdue": visible_tickets.filter(**overdue_filter).count(),
+                "unassigned": needs_response.filter(assigned_to__isnull=True).count(),
+                "recently_resolved": visible_tickets.filter(
+                    status__in=[
+                        SupportTicket.Status.APPROVED,
+                        SupportTicket.Status.REJECTED,
+                    ],
+                    updated_at__gte=since,
+                ).count(),
+            },
+            "attention_tickets": attention,
+            "support_queue_url": reverse("staff_admin_desk_support_tickets"),
+            "accounts_url": (
+                reverse("staff_admin_desk_accounts") if can_view_accounts else ""
+            ),
+            "desk_nav": _nav(request),
+        },
+    )
+
+@login_required
+@require_GET
+def admin_desk_platform(request):
+    """Permission-scoped, read-only Platform overview for jobs, provisioning and audit."""
+    _guard(request)
+    now = timezone.now()
+    since = now - timedelta(days=7)
+    context = {
+        "now": now,
+        "since": since,
+        "operations_url": reverse("staff_admin_desk_operations_timeline"),
+        "advanced_admin_url": reverse("admin:index"),
+    }
+
+    if _allowed(request.user, "jobs.view_job"):
+        from apps.jobs.models import Job
+
+        context["job_summary"] = {
+            "pending": Job.objects.filter(status=Job.STATUS_PENDING).count(),
+            "running": Job.objects.filter(status=Job.STATUS_RUNNING).count(),
+            "failed_7d": Job.objects.filter(
+                status=Job.STATUS_FAILED, updated_at__gte=since
+            ).count(),
+            "stalled": Job.objects.filter(
+                attempts__gte=3, status__in=Job.OPEN_STATUSES
+            ).count(),
+            "url": reverse("admin:jobs_job_changelist"),
+        }
+        incident_jobs = Job.objects.filter(
+            Q(status=Job.STATUS_FAILED, updated_at__gte=since)
+            | Q(status__in=Job.OPEN_STATUSES, attempts__gte=3)
+            | Q(
+                status=Job.STATUS_RUNNING,
+                locked_at__lt=now - timedelta(minutes=15),
+            )
+        ).only(
+            "kind", "status", "attempts", "max_attempts", "created_at", "updated_at"
+        ).order_by("-updated_at")[:8]
+        context["job_incidents"] = [
+            {
+                "job": job,
+                "url": reverse("staff_admin_desk_operations_job", args=[job.pk]),
+            }
+            for job in incident_jobs
+        ]
+
+    if _allowed(request.user, "jobs.view_provisioningoperation"):
+        from apps.jobs.models import ProvisioningOperation
+
+        active_states = [
+            ProvisioningOperation.ST_PENDING,
+            ProvisioningOperation.ST_CREATING,
+            ProvisioningOperation.ST_CREATED,
+            ProvisioningOperation.ST_SENDING,
+            ProvisioningOperation.ST_SENT,
+        ]
+        context["provisioning_summary"] = {
+            "active": ProvisioningOperation.objects.filter(
+                state__in=active_states
+            ).count(),
+            "failed": ProvisioningOperation.objects.filter(
+                state=ProvisioningOperation.ST_FAILED,
+                updated_at__gte=since,
+            ).count(),
+            "unknown": ProvisioningOperation.objects.filter(
+                state=ProvisioningOperation.ST_UNKNOWN,
+                updated_at__gte=since,
+            ).count(),
+        }
+        provisioning_incidents = ProvisioningOperation.objects.filter(
+            state__in=[
+                ProvisioningOperation.ST_FAILED,
+                ProvisioningOperation.ST_UNKNOWN,
+            ],
+            updated_at__gte=since,
+        ).only(
+            "operation_id", "operation", "state", "attempts", "updated_at"
+        ).order_by("-updated_at")[:8]
+        context["provisioning_incidents"] = [
+            {
+                "operation": operation,
+                "url": reverse(
+                    "staff_admin_desk_operations_provisioning",
+                    args=[operation.pk],
+                ),
+            }
+            for operation in provisioning_incidents
+        ]
+
+    if _allowed(request.user, "jobs.view_periodicjob"):
+        from apps.jobs.models import PeriodicJob
+
+        context["scheduler_summary"] = {
+            "enabled": PeriodicJob.objects.filter(enabled=True).count(),
+            "errors": PeriodicJob.objects.filter(
+                last_status=PeriodicJob.Status.ERROR
+            ).count(),
+            "never_run": PeriodicJob.objects.filter(
+                enabled=True, last_run_at__isnull=True
+            ).count(),
+            "url": reverse("admin:jobs_periodicjob_changelist"),
+        }
+        context["scheduler_items"] = list(
+            PeriodicJob.objects.only(
+                "name", "enabled", "last_run_at", "last_status"
+            ).order_by("name")[:10]
+        )
+
+    if _allowed(request.user, "audit.view_auditlog"):
+        from apps.audit.models import AuditLog
+
+        context["audit_summary"] = {
+            "recent": AuditLog.objects.filter(created_at__gte=since).count(),
+            "url": reverse("admin:audit_auditlog_changelist"),
+        }
+        context["audit_items"] = list(
+            AuditLog.objects.select_related("user").only(
+                "action", "object_type", "created_at", "user__username"
+            ).order_by("-created_at")[:10]
+        )
+
+    if _allowed(request.user, "accounts.view_securityevent"):
+        from apps.accounts.models import SecurityEvent
+
+        context["security_summary"] = {
+            "recent": SecurityEvent.objects.filter(occurred_at__gte=since).count(),
+        }
+        # Security detail is intentionally minimised: do not render IP addresses,
+        # user agents, raw event detail or tokens in this overview.
+        context["security_items"] = list(
+            SecurityEvent.objects.only(
+                "event_type", "occurred_at"
+            ).order_by("-occurred_at")[:10]
+        )
+
+    if _allowed(request.user, "policies.view_policyversion"):
+        from django.contrib import admin
+        from apps.policies.models import PolicyVersion
+
+        policy_admin = admin.site._registry.get(PolicyVersion)
+        if policy_admin and policy_admin.has_view_permission(request):
+            from apps.policies.services import sales_policy_readiness
+
+            readiness = sales_policy_readiness()
+            readiness["url"] = reverse("admin:policies_policyversion_changelist")
+            context["policy_readiness"] = readiness
+
+    context["has_platform_records"] = any(
+        key in context for key in (
+            "job_summary", "provisioning_summary", "scheduler_summary",
+            "audit_summary", "security_summary", "policy_readiness",
+        )
+    )
+    return render(request, "admin/desk_platform.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_growth(request):
+    """Read-only Growth overview with each report gated by its source permission."""
+    _guard(request)
+    from apps.analytics.services import report
+    from apps.growth.permissions import has_growth_permission
+
+    context = {
+        "has_growth_data": False,
+        "can_view_referrals": has_growth_permission(
+            request.user,
+            ("growth.view_referralreward", "growth.view_referralsettings"),
+        ),
+        "can_send_gifts": has_growth_permission(
+            request.user,
+            (
+                "growth.add_giftinvite",
+                "subscriptions.add_giftsubscription",
+                "subscriptions.view_plan",
+            ),
+        ),
+        "referrals_url": "/growth/admin/referral-rewards/",
+    }
+
+    if has_growth_permission(request.user, "events.view_event"):
+        context["purchase_report"] = report.signup_analytics(days=30)
+        context["events_url"] = reverse("admin:events_event_changelist")
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "emailing.view_delivery"):
+        context["email_report"] = report.email_performance(days=30)
+        context["email_url"] = reverse("admin:emailing_delivery_changelist")
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "campaigns.view_campaign"):
+        context["campaign_report"] = report.campaign_performance()[:8]
+        context["campaign_url"] = reverse("admin:campaigns_campaign_changelist")
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "promotions.view_couponredemption"):
+        context["promotion_report"] = report.promotion_performance()[:8]
+        context["promotion_url"] = reverse(
+            "admin:promotions_couponredemption_changelist"
+        )
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "growth.view_referralreward"):
+        context["referral_report"] = report.referral_performance()
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "growth.view_giftinvite"):
+        from apps.growth.models import GiftInvite
+
+        context["gift_summary"] = {
+            "pending": GiftInvite.objects.filter(
+                status=GiftInvite.Status.PENDING
+            ).count(),
+            "claimed": GiftInvite.objects.filter(
+                status=GiftInvite.Status.CLAIMED
+            ).count(),
+            "expired": GiftInvite.objects.filter(
+                status=GiftInvite.Status.EXPIRED
+            ).count(),
+            "url": reverse("admin:growth_giftinvite_changelist"),
+        }
+        context["has_growth_data"] = True
+
+    context["can_view_campaigns"] = "campaign_report" in context
+    context["can_view_email"] = "email_report" in context
+    context["can_view_promotions"] = "promotion_report" in context
+    context["can_view_purchases"] = "purchase_report" in context
+    context["can_view_referral_metrics"] = "referral_report" in context
+    return render(request, "admin/desk_growth.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_revenue(request):
+    """Permission-scoped Revenue landing page; amounts remain in source currencies."""
+    _guard(request)
+    now = timezone.now()
+    since = now - timedelta(days=30)
+    soon = now + timedelta(hours=72)
+    context = {"period_days": 30}
+
+    can_view_payments = _allowed(request.user, "payments.view_paymentintent")
+    can_view_invoices = _allowed(request.user, "payments.view_invoice")
+    if can_view_payments:
+        from apps.payments.models import PaymentIntent
+        payment_base = PaymentIntent.objects.filter(
+            is_simulated=False,
+            created_at__gte=since,
+        )
+        context["payment_summary"] = {
+            "pending": payment_base.filter(
+                status=PaymentIntent.Status.PENDING
+            ).count(),
+            "successful": payment_base.filter(
+                status=PaymentIntent.Status.SUCCESS
+            ).count(),
+            "failed": payment_base.filter(
+                status=PaymentIntent.Status.FAILED
+            ).count(),
+            "successful_by_currency": list(
+                payment_base.filter(status=PaymentIntent.Status.SUCCESS)
+                .values("currency")
+                .annotate(
+                    payments=Count("pk"),
+                    amount_cents=Sum("amount"),
+                )
+                .order_by("currency")
+            ),
+            "url": reverse("staff_admin_desk_finance"),
+        }
+    if can_view_invoices:
+        from apps.payments.models import Invoice
+
+        context["invoice_summary"] = {
+            "issued": Invoice.objects.filter(issued_at__gte=since).count(),
+            "url": reverse("staff_admin_desk_finance") + "?tab=invoices",
+        }
+
+    if _allowed(request.user, "subscriptions.view_subscription"):
+        from apps.subscriptions.models import Subscription
+
+        context["subscription_summary"] = {
+            "active": Subscription.objects.filter(
+                status=Subscription.Status.ACTIVE,
+                is_active=True,
+            ).count(),
+            "pending": Subscription.objects.filter(
+                status=Subscription.Status.PENDING
+            ).count(),
+            "expiring_soon": Subscription.objects.filter(
+                status=Subscription.Status.ACTIVE,
+                is_active=True,
+                expires_at__isnull=False,
+                expires_at__gt=now,
+                expires_at__lte=soon,
+            ).count(),
+            "url": reverse("staff_admin_desk_subscriptions"),
+        }
+
+    can_view_disputes = bool(
+        request.user.is_superuser
+        or getattr(request.user, "role", None) == "admin"
+        or _allowed(request.user, "disputes.view_dispute")
+    )
+    if can_view_disputes:
+        from apps.disputes.models import Dispute
+
+        live_statuses = [
+            Dispute.Status.OPENED,
+            Dispute.Status.EVIDENCE_PREP,
+            Dispute.Status.READY_FOR_REVIEW,
+        ]
+        context["dispute_summary"] = {
+            "open": Dispute.objects.filter(
+                status__in=[Dispute.Status.OPENED, Dispute.Status.EVIDENCE_PREP]
+            ).count(),
+            "needs_response": Dispute.objects.filter(
+                status__in=live_statuses
+            ).count(),
+            "deadline_72h": Dispute.objects.filter(
+                status__in=live_statuses,
+                evidence_due_at__lte=soon,
+            ).count(),
+            "overdue": Dispute.objects.filter(
+                status__in=live_statuses,
+                evidence_due_at__lt=now,
+            ).count(),
+            "url": "/admin-disputes/",
+        }
+
+    from apps.payments.models import BillingSettings
+    settings_exist = BillingSettings.objects.filter(pk=1).exists()
+    can_manage_business = (
+        _allowed(request.user, "payments.change_billingsettings")
+        if settings_exist
+        else _allowed(request.user, "payments.add_billingsettings")
+    )
+    if can_manage_business:
+        context["business_url"] = reverse("staff_admin_desk_business")
+
+    context["has_revenue_sections"] = any(
+        key in context for key in (
+            "payment_summary", "invoice_summary", "subscription_summary",
+            "dispute_summary", "business_url",
+        )
+    )
+    return render(request, "admin/desk_revenue.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_academy(request):
+    """Permission-scoped Academy overview over canonical course/access records."""
+    _guard(request)
+    from apps.academy.models import Course, CourseEntitlement, CourseOffer
+    from apps.academy.permissions import is_course_content_admin
+
+    now = timezone.now()
+    context = {
+        "can_review_courses": is_course_content_admin(request.user),
+        "can_build_courses": is_course_content_admin(request.user),
+        "can_view_courses": _allowed(request.user, "academy.view_course"),
+        "can_view_offers": _allowed(request.user, "academy.view_courseoffer"),
+        "can_view_entitlements": _allowed(
+            request.user, "academy.view_courseentitlement"
+        ),
+        "seo_url": reverse("staff_admin_desk_seo"),
+    }
+
+    if context["can_view_courses"]:
+        context["course_summary"] = {
+            "total": Course.objects.count(),
+            "draft": Course.objects.filter(status=Course.Status.DRAFT).count(),
+            "published": Course.objects.filter(
+                status=Course.Status.PUBLISHED
+            ).count(),
+            "archived": Course.objects.filter(
+                status=Course.Status.ARCHIVED
+            ).count(),
+            "url": reverse("admin:academy_course_changelist"),
+        }
+
+    if context["can_review_courses"]:
+        from apps.academy.models import CourseImport
+
+        context["review_summary"] = {
+            "pending": CourseImport.objects.filter(
+                status=CourseImport.Status.REVIEW
+            ).count(),
+            "url": reverse("staff_admin_desk_course_reviews"),
+            "cleanup_url": reverse("staff_admin_desk_course_import_cleanup"),
+        }
+
+    if context["can_view_offers"]:
+        context["offer_summary"] = {
+            "active": CourseOffer.objects.filter(is_active=True).count(),
+            "inactive": CourseOffer.objects.filter(is_active=False).count(),
+            "url": reverse("admin:academy_courseoffer_changelist"),
+        }
+
+    if context["can_view_entitlements"]:
+        active_entitlements = CourseEntitlement.objects.filter(
+            status=CourseEntitlement.Status.ACTIVE,
+            starts_at__lte=now,
+        ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
+        context["entitlement_summary"] = {
+            "active": active_entitlements.count(),
+            "revoked": CourseEntitlement.objects.filter(
+                status=CourseEntitlement.Status.REVOKED
+            ).count(),
+            "url": reverse("admin:academy_courseentitlement_changelist"),
+        }
+
+    context["has_academy_sections"] = any(
+        key in context for key in (
+            "course_summary", "review_summary", "offer_summary",
+            "entitlement_summary",
+        )
+    )
+    return render(request, "admin/desk_academy.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_my_work(request):
+    """Show staff assignments and the signed-in user's own notifications."""
+    _guard(request)
+    from apps.notifications.models import Notification
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    now = timezone.now()
+    active_support = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.select_related(
+            "user", "plan", "affiliate_link", "assigned_to"
+        ),
+    ).filter(
+        assigned_to=request.user,
+        status__in=SupportTicket.ACTIVE_STATUSES,
+    )
+    context = {
+        "support_count": active_support.count(),
+        "assigned_disputes": None,
+        "dispute_count": 0,
+        "assigned_tickets": active_support.order_by(
+            "first_response_due_at", "-updated_at"
+        )[:10],
+        "notification_count": Notification.objects.filter(
+            user=request.user
+        ).count(),
+        "unread_notification_count": Notification.objects.filter(
+            user=request.user,
+            is_read=False,
+        ).count(),
+        "notifications": Notification.objects.filter(
+            user=request.user
+        ).only(
+            "id", "notification_type", "title", "message", "is_read", "created_at"
+        ).order_by("-created_at")[:8],
+        "notifications_url": "/notifications/",
+    }
+
+    can_view_disputes = bool(
+        request.user.is_superuser
+        or getattr(request.user, "role", None) == "admin"
+        or (
+            request.user.is_staff
+            and request.user.has_perm("disputes.view_dispute")
+        )
+    )
+    if can_view_disputes:
+        from apps.disputes.models import Dispute
+
+        active_disputes = Dispute.objects.filter(
+            assigned_to=request.user,
+            status__in=[
+                Dispute.Status.OPENED,
+                Dispute.Status.EVIDENCE_PREP,
+                Dispute.Status.READY_FOR_REVIEW,
+            ],
+        )
+        context["dispute_count"] = active_disputes.count()
+        context["assigned_disputes"] = active_disputes.order_by(
+            "evidence_due_at", "-opened_at"
+        )[:10]
+
+    context["total_assigned_work"] = (
+        context["support_count"] + context.get("dispute_count", 0)
+    )
+    context["now"] = now
+    context["desk_nav"] = _nav(request)
+    return render(request, "admin/desk_my_work.html", context)
 
 
 def _nav(request):

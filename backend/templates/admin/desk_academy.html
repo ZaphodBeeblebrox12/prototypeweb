@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Academy | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Academy{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-academy{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--line-soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-academy *{box-sizing:border-box}
+  .tt-academy a{color:#315b43;text-underline-offset:3px}
+  .tt-academy .head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:4px 0 19px}
+  .tt-academy .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-academy h1{margin:0;color:var(--ink);font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-academy .intro{max-width:790px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+  .tt-academy .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tt-academy .panel{min-width:0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-academy .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .tt-academy .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-academy .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-academy .panel-body{padding:13px 15px}
+  .tt-academy .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .tt-academy .stat{min-width:0;padding:11px;border:1px solid var(--line-soft);border-radius:4px;background:#fff}
+  .tt-academy .stat strong{display:block;color:var(--ink);font:600 23px/1 Georgia,"Times New Roman",serif;font-variant-numeric:tabular-nums}
+  .tt-academy .stat span{display:block;margin-top:6px;color:var(--muted);font-size:9px;line-height:1.35}
+  .tt-academy .stat.alert strong{color:#9b4b40}
+  .tt-academy .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+  .tt-academy .workflow-links{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-academy .workflow-link{display:inline-flex;align-items:center;gap:7px;min-height:33px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-academy .workflow-link:hover{background:#f0f4ee;border-color:#bdcbbd}
+  .tt-academy .empty-access{padding:22px 15px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-size:11px}
+  .tt-academy .callout{padding:12px 13px;border-left:3px solid #879985;background:#f4f6f0;color:#5e6d61;font-size:10px;line-height:1.55}
+  @media(max-width:900px){.tt-academy .grid{grid-template-columns:1fr}.tt-academy .stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:600px){.tt-academy h1{font-size:27px}.tt-academy .head{align-items:flex-start}.tt-academy .panel-head{align-items:flex-start;flex-direction:column}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-academy">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Academy / Learning products</p>
+      <h1>Academy overview</h1>
+      <p class="intro">A permission-scoped view of course catalogue records, review submissions, offers and learner entitlements. Course content and learner access remain owned by Academy; this overview does not publish courses or change access.</p>
+    </div>
+  </header>
+
+  {% if has_academy_sections %}
+  <div class="grid">
+    {% if course_summary %}
+    <section class="panel" aria-labelledby="academy-catalogue-heading">
+      <div class="panel-head">
+        <div><h2 id="academy-catalogue-heading">Course catalogue</h2><p>Canonical course records by publication state</p></div>
+        <a href="{{ course_summary.url }}">Open catalogue ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats">
+          <div class="stat"><strong>{{ course_summary.total }}</strong><span>Total courses</span></div>
+          <div class="stat"><strong>{{ course_summary.published }}</strong><span>Published</span></div>
+          <div class="stat"><strong>{{ course_summary.draft }}</strong><span>Draft</span></div>
+          <div class="stat"><strong>{{ course_summary.archived }}</strong><span>Archived</span></div>
+        </div>
+        <p class="note">Publication state does not by itself guarantee a course is catalogue-ready; public visibility also depends on its content, access and catalogue configuration.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if review_summary %}
+    <section class="panel" aria-labelledby="academy-review-heading">
+      <div class="panel-head">
+        <div><h2 id="academy-review-heading">Course approvals</h2><p>Submitted imports waiting for an authorised review</p></div>
+        <a href="{{ review_summary.url }}">Review queue →</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats" style="grid-template-columns:minmax(0,180px)">
+          <div class="stat alert"><strong>{{ review_summary.pending }}</strong><span>Awaiting review</span></div>
+        </div>
+        <div class="workflow-links" style="margin-top:12px">
+          <a class="workflow-link" href="{{ review_summary.url }}">Open submissions →</a>
+          <a class="workflow-link" href="{{ review_summary.cleanup_url }}">Import cleanup →</a>
+        </div>
+        <p class="note">Only the application Admin/superuser content role can review and publish submissions. Ordinary Django staff access is not sufficient.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if offer_summary %}
+    <section class="panel" aria-labelledby="academy-offers-heading">
+      <div class="panel-head">
+        <div><h2 id="academy-offers-heading">Offers &amp; pricing</h2><p>Course offer records linked to commerce Plans</p></div>
+        <a href="{{ offer_summary.url }}">Offer register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div class="stat"><strong>{{ offer_summary.active }}</strong><span>Marked active</span></div>
+          <div class="stat"><strong>{{ offer_summary.inactive }}</strong><span>Inactive offers</span></div>
+        </div>
+        <p class="note">An offer marked active is not necessarily saleable: it must also have a published eligible course, a hidden commerce Plan and an active one-time price. Changing offer data does not rewrite existing payment or entitlement history.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if entitlement_summary %}
+    <section class="panel" aria-labelledby="academy-entitlement-heading">
+      <div class="panel-head">
+        <div><h2 id="academy-entitlement-heading">Learner entitlements</h2><p>Course access state at the current time</p></div>
+        <a href="{{ entitlement_summary.url }}">Entitlement register ↗</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div class="stat"><strong>{{ entitlement_summary.active }}</strong><span>Currently active</span></div>
+          <div class="stat"><strong>{{ entitlement_summary.revoked }}</strong><span>Revoked</span></div>
+        </div>
+        <p class="note">Active count requires an active status, a start time reached, and no expiry (or a future expiry).</p>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+  {% if can_build_courses %}
+  <section class="panel" style="margin-top:13px" aria-labelledby="academy-authoring-heading">
+    <div class="panel-head"><h2 id="academy-authoring-heading">Authoring &amp; discoverability</h2><span class="status">Admin content role</span></div>
+    <div class="panel-body">
+      <div class="workflow-links">
+        <a class="workflow-link" href="{% url 'staff_course_builder_preview' %}">Open Course Builder →</a>
+        <a class="workflow-link" href="{{ seo_url }}">SEO &amp; discoverability →</a>
+      </div>
+      <div class="callout" style="margin-top:12px">The legacy Course Builder remains the default production authoring workflow. Tiptap remains a development feature and is not switched on by this navigation or overview.</div>
+    </div>
+  </section>
+  {% endif %}
+  {% else %}
+  <div class="empty-access">No Academy catalogue, review, offer or entitlement panels are available for the permissions assigned to this account.</div>
+  {% endif %}
+</div>
+{% endblock %}
