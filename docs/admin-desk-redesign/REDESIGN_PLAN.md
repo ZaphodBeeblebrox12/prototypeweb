@@ -753,3 +753,14 @@ Platform-specific source boundaries confirmed include the existing permission-fi
 - **New source findings:** course activation path records academy.entitlement_granted rather than purchase.completed and returns before ordinary membership coupon redemption; a course PaymentIntent may snapshot a coupon without an inspected CouponRedemption being created. Sample course payment is coupon-free; COHORT20 appears on membership PI-7002. Job success and ProvisioningOperation Unknown remain distinct. Member Notification is not a staff Command Centre item.
 - **Data safety:** all people, amounts, IDs and states are fictional; no API, provider, job or database writes are connected.
 - **Review status:** integrated board is draft for owner review; implementation handoff and approval remain outstanding.
+
+
+## 13. Owner decision completion and implementation readiness — 14 November 2026
+
+The owner has now completed 12 decision rounds and approved 60 product and operating-model decisions. The complete register is `OWNER_DECISION_REGISTER_V1.md`; the dependency-based implementation sequence, blockers, acceptance gates and authorisation boundary are in `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md`.
+
+The next work is Phase 0: refresh the current source/deployed baseline, inspect source-only changes, conduct authenticated staging and role-specific verification, and produce an up-to-date route/action/permission inventory. Implementation is still not authorised.
+
+The approved direction includes role-specific multi-department access, departmental and central workspace ownership, staff personal workspaces, permission-filtered team visibility and search, confirmation and audit for consequential actions, no mandatory dual approval, low-risk-only bulk operations, externally verified payment/provider outcomes, immutable financial records, phased rollout, pilot testing and departmental sign-off.
+
+Two constraints require explicit attention before access changes: (1) reconcile the superuser-only Django Admin target with workflow-by-workflow legacy cutover, and (2) verify provider refund initiation capability before exposing a staff-facing refund action. Other identified source gaps remain listed in the implementation-readiness document.
