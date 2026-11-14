@@ -1057,3 +1057,18 @@ The proposal covers Revenue Overview, Payments & Refunds, Payment Detail, Subscr
 Important newly confirmed migration boundary: the current Admin Desk finance page is read-only, but the Django Admin PaymentIntent action can record a full manual refund after a refund has already been processed in the provider dashboard. It records a ledger row, audit event and applies the existing full-refund access policy; it does not initiate a provider refund. This stays in Advanced Administration until a separately approved migration.
 
 The Revenue screens remain pending owner review and do not authorise implementation.
+
+
+## 19. Growth screen-level specification
+
+The Growth domain has a first screen-level design proposal:
+
+- `GROWTH_WORKSPACE_SPEC_V1.md` — detailed analytics/attribution, campaign, automation, coupon, referral/reward, gift, email delivery and advanced growth model semantics, route boundaries, execution caveats, permissions and cross-domain journeys.
+- `GROWTH_REVIEW_NOTES_V1.md` — source boundaries, browser smoke tests and open owner decisions.
+- `tradethesis_admin_growth_workspace_v1.html` — clickable static prototype using the approved V2 shell.
+
+The proposal covers Growth Overview, Analytics & Attribution, Campaigns & Audiences, Journeys & Automation, Promotions & Coupons, Referrals & Rewards, Gifts, Email Delivery and Advanced Growth.
+
+The source pass confirmed material caveats that must remain visible: the campaign send sweep uses a stub provider; additional campaign channels are staged; the analytics “signups” report counts purchase Events; promotion aggregate has an import defect; referral reward unlock logic has a PaymentIntent status mismatch; optional referee bonus credit currently logs only; reward balance helper mixes currencies; and the custom Referral Rewards Overview does not enforce staff-only access.
+
+The Growth screens remain pending owner review and do not authorise implementation.
