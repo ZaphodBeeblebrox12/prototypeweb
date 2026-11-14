@@ -67,24 +67,32 @@ class DisputeAccessTests(TestCase):
         grant(staff, "view_dispute")
         self.client.force_login(staff)
 
-        response = self.client.post(
+        action_paths = (
             f"/admin-disputes/{uuid4()}/note/",
-            {"note": "test note"},
+            f"/admin-disputes/{uuid4()}/generate/",
+            f"/admin-disputes/{uuid4()}/submit/",
+            f"/admin-disputes/{uuid4()}/resolve/",
         )
-
-        self.assertEqual(response.status_code, 403)
+        for path in action_paths:
+            with self.subTest(path=path):
+                response = self.client.post(path, {"note": "test note"})
+                self.assertEqual(response.status_code, 403)
 
     def test_change_without_view_is_not_enough_for_dispute_actions(self):
         staff = make_staff("dispute-change-only")
         grant(staff, "change_dispute")
         self.client.force_login(staff)
 
-        response = self.client.post(
+        action_paths = (
             f"/admin-disputes/{uuid4()}/note/",
-            {"note": "test note"},
+            f"/admin-disputes/{uuid4()}/generate/",
+            f"/admin-disputes/{uuid4()}/submit/",
+            f"/admin-disputes/{uuid4()}/resolve/",
         )
-
-        self.assertEqual(response.status_code, 403)
+        for path in action_paths:
+            with self.subTest(path=path):
+                response = self.client.post(path, {"note": "test note"})
+                self.assertEqual(response.status_code, 403)
 
     def test_staff_with_view_and_change_reaches_object_lookup(self):
         staff = make_staff("dispute-reviewer")
