@@ -348,8 +348,14 @@ class AdminDeskTests(TestCase):
         response = self.client.get("/notifications/")
 
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertContains(response, "&lt;script&gt;alert(&#x27;title-xss&#x27;)&lt;/script&gt;")
-        self.assertContains(response, "&lt;img src=x onerror=&quot;alert(&#x27;message-xss&#x27;)&quot;&gt;")
+        self.assertContains(
+            response,
+            "&lt;script&gt;alert(&#x27;title-xss&#x27;)&lt;/script&gt;",
+        )
+        self.assertContains(
+            response,
+            "&lt;img src=x onerror=&quot;alert(&#x27;message-xss&#x27;)&quot;&gt;",
+        )
         self.assertNotContains(response, "<script>alert('title-xss')</script>")
         self.assertNotContains(response, '<img src=x onerror="alert(\'message-xss\')">')
         self.assertContains(response, 'class="tt-admin-desk-layout"')
