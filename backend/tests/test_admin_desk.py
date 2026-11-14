@@ -562,7 +562,7 @@ class AdminDeskTests(TestCase):
         self.assertNotContains(response, internal_error)
         self.assertEqual(
             groups[0]["results"][0]["url"],
-            reverse("admin:payments_webhookevent_changelist"),
+            f"{reverse('admin:payments_webhookevent_changelist')}?q=dispute",
         )
 
     def test_global_search_preserves_unknown_provisioning_state_without_exposing_id(self):
