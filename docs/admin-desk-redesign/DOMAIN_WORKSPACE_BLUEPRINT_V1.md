@@ -1089,3 +1089,24 @@ The most important design constraint is that this extends the existing permissio
 The source pass also identified governance/verification gaps that must stay visible: /health/ is only a primary database SELECT 1 probe; configuration presence is not provider verification; AuditLog lacks an inspected append-only model guard; published PolicyVersion content immutability is not fully enforced; and the IsRoleAdmin API gate includes any is_staff user.
 
 The Platform screens remain pending owner review and do not authorise implementation.
+
+
+## 21. Holistic six-domain walkthrough (M50)
+
+The six top-level workspaces now have an integrated clickable workflow board:
+
+- `HOLISTIC_WALKTHROUGH_V1.md` — detailed seven-journey record graph, canonical ownership, lifecycle rules, permissions and source gaps.
+- `HOLISTIC_REVIEW_NOTES_V1.md` — browser test record and owner decisions.
+- `tradethesis_admin_holistic_workflow_v1.html` — M50 static prototype with 40 fictional linked records.
+
+The shared sample follows Maya Chen through a course review/purchase, membership and community access, first/last-touch campaign and referral, a support billing issue/dispute, a gift invitation failure and email evidence. Dev Singh's access request connects Customers approval through Revenue subscription grant and Platform reconciliation. Rohan Patel is Maya's referrer.
+
+The integrated source pass clarified two course-purchase details:
+- CourseOffer activation uses Academy `activate_course_payment`, grants CourseEntitlement and records an `academy.entitlement_granted` (or simulation) Event. The inspected course branch does not write `purchase.completed`.
+- Checkout can snapshot a coupon on the course PaymentIntent, but the CourseOffer activation branch returns before the ordinary membership CouponRedemption logic. The example keeps PI-7001 course purchase coupon-free and shows coupon/referral stacking on standard membership PaymentIntent PI-7002 instead. Course coupon policy needs explicit owner/engineering review.
+
+The other critical invariant is that successful worker execution is not external provisioning completion: support ticket TCK-4402 can be Approved, Subscription SUB-8114 granted and reconciliation Job JOB-8432 Succeeded while external ProvisioningOperation PROV-8C14 is still Unknown. The UI must not collapse these states.
+
+M50 passed 159/159 browser checks, including desktop shell geometry, all seven journeys, Inspect previews, 40-row register/search/owner filter, responsive mobile drawer and no-overflow checks at 390px. All records are fictional and no live APIs or mutations are connected.
+
+This is the end-to-end architecture review artefact. All six domains and M50 remain pending owner review; implementation remains unauthorised.
