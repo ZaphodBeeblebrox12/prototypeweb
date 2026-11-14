@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from apps.growth.models import GiftInvite
+from apps.subscriptions.models import GiftSubscription, Plan
 
 User = get_user_model()
 
@@ -79,6 +80,8 @@ class GiftWorkflowAccessTests(TestCase):
     def test_growth_staff_with_add_permission_can_open_gift_form(self):
         staff = make_user("gift-growth-staff", is_staff=True)
         grant(staff, GiftInvite, "add_giftinvite")
+        grant(staff, GiftSubscription, "add_giftsubscription")
+        grant(staff, Plan, "view_plan")
         self.client.force_login(staff)
         response = self.client.get("/admin/growth/send-gift/")
         self.assertEqual(response.status_code, 200)
