@@ -99,12 +99,12 @@
     {% if can_view_campaigns %}
     <section class="panel" aria-labelledby="growth-campaign-heading">
       <div class="panel-head">
-        <div><h2 id="growth-campaign-heading">Campaign performance</h2><p>Stored campaign counters</p></div>
+        <div><h2 id="growth-campaign-heading">Campaign performance</h2><p>Stored counters · current send sweep uses a stub provider</p></div>
         <a href="{{ campaign_url }}">Campaign register ↗</a>
       </div>
       <div class="panel-body">
         <div class="table-wrap" style="margin-top:0">
-          <table><thead><tr><th>Campaign</th><th>Total</th><th>Sent</th><th>Failed</th></tr></thead><tbody>
+          <table><thead><tr><th>Campaign</th><th>Total</th><th>Marked sent</th><th>Failed</th></tr></thead><tbody>
             {% for campaign in campaign_report %}
             <tr><td>{{ campaign.campaign }}</td><td>{{ campaign.total }}</td><td>{{ campaign.sent }}</td><td>{{ campaign.failed }}</td></tr>
             {% empty %}
@@ -112,7 +112,7 @@
             {% endfor %}
           </tbody></table>
         </div>
-        <p class="note">Additional non-email channel actions may be staged on a campaign; their delivery automation is not wired into the campaign send sweep yet.</p>
+        <p class="note"><strong>Simulation only — not sent to provider.</strong> “Marked sent” is a local campaign counter transition from the stub send sweep, not a provider delivery receipt or proof that a recipient received an email. Additional non-email channel actions are not wired into this send sweep.</p>
       </div>
     </section>
     {% endif %}
