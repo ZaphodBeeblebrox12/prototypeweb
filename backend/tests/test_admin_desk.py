@@ -424,6 +424,58 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "INR 1,299.00")
         self.assertNotContains(response, "Needle restricted support request")
 
+    def test_platform_webhook_summary_omits_provider_ids_payloads_and_errors(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import WebhookEvent
+
+        operator = User.objects.create_user(
+            username="platform-webhook-staff",
+            email="platform-webhook-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_webhookevent",
+        )
+        operator.user_permissions.add(permission)
+        provider_event_id = "evt_private_provider_reference_9834"
+        payload_secret = "payload-secret-do-not-render"
+        error_detail = "provider-internal-error-do-not-render"
+        WebhookEvent.objects.create(
+            provider="stripe",
+            provider_event_id=provider_event_id,
+            event_type="payment_intent.succeeded",
+            payload={"secret": payload_secret},
+            status=WebhookEvent.Status.FAILED,
+            error=error_detail,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_platform"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["webhook_summary"]["total_7d"], 1)
+        self.assertEqual(response.context["webhook_summary"]["failed"], 1)
+        self.assertContains(response, "Provider webhook evidence")
+        self.assertContains(response, "payment_intent.succeeded")
+        self.assertContains(response, "Failed")
+        self.assertNotContains(response, provider_event_id)
+        self.assertNotContains(response, payload_secret)
+        self.assertNotContains(response, error_detail)
+        access_sections = {
+            section["name"]: section["items"]
+            for section in response.context["my_access"]["sections"]
+        }
+        platform_access = {
+            item["label"]: item["granted"]
+            for item in access_sections["Platform"]
+        }
+        self.assertTrue(platform_access["Provider webhook events"])
+        self.assertFalse(platform_access["Background jobs"])
+
     def test_platform_access_summary_shows_only_current_staff_permissions(self):
         from django.contrib.auth.models import Group, Permission
 
