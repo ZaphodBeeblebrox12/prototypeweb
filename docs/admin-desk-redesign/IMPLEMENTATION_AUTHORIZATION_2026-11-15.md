@@ -43,3 +43,13 @@ No application deployment or production change has been made.
 - Preserve canonical domain ownership, existing action services, action-specific reason requirements, provider-truth semantics and server-side permission enforcement.
 - Do not invent task ownership, provider success, alert states or customer data where the current source has no reliable signal.
 - No production deployment without a separate explicit owner approval.
+
+## 5. Implementation handoff
+
+- **Implementation branch:** `admin-desk-v2-implementation`
+- **Draft pull request:** [#68 — TradeThesis Admin Desk V2 unified workspace](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/68)
+- **Latest implementation commit recorded:** `6fa58d256b359ce0eeb4a21ac272fc58b213c26b`
+- **Status at this update:** all six domain overview routes, shared workspace navigation, Command Centre action queue, personal My Work/notifications and permission-aware reporting views have been added. The existing detailed account, support, course-review, finance, subscription and operations workflows remain the canonical action pages.
+- **Automated CI:** running against the latest implementation head. Do not mark implementation ready until the latest CI matrix is green and any failures are resolved.
+- **Manual/browser/UAT acceptance:** deliberately not started. Keep the single consolidated campaign deferred until implementation is final and a final Academy staging deployment is separately approved.
+
