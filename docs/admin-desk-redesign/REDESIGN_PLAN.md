@@ -590,7 +590,8 @@ This is a planning-only progress record. It does not alter the original approval
 | Customers | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
 | Revenue | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
 | Growth | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
-| Platform | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions; holistic six-domain walkthrough follows |
+| Platform | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
+| Holistic six-domain walkthrough | M50 integrated seven-journey board with 40 shared fictional records and cross-domain source gaps documented | Owner review, cross-domain decisions, then implementation readiness matrix |
 | Handoff and resumption | Dedicated `HANDOFF_AND_RESUME.md` created | Update it after each major design pass |
 
 ### Phase status
@@ -599,10 +600,10 @@ This is a planning-only progress record. It does not alter the original approval
 - **Phase 1 — User jobs, roles and task prioritisation:** initial operating model recorded; complete staff/persona and permission matrix remains open.
 - **Phase 2 — Information architecture:** six top-level domains and order approved; child navigation is proposed and remains reviewable.
 - **Phase 3 — Command Centre concepts:** three concepts prototyped; final composition and prioritisation rules remain open.
-- **Phase 4 — Screen-level wireframes:** Academy, Customers, Revenue, Growth and Platform V1 screens/specs drafted; owner review and holistic walkthrough remain.
+- **Phase 4 — Screen-level wireframes:** Academy, Customers, Revenue, Growth and Platform V1 screens/specs plus M50 integrated workflow board drafted; owner review and revisions remain.
 - **Phase 5 — Visual design system:** common V2 visual direction selected; complete component tokens and accessibility validation remain.
-- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers, Revenue, Growth and Platform static prototypes created and smoke-tested; end-to-end holistic prototype remains.
-- **Phase 7 — Review and validation:** owner review is pending for the domain mockups; accessibility and authenticated staging parity remain.
+- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers, Revenue, Growth, Platform and M50 holistic static prototypes created and smoke-tested.
+- **Phase 7 — Review and validation:** all six domain mockups and M50 holistic board await owner review; accessibility, role/permission validation and authenticated staging parity remain.
 - **Phase 8 — Implementation handoff:** not started; only begins after the user approves the design and technical plan.
 
 ### Current implementation boundary
@@ -739,3 +740,16 @@ Platform-specific source boundaries confirmed include the existing permission-fi
 - **Smoke test:** 30/30 browser checks passed. All Platform destinations, tabs, job filters, event-source filter, detail previews and mobile drawer passed. No JavaScript or console errors; 390px viewport had no horizontal overflow.
 - **Data safety:** names, IDs, states, incidents and counts are fictional. Prototype does not read secrets, query live APIs, enqueue jobs or perform provider actions.
 - **Review state:** V1 is draft for owner review; no implementation is approved.
+
+
+### Holistic workflow pass — 14 November 2026
+
+- **Prototype:** tradethesis_admin_holistic_workflow_v1.html.
+- **Specification:** HOLISTIC_WALKTHROUGH_V1.md.
+- **Review notes:** HOLISTIC_REVIEW_NOTES_V1.md.
+- **Scope:** seven end-to-end journeys and a shared register of 40 fictional records using one primary learner and two secondary actors across all six domains.
+- **Journeys:** mini-course publication/purchase; membership/community access; campaign/referral; support access approval; billing/refund/dispute; gift/email failure; email delivery and operational evidence.
+- **Validation:** 159/159 browser checks passed, including desktop shell geometry, record Inspect modals, shared register search/owner filter, mobile drawer and no horizontal overflow at 390px. No JS or console errors in tested paths.
+- **New source findings:** course activation path records academy.entitlement_granted rather than purchase.completed and returns before ordinary membership coupon redemption; a course PaymentIntent may snapshot a coupon without an inspected CouponRedemption being created. Sample course payment is coupon-free; COHORT20 appears on membership PI-7002. Job success and ProvisioningOperation Unknown remain distinct. Member Notification is not a staff Command Centre item.
+- **Data safety:** all people, amounts, IDs and states are fictional; no API, provider, job or database writes are connected.
+- **Review status:** integrated board is draft for owner review; implementation handoff and approval remain outstanding.
