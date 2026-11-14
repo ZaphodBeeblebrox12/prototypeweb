@@ -4,7 +4,7 @@
 **Repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Planning branch:** `admin-desk-redesign-planning`  
 **Source/code baseline:** `my-new-branch`  
-**Current phase:** Owner decisions consolidated; implementation-readiness planning and mockup review.  
+**Current phase:** Phase 0 source/deployment baseline audit checkpoint; authenticated staging and role verification remain outstanding.  
 **Implementation status:** Not authorised. Do not modify app code or deploy.
 
 ## 1. Resume instruction for a new chat
@@ -48,8 +48,8 @@ The exact decisions and their rationale are in `DECISION_LOG.md`.
 - The branch was created from `my-new-branch`.
 - Current source inspections have used `my-new-branch` as the baseline.
 - Compare against `my-new-branch` before handing over or merging.
-- **Current comparison (14 November 2026):** the planning branch is 10 commits behind `my-new-branch`; all 20 files changed on the planning branch are exclusively under `docs/admin-desk-redesign/`. The ahead count continues to increase as each planning document is updated, so it is not a stable handoff value. The source branch has advanced independently since the planning branch was created.
-- Do not auto-merge or rebase the planning branch. Before implementation, inspect the two source-branch-only commits, re-verify the deployed source/route state, and reconcile any relevant changes deliberately.
+- **Phase 0 comparison (14 November 2026):** at audit start, the planning branch was 82 commits ahead and 15 commits behind `my-new-branch`, with merge base `251260448c480ec5fbfec4f1966d9017fa0854ff`. All 21 planning-only changed files at that point were under `docs/admin-desk-redesign/`. The 15 source-only commits touched three Academy Course Builder files only. The Phase 0 audit and this handoff update add further documentation commits to the planning branch; re-run the comparison on resume rather than treating the planning-branch ahead count as fixed.
+- Do not auto-merge or rebase the planning branch. Inspect/reconcile the 15 source-only commits deliberately. The current Academy Render deployment matches the source HEAD recorded in `PHASE_0_CURRENT_BASELINE_AUDIT_V1.md`.
 - All changes so far are planning documentation. The HTML prototypes are standalone review artifacts supplied in conversation.
 - No application code, migration, tests, settings, hosting configuration or Render deployment has been changed by this redesign work.
 - Before any implementation, recheck the current branch HEAD, Render deployment SHA, auto-deploy setting, current authenticated staging pages and role-specific access. The old source baseline is not a substitute for a fresh implementation audit.
@@ -293,8 +293,8 @@ Do not mark a mockup as approved because it was created or smoke-tested. Record 
 
 ## 8. Recommended next steps
 
-1. Run Phase 0 in `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md`: refresh the current source/deployment baseline and complete authenticated staging and role-specific verification.
-2. Produce a current route/action/permission inventory, including actual staff roles, object scopes, service calls, audit events, side effects and legacy Django Admin capabilities.
+1. Continue the unfinished Phase 0 work in `PHASE_0_CURRENT_BASELINE_AUDIT_V1.md`: complete authenticated staging and role-specific verification with authorised test accounts.
+2. Reconcile the source-verified route/action/permission inventory in the Phase 0 audit with the live role and object-scope results. Do not treat source registration as live authenticated proof.
 3. Reconcile the superuser-only Django Admin target with the workflow-by-workflow legacy cutover rule before changing access.
 4. Close the source-contract gaps listed in the readiness document for refunds, subscription cancellation, course coupon redemption, unified purchase events, referral rewards, provider-backed campaign delivery, safe job retries, integration health, audit/policy immutability and privacy/retention.
 5. Review and revise the six domain mockups and M50; finish accessibility and authenticated role review.
@@ -365,12 +365,46 @@ The written specifications and design decisions are saved in this GitHub branch.
 - **Django Admin access:** decision 9 states the target boundary is superusers only; decision 52 says ordinary staff access is removed workflow by workflow after parity. Treat this as a cutover-policy clarification. Do not change permissions until the exact transition is reconciled against the live role model and actual staff workflows.
 - **Refund initiation:** the inspected current manual-refund path records a refund after provider-side processing; it does not initiate a PSP refund. The approved staff refund capability requires a supported provider operation and permission-checked service path before the interface may claim to initiate a refund.
 - **Source-contract gaps:** one-time course coupon redemption and `purchase.completed` emission, referral reward status/currency/persistence, campaign stub-vs-provider status, safe job retry service, provider health evidence, AuditLog/PolicyVersion immutability and privacy/retention enforcement remain readiness items for their respective phases.
-- **Live verification:** authenticated staging role/permission audit, deployed SHA and Render settings were not completed by the design-only pass. Refresh them before implementation planning is finalised.
+- **Live verification:** the Phase 0 audit has now rechecked Academy service identity, branch, auto-deploy setting and deployed SHA. The Academy deployment is live and matches the current source HEAD captured in the audit. The public static staging deployment is older than the source HEAD. Authenticated staging role/permission review remains outstanding.
 
 ### Recommended immediate next step
 
-Run Phase 0 in `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md`: refresh the source/deployment baseline, complete authenticated staging and role-specific verification, and produce the current route/action/permission inventory. This is still an audit/planning phase, not implementation.
+Continue Phase 0 from `PHASE_0_CURRENT_BASELINE_AUDIT_V1.md`. The source/deployment baseline and source-level route/action/permission inventory have been refreshed. The remaining hard blocker is authenticated staging review with representative roles and a superuser, followed by a signed-off role/object-scope matrix and workflow parity/rollback checklist. This is still an audit/planning phase, not implementation.
 
 ### Scope boundary reaffirmed
 
 No application code, migration, route, API contract, permission, test, Render setting, deployment, merge or rebase has been changed as part of the 60-decision consolidation. Explicit owner implementation approval remains required.
+
+
+## 13. Phase 0 current baseline audit checkpoint — 14 November 2026
+
+### Audit record
+
+- **Full report:** `PHASE_0_CURRENT_BASELINE_AUDIT_V1.md`.
+- **Audit state:** source and Render Academy baseline verified; authenticated staging and role verification remain incomplete.
+- **Source HEAD:** `6cdb7b9e78306850902da9b95467e494066baa13` on `my-new-branch`.
+- **Planning HEAD when Phase 0 began:** `69e3835eeb36fbe4d708fdbd3441f6c507e1e4a0`; the audit/report commits subsequently advance the planning branch.
+- **Academy staging:** `tradethesis-academy-staging` is configured to `my-new-branch`, auto-deploy off, and latest live deployment SHA matches the source HEAD above.
+- **Public staging:** static service is configured to `my-new-branch`, auto-deploy off, but its latest live deployment is `c5bdc0fb58be35122a41da3bc646a06c48dc162d` from 7 November 2026; assess separately.
+- **Source-only delta:** 15 commits across the Course Builder API, preview template and Trading Path import JSON. No Admin Desk route/view/permission files changed in that delta. See the audit for the commit-by-commit content migration summary and required Builder regression tests.
+
+### Material source findings
+
+- Django Admin remains on the standard active-staff access boundary in the reviewed configuration; a superuser-only gate was not found. Reconcile owner decisions 9 and 52 before any permission change.
+- The custom IsRoleAdmin API permission accepts role ADMIN, superuser **or any is_staff user**. It protects ban/unban and staff-approval actions.
+- The Growth referral-rewards overview uses LoginRequiredMixin rather than a staff-only permission gate. Do not expose it in staff navigation until reviewed.
+- Course review, Builder and SEO paths use the Academy content-admin helper (superuser or role ADMIN). Other operational routes use a mixture of model permissions, reviewer scope and broad staff-only guards.
+- Current provider inspection found webhook-based recording of external refund events but no staff-initiated PSP refund operation. The manual Django Admin action records a refund after provider-side processing.
+- Current subscription cancellation is immediate only; end-of-period cancellation was not found in the reviewed service.
+- The health endpoint only probes the primary database with SELECT 1. It is not provider or full-service health.
+
+### Phase 0 remaining work
+
+- Complete the authenticated role matrix in the audit, including direct-route/API denial and object-level scope checks.
+- Map current users, roles, Django Groups/model permissions and staff approval state to the approved departmental model.
+- Resolve the Django Admin target/cutover policy.
+- Confirm provider-backed refund capability and the intended cancellation contract.
+- Run the source-only Academy Builder migration regression checks.
+- Add workflow parity tests and rollback triggers before implementation approval.
+
+**Do not restart the 60-decision process. Do not implement.** All work remains documentation-only until explicit implementation authorisation.
