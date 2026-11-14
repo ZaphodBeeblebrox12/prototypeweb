@@ -10,8 +10,8 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | ID | Screen / artefact | Required concepts or states | Priority | Status |
 |---|---|---|---|---|
 | M00 | Current-state reference board | Existing Admin Desk, shared nav, Django Admin boundary, key current routes | P0 | Not started |
-| M01 | Global application shell | Expanded/collapsed sidebar, top bar, breadcrumbs, search, notification entry, mobile menu | P0 | V1 drafted — review pending |
-| M02 | Command Centre | Three alternatives: action queue, operational cockpit, personal workbench | P0 | V1 drafted — review pending |
+| M01 | Global application shell | Expanded/collapsed sidebar, top bar, breadcrumbs, search, notification entry, mobile menu | P0 | V2 visual revision drafted — review pending |
+| M02 | Command Centre | Three alternatives: action queue, operational cockpit, personal workbench | P0 | V2 visual revision drafted — review pending |
 | M03 | Academy landing | Course catalogue summary, approvals and course health | P0 | Not started |
 | M04 | Course catalogue | Flagship/supporting/mini/hidden; lifecycle; access type; filters and density | P0 | Not started |
 | M05 | Course detail / control page | Content, catalogue role, access model, modules/lessons, linked offers, readiness | P0 | Not started |
@@ -73,3 +73,17 @@ HTML mockups must use local illustrative data and simulated interactions only. T
 - **Data safety:** All names, counts, IDs, queue entries and times are fictional illustrative data. No live APIs or backend actions are connected.
 - **Current visual direction:** Warm light, compact/editorial, restrained terracotta accent, thin borders, low card usage and dense but readable queue rows.
 - **Outstanding review:** Sidebar content/order below the six approved domains; balance and placement of overview context; task prioritisation, ownership and notification semantics; top-bar controls; small-screen navigation.
+
+### Visual direction refinement — 14 November 2026
+
+The owner preferred the visual language in the supplied Customer 360 screenshot over the first M01/M02 shell styling. M01/M02 v2 therefore returns to:
+
+- Deep forest-green sidebar (`#27352e`) with pale sage active navigation.
+- Warm ivory workspace (`#f5f2eb`) and warm-white panels (`#fffefa`).
+- Restrained terracotta accents for selection and key emphasis.
+- Muted sage for healthy/positive operational states.
+- Editorial serif page headings with compact sans-serif interface text.
+- Fine borders, minimal shadows and restrained corner radii.
+- Preserve the six approved top-level domains and all M01/M02 interactions.
+
+The supplied Customer 360 screenshot is a visual reference, not an instruction to copy its page content or to treat all displayed sample data as live. M01/M02 v2 is a refinement for review; the visual system is not yet frozen.
