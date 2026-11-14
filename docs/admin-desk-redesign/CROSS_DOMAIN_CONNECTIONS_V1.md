@@ -25,6 +25,7 @@ Key record links verified in the source baseline:
 
 - CourseOffer has a Course relationship and a one-to-one Plan relationship.
 - CourseEntitlement links User, Course, optional CourseOffer and optional PaymentIntent; it can record purchase/admin/migration/complimentary source and access dates.
+- Verified fulfilment path: `payment_confirm` calls `activate_paid_subscription`; a matching CourseOffer dispatches to `apps.academy.services.activate_course_payment`, which atomically claims the verified PaymentIntent and grants/links the CourseEntitlement.
 - PlanCourseAccess links a Plan to a Course for membership-plan inclusion.
 - Subscription links User, Plan, Product and its selected price snapshot; it records gift/admin-grant/trial provenance.
 - PaymentIntent links User and Plan, stores the amount/currency/provider/price and tax snapshots, and can store referral discount provenance and refund/chargeback state.
@@ -114,7 +115,7 @@ Do not collapse these into one green “course active” status.
 ### 5.2 Course purchase versus membership subscription
 
 **Individual course purchase**
-Course → CourseOffer → dedicated hidden Plan → one-time PlanPrice/GeoPlanPrice → PaymentIntent → CourseEntitlement → LessonProgress.
+Course → CourseOffer → dedicated hidden Plan → one-time PlanPrice/GeoPlanPrice → PaymentIntent → provider verification → `activate_course_payment` (atomic claim + entitlement grant) → CourseEntitlement → LessonProgress.
 
 **Recurring membership**
 Product → Plan → recurring PlanPrice/GeoPlanPrice → PaymentIntent → Subscription → PlanCourseAccess → course availability/progress.
@@ -127,7 +128,7 @@ These may show together in a member's learning view, but their commercial and ac
 SupportTicket → eligible hidden Plan (possibly selected from AffiliateLink default) → authorised reviewer → approve_ticket service → subscription grant → durable reconciliation Job → external provisioning where configured → notification to member.
 
 **Course purchase**
-CourseOffer → payment → direct CourseEntitlement.
+CourseOffer → PaymentIntent → provider verification → `activate_paid_subscription` dispatches the CourseOffer path to `activate_course_payment` → atomic CourseEntitlement grant.
 
 An access-request approval must not be rendered as a course purchase. It grants a hidden plan and may lead to subscription/community access according to the existing plan configuration.
 
@@ -159,6 +160,7 @@ Use one coherent fictional record set through the prototype. Every screen should
 Academy Builder → CourseImport review → approval/publish → catalogue/SEO check → CourseOffer setup → Revenue hidden Plan/one-time price → successful PaymentIntent → Academy CourseEntitlement → Customer 360 progress.
 
 Checks:
+- The source-verified one-time payment fulfilment path is represented accurately: provider verification, atomic PaymentIntent claim and entitlement grant.
 - New versus revision submission is clear.
 - Return requires reviewer feedback.
 - Test-import permanent cleanup is separate.
@@ -271,3 +273,18 @@ The holistic prototype is ready for review when:
 - No mockup implies an action or route already exists when it is proposed.
 
 This document is a design contract for future mockups. It does not authorise implementation.
+
+
+## 10. Verified one-time course purchase implementation path
+
+The current source baseline confirms this specific sequence:
+
+1. The checkout path detects a CourseOffer by the selected Plan and enforces saleability and access checks.
+2. It creates a PaymentIntent with a one-time price snapshot and identifies the product type as a course.
+3. `payment_confirm` verifies the provider's payment state.
+4. It calls `activate_paid_subscription`.
+5. `activate_paid_subscription` detects the matching CourseOffer and dispatches to `apps.academy.services.activate_course_payment`.
+6. The atomic course payment service claims the PaymentIntent as successful and calls the entitlement grant service with Purchase source and the linked PaymentIntent.
+7. It records the entitlement event/domain event and queues personalised-video work when the entitlement is newly created. A non-simulated purchase receipt is attempted after commit.
+
+This confirms the intended direct course purchase path in the source baseline. It does not mean membership subscriptions or access-request approvals use the same entitlement path; those remain separate flows.
