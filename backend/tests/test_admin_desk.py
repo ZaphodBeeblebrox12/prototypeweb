@@ -263,6 +263,144 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "Your assignment changed")
         self.assertNotContains(response, "Private notification")
 
+    def test_global_search_respects_domain_permissions_and_ticket_reviewer_scope(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import PaymentIntent
+        from apps.subscriptions.models import Plan
+
+        operator = User.objects.create_user(
+            username="global-search-operator",
+            email="global-search-operator@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        for app_label, codename in (
+            ("accounts", "view_user"),
+            ("academy", "view_course"),
+            ("payments", "view_paymentintent"),
+        ):
+            permission = Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            operator.user_permissions.add(permission)
+
+        member = User.objects.create_user(
+            username="needle-member",
+            email="needle-member@example.test",
+            first_name="Needle",
+            last_name="Member",
+        )
+        hidden_member = User.objects.create_user(
+            username="hidden-scope-member",
+            email="hidden-scope-member@example.test",
+        )
+        other_reviewer = User.objects.create_user(
+            username="global-search-other-reviewer",
+            email="global-search-other-reviewer@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=other_reviewer,
+            email=other_reviewer.email,
+            verified=True,
+            primary=True,
+        )
+
+        visible_plan = Plan.objects.create(
+            name="Visible support plan",
+            tier=Plan.Tier.BASIC,
+        )
+        visible_plan.ticket_approvers.add(operator)
+        hidden_plan = Plan.objects.create(
+            name="Restricted support plan",
+            tier=Plan.Tier.PRO,
+        )
+        hidden_plan.ticket_approvers.add(other_reviewer)
+
+        visible_ticket = SupportTicket.objects.create(
+            user=member,
+            plan=visible_plan,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Needle visible support request",
+        )
+        hidden_ticket = SupportTicket.objects.create(
+            user=hidden_member,
+            plan=hidden_plan,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Needle restricted support request",
+        )
+        course = Course.objects.create(
+            title="Needle Course",
+            slug="needle-course",
+            status=Course.Status.DRAFT,
+        )
+        payment_plan = Plan.objects.create(
+            name="Needle Payment Plan",
+            tier=Plan.Tier.ENTERPRISE,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=payment_plan,
+            provider=PaymentIntent.Provider.RAZORPAY,
+            amount=129900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "needle"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        groups = {group["name"]: group["results"] for group in response.context["search_groups"]}
+        self.assertIn("Customers", groups)
+        self.assertIn("Academy", groups)
+        self.assertIn("Revenue", groups)
+        self.assertContains(response, member.username)
+        self.assertContains(response, visible_ticket.short_id)
+        self.assertNotContains(response, hidden_ticket.short_id)
+        self.assertNotContains(response, hidden_member.username)
+        self.assertContains(response, course.title)
+        self.assertContains(response, payment_plan.name)
+        self.assertContains(response, "INR 1,299.00")
+        self.assertNotContains(response, "Needle restricted support request")
+
+    def test_global_search_does_not_expose_unpermitted_account_or_course_records(self):
+        operator = User.objects.create_user(
+            username="global-search-limited-staff",
+            email="global-search-limited-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        User.objects.create_user(
+            username="private-search-target",
+            email="private-search-target@example.test",
+        )
+        Course.objects.create(
+            title="Private Search Course",
+            slug="private-search-course",
+            status=Course.Status.DRAFT,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "private-search"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["search_groups"], [])
+        self.assertEqual(response.context["total_results"], 0)
+        self.assertNotContains(response, "private-search-target")
+        self.assertNotContains(response, "Private Search Course")
+
     def test_domain_overviews_render_for_superuser(self):
         owner = User.objects.create_superuser(
             username="domain-overview-owner",
