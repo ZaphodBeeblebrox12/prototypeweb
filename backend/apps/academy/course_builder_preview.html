@@ -5679,16 +5679,16 @@ body.builder-dialog-open { overflow:hidden; }
       if (!targetLesson) return;
 
       const originalContent = String(targetLesson.content || '');
-      const hasQuickCheckHeading = /^#{1,6}\\s*Quick check\\b/im.test(originalContent);
-      const contentLines = originalContent.split(/\\r?\\n/);
+      const hasQuickCheckHeading = /^#{1,6}\s*Quick check\b/im.test(originalContent);
+      const contentLines = originalContent.split(/\r?\n/);
       const actionIndex = contentLines.findIndex(line =>
-        /^#{1,6}\\s*Today(?:'|’)?s action step\\b/i.test(line.trim())
+        /^#{1,6}\s*Today(?:'|’)?s action step\b/i.test(line.trim())
       );
       let hasOrphanedQuickCheckItems = false;
       if (!hasQuickCheckHeading && actionIndex >= 0) {
         let previousHeading = -1;
         for (let i = actionIndex - 1; i >= 0; i -= 1) {
-          if (/^#{1,6}\\s+/.test(contentLines[i])) {
+          if (/^#{1,6}\s+/.test(contentLines[i])) {
             previousHeading = i;
             break;
           }
@@ -5696,7 +5696,7 @@ body.builder-dialog-open { overflow:hidden; }
         if (previousHeading >= 0 && /key takeaways/i.test(contentLines[previousHeading])) {
           const numberedItems = contentLines
             .slice(previousHeading + 1, actionIndex)
-            .filter(line => /^\\s*\\d+[.)]\\s+/.test(line)).length;
+            .filter(line => /^\s*\d+[.)]\s+/.test(line)).length;
           hasOrphanedQuickCheckItems = numberedItems >= 2;
         }
       }
