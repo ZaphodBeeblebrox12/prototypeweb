@@ -48,6 +48,8 @@ The exact decisions and their rationale are in `DECISION_LOG.md`.
 - The branch was created from `my-new-branch`.
 - Current source inspections have used `my-new-branch` as the baseline.
 - Compare against `my-new-branch` before handing over or merging.
+- **Current comparison (14 November 2026):** the planning branch is 47 commits ahead and 2 commits behind `my-new-branch`; the files changed on the planning branch are exclusively under `docs/admin-desk-redesign/`. The source branch has advanced independently since the planning branch was created.
+- Do not auto-merge or rebase the planning branch. Before implementation, inspect the two source-branch-only commits, re-verify the deployed source/route state, and reconcile any relevant changes deliberately.
 - All changes so far are planning documentation. The HTML prototypes are standalone review artifacts supplied in conversation.
 - No application code, migration, tests, settings, hosting configuration or Render deployment has been changed by this redesign work.
 - Before any implementation, recheck the current branch HEAD, Render deployment SHA, auto-deploy setting, current authenticated staging pages and role-specific access. The old source baseline is not a substitute for a fresh implementation audit.
