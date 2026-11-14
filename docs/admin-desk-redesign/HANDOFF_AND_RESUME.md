@@ -560,3 +560,43 @@ Revised sequence:
 No temporary staff/test accounts were created. No app code or permissions changed. The two open findings remain: missing `Sum` in the analytics promotion report and the login-only Growth referral rewards overview accessible to ordinary authenticated users.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.**
+
+
+## 21. Promoted staff account audit — 14 November 2026
+
+The owner supplied a consolidated GET-only access audit from Academy staging at 17:34:27 UTC.
+
+**Server identity:** role=user, is_staff=true, is_admin=false. This is a Django staff-enabled account, but not an application Role.STAFF account. The auth serializer does not expose is_staff_approved, so the script's null does not establish the database value.
+
+**Results:** 20 named route checks — 11 returned 200, eight returned 403, and /api/analytics/overview/ returned 500. Command Centre, Operations, Support queue, staff approvals API, Growth referral overview, own notifications, Django Admin, Gift send form and Disputes routes returned 200. Accounts, Academy and Revenue domain routes returned 403. Five saved Support ticket detail URLs also returned 200; no account detail URLs were discovered. These are positive GET results only; the report did not retain response bodies or ticket assignment metadata.
+
+### What the role boundary tells us
+
+- Accounts 403 is consistent with missing accounts.view_user.
+- Academy/Builder 403 is consistent with the existing superuser/application role=admin gate. Generic is_staff=true is not sufficient.
+- Revenue 403 is consistent with missing model permissions.
+- Command Centre/Operations and Support work under the generic staff gate; ticket scope still depends on plan approver configuration and an existing any-staff fallback when a plan has no approvers.
+- Django Admin, Gift send and Disputes are also reachable by any active Django staff user under their current staff_member_required gates. Gift POST creates a gift and sends email. Disputes dashboard lists the dispute queryset broadly; review that all-staff visibility is intended. Do not submit any POST action during this audit.
+- /growth/admin/referral-rewards/ remains an authenticated-member exposure, not just a staff route.
+- Analytics remains HTTP 500. The source still imports Count only while calling Sum in promotion_performance().
+
+### Additional high-priority source issue
+
+backend/apps/accounts/admin_views.py::IsRoleAdmin grants access to application role=admin or any Django superuser or any is_staff user. StaffApprovalListView, StaffApprovalActionView, BanUserView and UnbanUserView share this class. The staff-approval POST can change a target to role=STAFF/is_staff=true/is_staff_approved=true or reject/demote it. Ban/unban POSTs are also behind that broad gate.
+
+The owner's run made only GET requests, so no action was submitted. However, the shared source permission class means ordinary Django staff can reach these mutation handlers if they call the POST endpoints. Treat as a high-priority privilege-boundary defect. Do not test POSTs until the gate is fixed and a disposable target is designated.
+
+### Account-role clarification
+
+The model defines Role values admin/staff/user plus separate is_staff and is_staff_approved. The approve_staff() helper sets approval and Django staff status but leaves Role unchanged. The staff approval API sets Role to STAFF too. The built-in UserAdmin form does not expose the custom role/approval fields. Do not use the currently broad staff-approval API as a promotion workaround; fix its authorization first. If a separate role=staff staging persona is later needed, create it through an approved admin-controlled fixture/database procedure.
+
+### Resume action order
+
+1. Complete source-only permission mapping and document each sensitive endpoint's actual gate.
+2. Prioritise permission defects: Growth referral overview; shared IsRoleAdmin access to staff approval/ban/unban actions; and broad staff-only visibility of Django Admin/Gift/Disputes/Analytics.
+3. Correct the analytics missing Sum import and add promotion-report tests.
+4. Obtain explicit owner approval before changing application code or permissions.
+5. After fixes, create separate staging-only personas (ordinary Role.STAFF, Support-assigned reviewer, Academy admin/editor, Revenue permission profile, Growth permission profile, Platform permission profile) as needed. Do not create them until authorised.
+6. Run direct GET and object-scope denials for each persona, and separate POST tests only with a dedicated disposable test plan.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.** The staff account is a useful first generic-staff test identity but does not replace the role/department matrix. No application code, tests, permissions, migrations, Render settings, deployment, merge or rebase were changed.
