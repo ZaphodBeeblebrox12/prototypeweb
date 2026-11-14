@@ -408,3 +408,27 @@ No application code, migration, route, API contract, permission, test, Render se
 - Add workflow parity tests and rollback triggers before implementation approval.
 
 **Do not restart the 60-decision process. Do not implement.** All work remains documentation-only until explicit implementation authorisation.
+
+
+## 14. Phase 0 continuation — CI and regression-test evidence
+
+The source/deployment commit `6cdb7b9e78306850902da9b95467e494066baa13` has successful GitHub Actions runs:
+
+- **Verify Django Academy backend**, run [2048](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43611322315): Python 3.11 and 3.12 jobs both passed; each reports 1,314 passed, 1 skipped, 512 warnings and 178 subtests passed.
+- **Academy backend CI**, run [1888](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43611322349): Python 3.11 and 3.12 backend jobs and the separate Tiptap bundle/DOM compatibility job all passed. The backend jobs each report 1,314 passed, 1 skipped and 178 subtests passed; Tiptap's focused Markdown suite reports 19 passed and 4 subtests passed.
+
+These are isolated CI tests, not live staging role checks. Existing local tests cover course review, support reviewer scope, Customer 360 section permissions, operations timeline permissions/redaction, subscription lifecycle and job/provisioning idempotency. The account `IsRoleAdmin` test covers superuser, role ADMIN and plain user, but not an ordinary `is_staff=True` role=STAFF account; the implementation's predicate does accept any `is_staff` user. The current Growth referral rewards overview remains login-only.
+
+An unauthenticated web retrieval attempt against six staging paths returned no HTTP statuses because the retrieval channel could not access the URLs. Do not infer a route failure or successful access-control response from that attempt.
+
+Full test coverage and the explicit remaining limitations are in `PHASE_0_CURRENT_BASELINE_AUDIT_V1.md`.
+
+### Remaining Phase 0 gate
+
+- Obtain live authenticated staging results for the representative role matrix and superuser.
+- Verify direct route/API denial and object-level scope using the actual deployed staff/group setup.
+- Reconcile the Django Admin superuser-only target with workflow-by-workflow legacy cutover.
+- Resolve the broad `IsRoleAdmin` boundary and the login-only Growth referral route before staff navigation/migration.
+- Keep refund initiation and end-of-period cancellation classified as unsupported until a verified service contract exists.
+
+**CI is green; Phase 0 is still incomplete. Implementation remains NOT AUTHORISED.**
