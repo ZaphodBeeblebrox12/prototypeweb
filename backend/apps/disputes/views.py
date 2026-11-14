@@ -81,7 +81,10 @@ def detail(request, pk):
         "agreement": services.agreement_sentence(intent),
         "packages": dispute.packages.all(),
         "events": dispute.events.all(),
-        "can_resolve": request.user.has_perm("disputes.change_dispute"),
+        "can_resolve": _has_dispute_permissions(
+            request.user,
+            ("disputes.view_dispute", "disputes.change_dispute"),
+        ),
     }
     if dispute.reason_category in (Dispute.ReasonCategory.FRAUD,
                                    Dispute.ReasonCategory.UNRECOGNIZED):
