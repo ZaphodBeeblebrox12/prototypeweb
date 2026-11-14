@@ -1504,6 +1504,31 @@ def admin_desk_platform(request):
             for operation in provisioning_incidents
         ]
 
+    if _allowed(request.user, "payments.view_webhookevent"):
+        from apps.payments.models import WebhookEvent
+
+        recent_webhooks = WebhookEvent.objects.filter(
+            received_at__gte=since
+        )
+        webhook_counts = {
+            state: recent_webhooks.filter(status=state).count()
+            for state, _label in WebhookEvent.Status.choices
+        }
+        context["webhook_summary"] = {
+            "total_7d": recent_webhooks.count(),
+            "received": webhook_counts[WebhookEvent.Status.RECEIVED],
+            "processed": webhook_counts[WebhookEvent.Status.PROCESSED],
+            "failed": webhook_counts[WebhookEvent.Status.FAILED],
+            "ignored": webhook_counts[WebhookEvent.Status.IGNORED],
+            "url": reverse("admin:payments_webhookevent_changelist"),
+        }
+        context["webhook_items"] = list(
+            recent_webhooks.only(
+                "provider", "event_type", "status",
+                "received_at", "processed_at",
+            ).order_by("-received_at")[:8]
+        )
+
     if _allowed(request.user, "jobs.view_periodicjob"):
         from apps.jobs.models import PeriodicJob
 
@@ -1687,7 +1712,8 @@ def admin_desk_platform(request):
     context["has_platform_records"] = any(
         key in context for key in (
             "job_summary", "provisioning_summary", "scheduler_summary",
-            "audit_summary", "security_summary", "policy_readiness",
+            "webhook_summary", "audit_summary", "security_summary",
+            "policy_readiness",
         )
     )
     return render(request, "admin/desk_platform.html", context)
