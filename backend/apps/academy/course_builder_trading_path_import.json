@@ -227,15 +227,15 @@
             "questions": [
               {
                 "id": "trading-path-lesson-04-q1",
-                "prompt": "Nifty moves 80 points in your favour. One lot is 75 units and you hold 2 lots. What is the gross profit before costs?",
+                "prompt": "Nifty lot is 65. You gain 80 points on 2 lots. What is the gross profit before costs?",
                 "options": [
-                  "₹6,000",
+                  "₹10,400",
                   "₹12,000",
-                  "₹15,000",
-                  "₹24,000"
+                  "₹9,750",
+                  "₹5,200"
                 ],
-                "correctIndex": 1,
-                "explanation": "Gross P/L = 80 points × 75 units per lot × 2 lots = ₹12,000. Brokerage, taxes and slippage are excluded.",
+                "correctIndex": 0,
+                "explanation": "Gross P/L = 80 points × 65 units per lot × 2 lots = ₹10,400, before brokerage, taxes and slippage. Use the lot size shown for the instrument and contract you are trading.",
                 "imageId": ""
               },
               {
