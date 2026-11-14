@@ -48,7 +48,7 @@ The exact decisions and their rationale are in `DECISION_LOG.md`.
 - The branch was created from `my-new-branch`.
 - Current source inspections have used `my-new-branch` as the baseline.
 - Compare against `my-new-branch` before handing over or merging.
-- **Current comparison (14 November 2026):** the planning branch is 2 commits behind `my-new-branch`; all 14 files changed on the planning branch are exclusively under `docs/admin-desk-redesign/`. The ahead count continues to increase as each planning document is updated, so it is not a stable handoff value. The source branch has advanced independently since the planning branch was created.
+- **Current comparison (14 November 2026):** the planning branch is 4 commits behind `my-new-branch`; all 16 files changed on the planning branch are exclusively under `docs/admin-desk-redesign/`. The ahead count continues to increase as each planning document is updated, so it is not a stable handoff value. The source branch has advanced independently since the planning branch was created.
 - Do not auto-merge or rebase the planning branch. Before implementation, inspect the two source-branch-only commits, re-verify the deployed source/route state, and reconcile any relevant changes deliberately.
 - All changes so far are planning documentation. The HTML prototypes are standalone review artifacts supplied in conversation.
 - No application code, migration, tests, settings, hosting configuration or Render deployment has been changed by this redesign work.
@@ -271,7 +271,7 @@ The current conversation includes downloadable HTML prototypes:
 - `tradethesis_admin_customers_workspace_v1.html`
 - `tradethesis_admin_revenue_workspace_v1.html`
 
-The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v3.zip` was also created in the design review conversation with the four current prototypes and PNG previews. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
+The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v3.zip` contains the six current main prototypes, domain preview images, the Growth build/test/capture scripts, Revenue smoke tests and the V3 resume README. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
 
 ## 10. Safety and scope checklist for the next chat
 
