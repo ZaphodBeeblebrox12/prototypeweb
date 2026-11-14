@@ -1042,3 +1042,18 @@ The Customers domain has a first screen-level design proposal:
 - `tradethesis_admin_customers_workspace_v1.html` — clickable static prototype using the approved V2 shell.
 
 The proposal covers Customers Overview, Learners & Accounts, Learner Account Detail, Support Tickets, Ticket Detail and Customer 360. It remains pending owner review and does not authorise implementation.
+
+
+## 18. Revenue screen-level specification
+
+The Revenue domain has a first screen-level design proposal:
+
+- `REVENUE_WORKSPACE_SPEC_V1.md` — detailed payment/refund/subscription/plan/price/invoice/dispute/business semantics, existing routes, permission boundaries and proposed screen layouts.
+- `REVENUE_REVIEW_NOTES_V1.md` — source boundaries, browser smoke tests and open owner decisions.
+- `tradethesis_admin_revenue_workspace_v1.html` — clickable static prototype using the approved V2 shell.
+
+The proposal covers Revenue Overview, Payments & Refunds, Payment Detail, Subscriptions, Plans & Pricing, Invoices, Invoice Detail, Disputes, Dispute Detail, and Business & Finance.
+
+Important newly confirmed migration boundary: the current Admin Desk finance page is read-only, but the Django Admin PaymentIntent action can record a full manual refund after a refund has already been processed in the provider dashboard. It records a ledger row, audit event and applies the existing full-refund access policy; it does not initiate a provider refund. This stays in Advanced Administration until a separately approved migration.
+
+The Revenue screens remain pending owner review and do not authorise implementation.
