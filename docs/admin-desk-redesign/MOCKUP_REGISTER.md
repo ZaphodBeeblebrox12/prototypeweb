@@ -23,8 +23,8 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M11 | Ticket detail | Conversation, attachments, public reply, internal note, approval/rejection, reassignment | P0 | V1 drafted — review pending |
 | M12 | Learners & accounts | Search, account state, safe actions, list density | P1 | V1 drafted — review pending |
 | M13 | Customer 360 | Course progress/access, subscription/payment, support, community, security restrictions | P0 | V1 drafted — review pending |
-| M14 | Revenue overview | Payments, subscriptions, invoices, refunds/disputes | P1 | Not started |
-| M15 | Business readiness | Seller/invoice/legal/payment/email/runtime checks; configured vs tested | P1 | Not started |
+| M14 | Revenue overview | Exception-first financial and access work; canonical links across payment, subscription and dispute | P0 | V1 drafted — review pending |
+| M15 | Business & Finance | Seller/invoice/tax settings, confirmation and configured-vs-tested distinction | P1 | V1 drafted — review pending |
 | M16 | Operations overview | Incident severity, affected customers, issue clusters, time range | P0 | Not started |
 | M17 | Jobs & provisioning | Queue states, attempts, lock age, unknown external state, error detail | P1 | Not started |
 | M18 | Growth & analytics | Signups, campaigns, promotions, referrals, gifts, email delivery/suppression | P2 | Not started |
@@ -38,6 +38,11 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M26 | Course Builder hand-off | Existing authoring route, saved draft selection, review lifecycle and Tiptap boundary | P1 | V1 drafted — review pending |
 | M27 | Customers overview | Action-first customer work summary and cross-domain routing | P0 | V1 drafted — review pending |
 | M28 | Learner account detail | Account identity/actions, subscription, course, payment and invoice history | P1 | V1 drafted — review pending |
+| M29 | Payments & Refunds | Read-only PaymentIntent register/detail, append-only refund ledger, provider/refund/chargeback state | P0 | V1 drafted — review pending |
+| M30 | Subscriptions | Search, status/expiry filters, immutable price snapshot, audited grant/extend/cancel actions | P0 | V1 drafted — review pending |
+| M31 | Plans & Pricing | Product/Plan catalogue, active base prices, geo overrides, hidden/trial/channel configuration and migration boundary | P1 | V1 drafted — review pending |
+| M32 | Invoices | Immutable invoice register/detail, seller/customer/payment snapshots and print/save as PDF | P1 | V1 drafted — review pending |
+| M33 | Disputes | Case queue, evidence readiness/packages, provider deadline, external submission reference and final outcomes | P0 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -129,3 +134,17 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **Important Customer 360 boundary:** Independent permission gates for subscriptions, payments, invoices, Academy records and security. Internal staff requester profiles remain identity + reviewer-visible support only. Managed Telegram/Discord link state is distinct from legacy login verification.
 - **Browser checks:** Ticket filtering, ticket detail hand-off, public/internal composer switching, Customer 360 tabs, internal-account restricted preview, learner search, account-detail hand-off and mobile drawer tested. No JavaScript errors in exercised paths; 390px viewport had no horizontal overflow.
 - **Review status:** Draft for owner review. No Customers screen is approved for implementation yet.
+
+
+## Revenue screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_revenue_workspace_v1.html` — clickable Revenue workspace using the approved V2 shell.
+- **Screens represented:** M14 Revenue Overview; M29 Payments & Refunds; M30 Subscriptions; M31 Plans & Pricing; M32 Invoices; M33 Disputes; M15 Business & Finance.
+- **Detailed specification:** `REVENUE_WORKSPACE_SPEC_V1.md`.
+- **Review notes:** `REVENUE_REVIEW_NOTES_V1.md`.
+- **Source boundary:** Current staff finance/payments/invoices, subscriptions/actions and business settings routes are existing Admin Desk foundations. Disputes is a separate staff workflow under /admin-disputes/. Product/Plan/base and geo price administration and manual refund recording remain in Django Admin.
+- **Critical refund finding:** The current finance page is read-only. Django Admin PaymentIntent has a “Record FULL manual refund” action that is used only after the refund has already been processed in the provider dashboard. It records the full remaining amount in the unified Refund ledger, writes audit, applies full-refund access policy and notifies; it does not initiate a PSP refund. The new finance screen does not expose it.
+- **Critical dispute finding:** “Funds withdrawn” is not a final loss. Won leaves access intact; confirmed Lost/Accepted calls the exactly-once chargeback access action. The dispute app records an external submission reference; it does not upload evidence to the provider.
+- **Pricing/business rules:** Country geo override → regional override → global base; geo price is override-only; one active base price per Plan+interval. Tax is a single fixed percentage today, not a jurisdiction-aware GST engine; explicit accountant confirmation is required before first enabling.
+- **Browser checks:** Revenue navigation, payment/subscription search/filter, payment and invoice detail, subscription inspection modal, hidden-plan filtering, dispute detail/filter, external submission reference preview and tax confirmation were exercised. No JavaScript errors or console errors. Mobile drawer open/navigation/close passed; 390px viewport has no horizontal overflow.
+- **Review status:** Draft for owner review. No Revenue screen is approved for implementation yet.
