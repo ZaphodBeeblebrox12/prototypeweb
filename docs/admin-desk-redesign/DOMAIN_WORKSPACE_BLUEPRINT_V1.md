@@ -1021,3 +1021,13 @@ The first clickable six-domain navigation and relationship board is maintained a
 - This is an architecture review board, not the final visual design of every production screen.
 
 The next screen-level design passes should turn each destination into a focused wireframe/prototype, beginning with Command Centre and Academy, then test the same fictional records through Customers and Revenue before extending the journeys into Growth and Platform.
+
+
+## 16. Academy screen-level specification
+
+The Academy workspace is now developed in a separate screen-level specification:
+
+- `ACADEMY_WORKSPACE_SPEC_V1.md` — detailed fields, screen purpose, source-backed actions, route boundaries, permissions, status semantics, and edge cases for M03–M09 plus SEO and Builder hand-off.
+- `tradethesis_admin_academy_workspace_v1.html` — clickable static prototype using the selected V2 shell.
+
+The Academy screen proposal is still awaiting owner review. It does not authorise implementation and does not claim all proposed pages already exist as live Admin Desk routes.
