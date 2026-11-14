@@ -12,13 +12,13 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M00 | Current-state reference board | Existing Admin Desk, shared nav, Django Admin boundary, key current routes | P0 | Not started |
 | M01 | Global application shell | Expanded/collapsed sidebar, top bar, breadcrumbs, search, notification entry, mobile menu | P0 | V2 visual revision drafted — review pending |
 | M02 | Command Centre | Three alternatives: action queue, operational cockpit, personal workbench | P0 | V2 visual revision drafted — review pending |
-| M03 | Academy landing | Course catalogue summary, approvals and course health | P0 | Not started |
-| M04 | Course catalogue | Flagship/supporting/mini/hidden; lifecycle; access type; filters and density | P0 | Not started |
-| M05 | Course detail / control page | Content, catalogue role, access model, modules/lessons, linked offers, readiness | P0 | Not started |
-| M06 | Approval queue | New vs revision, author, submitted time, review status, missing assets | P0 | Not started |
-| M07 | Course review detail | Preview, outline, assets, validation, approve, return with mandatory feedback | P0 | Not started |
-| M08 | Offers & pricing | Course-offer ↔ Plan, one-time price, geo-pricing, duration, active status | P0 | Not started |
-| M09 | Learner access | Entitlements, scheduled/active/expired/revoked, event history, safe grant/revoke | P1 | Not started |
+| M03 | Academy landing | Course catalogue summary, approvals and course health | P0 | V1 drafted — review pending |
+| M04 | Course catalogue | Flagship/supporting/mini/hidden; lifecycle; access type; filters and density | P0 | V1 drafted — review pending |
+| M05 | Course detail / control page | Content, catalogue role, access model, modules/lessons, linked offers, readiness | P0 | V1 drafted — review pending |
+| M06 | Approval queue | New vs revision, author, submitted time, review status, missing assets | P0 | V1 drafted — review pending |
+| M07 | Course review detail | Preview, outline, assets, validation, approve, return with mandatory feedback | P0 | V1 drafted — review pending |
+| M08 | Offers & pricing | Course-offer ↔ Plan, one-time price, geo-pricing, duration, active status | P0 | V1 drafted — review pending |
+| M09 | Learner access | Entitlements, scheduled/active/expired/revoked, event history, safe grant/revoke | P1 | V1 drafted — review pending |
 | M10 | Support queue | SLA, priority, category, assignment, mine/unassigned, filters | P0 | Not started |
 | M11 | Ticket detail | Conversation, attachments, public reply, internal note, approval/rejection, reassignment | P0 | Not started |
 | M12 | Learners & accounts | Search, account state, safe actions, list density | P1 | Not started |
@@ -34,6 +34,8 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M22 | Component and visual system | Typography, spacing, tables, statuses, forms, menus, dialogs, toasts, empty/error states | P0 | Not started |
 | M23 | Clickable prototype | End-to-end priority journeys using clearly labelled illustrative data | P0 | Architecture prototype to follow after screen review |
 | M24 | Six-domain workspace map | Clickable top-level and child navigation; responsibilities, canonical records, cross-domain links and workflow hand-offs | P0 | V1 drafted — review pending |
+| M25 | SEO & Discoverability | Site-wide and course indexability, metadata, primary-topic map, blockers and editorial notes | P0 | V1 drafted — review pending |
+| M26 | Course Builder hand-off | Existing authoring route, saved draft selection, review lifecycle and Tiptap boundary | P1 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -100,3 +102,15 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **Validation:** Desktop preview inspected; all 32 navigation destinations passed a click-through smoke test; mobile drawer opens, navigates and closes; mobile viewport has no horizontal overflow. Accessibility, keyboard-only navigation, contrast measurement and screen-reader review remain open.
 - **Data safety:** Sample people, IDs, amounts, states and counts are fictional. The prototype is static and does not call live services or perform writes.
 - **Important verified flow:** one-time CourseOffer payment fulfilment is dispatched through `activate_paid_subscription` to `activate_course_payment`, which atomically claims the verified PaymentIntent and grants the direct CourseEntitlement.
+
+
+## Academy screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_academy_workspace_v1.html` — clickable Academy workspace using the selected V2 shell.
+- **Screens represented:** M03 Academy landing; M04 Course Catalogue; M05 Course Detail; M06 Course Approvals queue; M07 Review Detail; M08 Offers & Access; M09 Learner Access & Progress; M25 SEO & Discoverability; M26 Course Builder hand-off.
+- **Detailed specification:** `ACADEMY_WORKSPACE_SPEC_V1.md`.
+- **Source boundary:** Existing Course Builder, approvals/review, canonical publish/return, SEO and Customer 360 Academy data are mapped as existing foundations. The unified catalogue, Course Detail, Offers & Access register, standalone Learner Access & Progress and shared-shell hand-off are design proposals where no dedicated Admin Desk route currently exists.
+- **Important model distinction:** Course catalogue role, publication status and access type are independent. Direct CourseEntitlement, free-course complimentary enrolment and the current TradeThesis Free membership PlanCourseAccess path are represented separately. The current service is not assumed to grant courses through every subscription tier.
+- **Workflow preservation:** CourseImport revision remains staged until approved; return requires reviewer feedback; permanent test-import cleanup stays separate; CourseOffer retains its hidden Plan, active one-time price and payment-history constraints.
+- **Browser checks:** Catalogue filtering, course-detail tabs, approval → review navigation, offers, learner-access tabs and SEO navigation exercised. No JS page errors observed. Mobile menu open/navigate/close and 390px horizontal-overflow check passed.
+- **Review status:** Draft for owner review. No Academy screen is approved for implementation yet.
