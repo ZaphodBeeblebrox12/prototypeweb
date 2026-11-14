@@ -503,3 +503,13 @@ Source inspection confirms `AdminReferralRewardsView` uses `LoginRequiredMixin` 
 The later batch labelled `Superuser` returned 403 on all Admin Desk endpoints and redirected `/admin/`, `/admin/growth/send-gift/` and `/admin-disputes/` to `/admin/login/`. The label was manually entered and is not server identity proof. Do not count this as a superuser pass. Next batch should also GET `/api/auth/me/` and print only `role`, `is_staff` and `is_admin` from the server response; omit personal identifiers. That serializer does not expose `is_superuser`, so successful Django Admin access and actual superuser-only capabilities still need confirmation.
 
 **Phase 0 closure condition added:** referral rewards route denies the non-staff learner and allows only an authorised staff/domain permission persona; a superuser run is positively verified; other discovered Admin links are checked directly; no cross-domain data remains exposed.
+
+## 18. Identity validation from second consolidated run
+
+At 2026-11-14 17:05:19 UTC, the batch was labelled `Superuser` by operator prompt, but `GET /api/auth/me/` returned server flags `role=user`, `is_staff=false`, `is_admin=false`. Treat this as a second non-staff learner run, not a superuser run. Its staff/Admin Desk 403 results are expected; `/admin/`, gifts and disputes redirected to Django Admin login.
+
+The same run again returned HTTP 200 for `/growth/admin/referral-rewards/`. This is the second reproduction of learner access to the Growth referral rewards overview, now with server-verified non-staff role flags. Treat as a confirmed high-priority staging access-control exposure until fixed and retested.
+
+For the actual superuser pass, sign out through the staging UI, sign in with the authorised superuser account, then run the same consolidated batch. Do not proceed until `/api/auth/me/` reports elevated flags and `/admin/` reaches the admin index. The API serializer does not expose `is_superuser`; verify a superuser-only admin capability separately.
+
+**Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.**
