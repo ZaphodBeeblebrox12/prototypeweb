@@ -58,13 +58,15 @@ The exact decisions and their rationale are in `DECISION_LOG.md`.
 
 Read these in order:
 
-1. `DECISION_LOG.md` — approved decisions and remaining owner choices.
-2. `REDESIGN_PLAN.md` — overall process, phases and guardrails.
-3. `INFORMATION_ARCHITECTURE_V1.md` — approved six-domain model and proposed child navigation.
-4. `DOMAIN_WORKSPACE_BLUEPRINT_V1.md` — responsibilities, workspaces, records and end-to-end journeys.
-5. `CROSS_DOMAIN_CONNECTIONS_V1.md` — canonical ownership and hand-off contract.
-6. `ROUTE_TO_WORKSPACE_MAP_V1.md` — current route, API and Django Admin boundaries.
-7. `MOCKUP_REGISTER.md` — all mockups and their review state.
+1. `OWNER_DECISION_REGISTER_V1.md` — all 60 owner-approved product and operating-model decisions.
+2. `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md` — readiness blockers, dependency-based phases, exit gates and hard-stop boundary.
+3. `DECISION_LOG.md` — original design decisions and decision-control rules.
+4. `REDESIGN_PLAN.md` — overall process, phases and guardrails.
+5. `INFORMATION_ARCHITECTURE_V1.md` — approved six-domain model and proposed child navigation.
+6. `DOMAIN_WORKSPACE_BLUEPRINT_V1.md` — responsibilities, workspaces, records and end-to-end journeys.
+7. `CROSS_DOMAIN_CONNECTIONS_V1.md` — canonical ownership and hand-off contract.
+8. `ROUTE_TO_WORKSPACE_MAP_V1.md` — current route, API and Django Admin boundaries.
+9. `MOCKUP_REGISTER.md` — all mockups and their review state.
 
 Screen-level specifications:
 - `ACADEMY_WORKSPACE_SPEC_V1.md`
@@ -291,12 +293,12 @@ Do not mark a mockup as approved because it was created or smoke-tested. Record 
 
 ## 8. Recommended next steps
 
-1. Review Academy, Customers, Revenue, Growth, Platform and M50 Holistic Workflow V1 with the owner; record requested changes and decisions.
-2. Revise the relevant screens and update the decision log/mockup register.
-3. Use HOLISTIC_WALKTHROUGH_V1.md and HOLISTIC_REVIEW_NOTES_V1.md to resolve the course coupon/analytics contract, referral reward, campaign delivery, notification/work and external provisioning state questions.
-4. Complete the cross-domain role/permission matrix and Django Admin migration inventory, including Platform governance hardening items.
-5. Perform authenticated staging visual/role audit and verify the actual deployed source before producing an implementation handoff.
-6. Produce a phased migration plan with parity/acceptance criteria and explicit rollback boundaries.
+1. Run Phase 0 in `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md`: refresh the current source/deployment baseline and complete authenticated staging and role-specific verification.
+2. Produce a current route/action/permission inventory, including actual staff roles, object scopes, service calls, audit events, side effects and legacy Django Admin capabilities.
+3. Reconcile the superuser-only Django Admin target with the workflow-by-workflow legacy cutover rule before changing access.
+4. Close the source-contract gaps listed in the readiness document for refunds, subscription cancellation, course coupon redemption, unified purchase events, referral rewards, provider-backed campaign delivery, safe job retries, integration health, audit/policy immutability and privacy/retention.
+5. Review and revise the six domain mockups and M50; finish accessibility and authenticated role review.
+6. Complete the implementation handoff with parity tests, rollout stages and rollback boundaries.
 7. Obtain explicit implementation approval before changing application code.
 
 ## 9. Prototype artifact availability
