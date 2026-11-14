@@ -40,10 +40,10 @@
 
 | Proposed tab | Current route/source | Current state | Design mapping |
 |---|---|---|---|
-| Overview | Accounts, support and Customer 360 links are embedded in `/staff/admin-desk/` | Existing summary links; no dedicated Customers landing page verified | Proposed Customers landing focused on tickets, learner lookup and member-impacting work. |
-| Learners & Accounts | `/staff/admin-desk/accounts/`; detail `/staff/admin-desk/accounts/<uuid:user_id>/`; actions `.../action/` | Existing Admin Desk list/detail/action routes | Canonical owner of learner account operations. Staff/superuser accounts stay outside the normal learner list. |
-| Support Tickets | `/staff/admin-desk/support/tickets/`; detail `.../support/tickets/<uuid:ticket_id>/`; actions `.../action/` | Existing Admin Desk queue/detail/actions | Canonical owner of ticket status, assignment, priority, public reply and internal note. Preserve reviewer scope and SLA. |
-| Customer 360 | `/staff/admin-desk/customers/<uuid:user_id>/` | Existing read-oriented, permission-scoped cross-domain record | Retain as full-page relationship hub; add only a compact contextual preview within ticket detail. |
+| Overview | `/staff/admin-desk/` has cross-domain operational summaries; no dedicated Customers landing route exists | Existing account/support summaries; no dedicated Customers home verified | Proposed action-first Customers landing focused on reviewer-visible tickets, account lookup and member-impacting work. Counts must be reviewer-scoped. |
+| Learners & Accounts | `/staff/admin-desk/accounts/`; detail `/staff/admin-desk/accounts/<uuid:user_id>/`; actions `/staff/admin-desk/accounts/<uuid:user_id>/action/` | Existing Admin Desk list/detail/action routes. List searches username/email/first/last name/nickname, filters active/inactive/banned, orders newest joined first and paginates 25. | Canonical owner of learner account operations. Staff/superuser accounts stay outside the normal learner list. Subscription count is permission-gated. Account actions require `accounts.change_user`; ban/deactivate require a reason and write audit/reconciliation evidence. |
+| Support Tickets | `/staff/admin-desk/support/tickets/`; detail `/staff/admin-desk/support/tickets/<uuid:ticket_id>/`; actions `/staff/admin-desk/support/tickets/<uuid:ticket_id>/action/` | Existing Admin Desk queue/detail/actions. Queue supports search, status, category, priority, mine/unassigned filters; newest-first ordering; 25/page. Reviewer scope uses active staff and plan/affiliate-plan ticket_approvers. | Canonical owner of ticket status, assignment, priority, public reply, internal note and access-request decisions. Preserve 2h/8h/24h/72h SLA targets, reviewer scope and transactional grant/reconciliation workflow. |
+| Customer 360 | `/staff/admin-desk/customers/<uuid:user_id>/` | Existing read-only, permission-scoped cross-domain record. Can resolve through a reviewer-visible ticket or `accounts.view_user`. Independent section permissions for subscriptions, payments, invoices, Academy and security; internal requester profiles are restricted to identity + reviewer-visible support. | Retain as full-page relationship hub; add only a compact contextual preview within ticket detail. Keep internal notes, raw security details and raw payment-provider identifiers out of the activity stream. |
 
 ## 5. Revenue
 
@@ -116,3 +116,14 @@ The detailed Academy prototype and specification are recorded in:
 - `tradethesis_admin_academy_workspace_v1.html`
 
 The screen-level proposal covers Academy Overview, Course Catalogue, Course Detail, Approvals Queue, Review Detail, Course Builder hand-off, Offers & Access, Learner Access & Progress and SEO & Discoverability. All sample data is illustrative; proposed screens do not imply that a dedicated production route already exists.
+
+
+## Customers screen-design follow-up — 14 November 2026
+
+The detailed Customers prototype and specification are recorded in:
+
+- `CUSTOMERS_WORKSPACE_SPEC_V1.md`
+- `CUSTOMERS_REVIEW_NOTES_V1.md`
+- `tradethesis_admin_customers_workspace_v1.html` (standalone HTML artifact supplied in the design review conversation)
+
+M27 Customers Overview and M28 Learner Account Detail are proposed page structures. M12, M10, M11 and M13 redesign current source-backed account/support/customer workflows while preserving their permission, SLA and lifecycle rules. The sample data remains illustrative.
