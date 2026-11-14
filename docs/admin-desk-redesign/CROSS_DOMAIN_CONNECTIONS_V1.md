@@ -288,3 +288,19 @@ The current source baseline confirms this specific sequence:
 7. It records the entitlement event/domain event and queues personalised-video work when the entitlement is newly created. A non-simulated purchase receipt is attempted after commit.
 
 This confirms the intended direct course purchase path in the source baseline. It does not mean membership subscriptions or access-request approvals use the same entitlement path; those remain separate flows.
+
+
+## 11. Customer identity and support workflow contract
+
+The Customers screen design is grounded in these source rules:
+
+- The general learner directory excludes `is_staff` and `is_superuser` accounts. A staff/superuser requester can be resolved only through a ticket visible to the current reviewer, and that internal profile is restricted to identity plus reviewer-visible support history.
+- Support queue, counts and ticket detail use the same reviewer-scope logic. A configured Plan `ticket_approvers` list restricts access; an empty list retains current any-staff behaviour; superusers retain their established wider scope.
+- First-response SLA targets are 2h / 8h / 24h / 72h for Urgent / High / Normal / Low. A response timestamp stops the first-response-overdue calculation; an Awaiting Member ticket with a recorded first response is not first-response-overdue.
+- A staff public reply is member-visible, append-only, changes an open ticket to Awaiting Member and records first response if not already set. An internal `TicketMessage` is append-only, private and does not itself notify the member.
+- The reviewer/resolution `admin_notes` summary is separate from private internal `TicketMessage`. Do not use one generic “note” label for both.
+- Access-request approval can grant a hidden subscription Plan and enqueue reconciliation atomically; Billing/Technical approval resolves a ticket without a plan grant.
+- Customer 360's Academy, Revenue, subscription, invoice and security panels are independently permission-gated. Internal staff requester profiles do not show learner commercial, course, community or security records.
+- Customer 360 activity includes public support conversation, but excludes internal ticket notes and raw security/payment-provider identifiers.
+
+The Customers prototype keeps these boundaries visible and links to Academy, Revenue and Platform for canonical record work.
