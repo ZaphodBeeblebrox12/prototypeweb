@@ -34,6 +34,8 @@
   .tt-platform .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750;white-space:nowrap}
   .tt-platform .pill.failed,.tt-platform .pill.unknown,.tt-platform .pill.error{border-color:#e4c4be;background:#fbefed;color:#934b40}
   .tt-platform .pill.pending,.tt-platform .pill.running{border-color:#e7d6b8;background:#fbf4e8;color:#835f30}
+  .tt-platform .pill.granted{border-color:#cbd9cb;background:#eff4ed;color:#3c5c43}
+  .tt-platform .pill.denied{border-color:#dedfd5;background:#f3f1eb;color:#778078}
   .tt-platform .empty{padding:20px 8px;color:var(--muted);font-size:11px;text-align:center}
   .tt-platform .note{margin:0;color:var(--muted);font-size:10px;line-height:1.55}
   .tt-platform .policy-list{display:grid;gap:9px;margin:12px 0 0;padding:0;list-style:none}
@@ -241,8 +243,60 @@
   </section>
   {% endif %}
 
+  {% if my_access %}
+  <section class="panel section" aria-labelledby="platform-access-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-access-heading">Your access</h2><p>Your own account role, groups and effective model permissions · read-only</p></div>
+      <span class="pill">View only</span>
+    </div>
+    <div class="panel-body">
+      <div class="stats" style="grid-template-columns:repeat(5,minmax(0,1fr))">
+        <div class="stat"><strong style="font-size:17px">{{ my_access.identity.application_role }}</strong><span>Application role</span></div>
+        <div class="stat"><strong>{% if my_access.identity.is_active %}Yes{% else %}No{% endif %}</strong><span>Account active</span></div>
+        <div class="stat"><strong>{% if my_access.identity.is_staff %}Yes{% else %}No{% endif %}</strong><span>Django staff</span></div>
+        <div class="stat"><strong>{% if my_access.identity.is_superuser %}Yes{% else %}No{% endif %}</strong><span>Django superuser</span></div>
+        <div class="stat"><strong style="font-size:15px">{{ my_access.identity.staff_approval }}</strong><span>Staff approval field</span></div>
+      </div>
+      <div style="margin-top:13px">
+        <strong style="font-size:10px">Django groups</strong>
+        <div class="link-row" style="margin-top:6px">
+          {% for group in my_access.groups %}
+          <span class="pill">{{ group }}</span>
+          {% empty %}
+          <span class="muted">No Django groups assigned.</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th>Domain</th><th>Capability</th><th>Effective access</th><th>Scope / requirement</th></tr></thead>
+          <tbody>
+            {% for section in my_access.sections %}
+              {% for item in section.items %}
+              <tr>
+                {% if forloop.first %}<td rowspan="{{ section.items|length }}"><strong>{{ section.name }}</strong></td>{% endif %}
+                <td>{{ item.label }}</td>
+                <td>
+                  {% if item.granted %}
+                  <span class="pill granted">Granted</span>
+                  {% else %}
+                  <span class="pill denied">Not granted</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.detail|default:"—" }}</td>
+              </tr>
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px">This view explains your own effective model permissions; it does not change access. Object-level and workflow-specific rules can narrow access further — especially Support plan-approver scope and Academy content-administrator rules. Every destination and action still performs its own server-side check. Manage roles and groups in Advanced Administration.</p>
+    </div>
+  </section>
+  {% endif %}
+
   {% if not has_platform_records %}
-  <section class="panel section"><div class="panel-body"><p class="note">No Platform record panels are available for your current permissions. The operations timeline remains available for staff-level support signals.</p></div></section>
+  <section class="panel section"><div class="panel-body"><p class="note">No operational Platform record panels are available for your current permissions. Your own access summary is shown separately above.</p></div></section>
   {% endif %}
   <p class="note">Read-only workspace. It reports persisted records and status fields; it does not expose unverified retry controls or imply provider-side completion.</p>
 </div>
