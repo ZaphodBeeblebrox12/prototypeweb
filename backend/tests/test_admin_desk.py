@@ -329,7 +329,7 @@ class AdminDeskTests(TestCase):
                 for key in forbidden_context_keys:
                     self.assertNotIn(key, response.context)
 
-    def test_staff_notifications_render_untrusted_message_as_text(self):
+    def test_staff_notifications_escape_untrusted_title_and_message(self):
         operator = User.objects.create_user(
             username="notification-render-staff",
             email="notification-render-staff@example.test",
@@ -338,15 +338,22 @@ class AdminDeskTests(TestCase):
         EmailAddress.objects.create(
             user=operator, email=operator.email, verified=True, primary=True
         )
+        Notification.objects.create(
+            user=operator,
+            title="<script>alert('title-xss')</script>",
+            message='<img src=x onerror="alert(\'message-xss\')">',
+        )
         self.client.force_login(operator)
 
         response = self.client.get("/notifications/")
 
         self.assertEqual(response.status_code, 200, response.content)
-        page = response.content.decode("utf-8")
-        self.assertIn("title.textContent = notification.title;", page)
-        self.assertIn("message.textContent = notification.message;", page)
-        self.assertNotIn("innerHTML", page)
+        self.assertContains(response, "&lt;script&gt;alert(&#x27;title-xss&#x27;)&lt;/script&gt;")
+        self.assertContains(response, "&lt;img src=x onerror=&quot;alert(&#x27;message-xss&#x27;)&quot;&gt;")
+        self.assertNotContains(response, "<script>alert('title-xss')</script>")
+        self.assertNotContains(response, '<img src=x onerror="alert(\'message-xss\')">')
+        self.assertContains(response, 'class="tt-admin-desk-layout"')
+        self.assertContains(response, 'id="ttDeskSidebar"')
 
     def test_non_staff_user_is_forbidden(self):
         learner = User.objects.create_user(
