@@ -1,6 +1,8 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import permission_required
+from functools import wraps
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -9,12 +11,39 @@ from . import services
 from .models import Dispute
 
 
+def _has_dispute_permissions(user, permissions):
+    if not getattr(user, "is_authenticated", False) or not getattr(user, "is_active", False):
+        return False
+    if getattr(user, "is_superuser", False) or getattr(user, "role", None) == "admin":
+        return True
+    return bool(
+        getattr(user, "is_staff", False)
+        and user.has_perms(permissions)
+    )
+
+
+def dispute_permission_required(*permissions):
+    """Require the relevant Disputes model permission(s), not generic staff."""
+
+    def decorator(view_func):
+        @login_required(login_url="/accounts/login/")
+        @wraps(view_func)
+        def wrapped(request, *args, **kwargs):
+            if not _has_dispute_permissions(request.user, permissions):
+                raise PermissionDenied
+            return view_func(request, *args, **kwargs)
+
+        return wrapped
+
+    return decorator
+
+
 def _visible(user):
     return Dispute.objects.select_related(
         "payment_intent__user", "payment_intent__plan", "assigned_to")
 
 
-@staff_member_required
+@dispute_permission_required("disputes.view_dispute")
 def dashboard(request):
     qs = _visible(request.user)
     now = timezone.now()
@@ -41,7 +70,7 @@ def dashboard(request):
                    "now": now})
 
 
-@staff_member_required
+@dispute_permission_required("disputes.view_dispute")
 def detail(request, pk):
     dispute = get_object_or_404(_visible(request.user), pk=pk)
     intent = dispute.payment_intent
@@ -62,7 +91,10 @@ def detail(request, pk):
         "agreement": services.agreement_sentence(intent),
         "packages": dispute.packages.all(),
         "events": dispute.events.all(),
-        "can_resolve": request.user.has_perm("disputes.change_dispute"),
+        "can_resolve": _has_dispute_permissions(
+            request.user,
+            ("disputes.view_dispute", "disputes.change_dispute"),
+        ),
     }
     if dispute.reason_category in (Dispute.ReasonCategory.FRAUD,
                                    Dispute.ReasonCategory.UNRECOGNIZED):
@@ -71,7 +103,7 @@ def detail(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def add_note(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     note = request.POST.get("note", "").strip()
@@ -81,7 +113,7 @@ def add_note(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def generate(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     pkg = services.generate_package(d, actor=request.user)
@@ -91,7 +123,7 @@ def generate(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def submit_latest(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     pkg = d.packages.first()
@@ -107,7 +139,7 @@ def submit_latest(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def resolve(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     try:

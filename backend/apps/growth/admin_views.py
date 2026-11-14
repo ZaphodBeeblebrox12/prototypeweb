@@ -3,25 +3,25 @@ Admin views for sending gifts.
 
 Simple UI for non-technical staff to send gift subscriptions.
 """
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.utils.decorators import method_decorator
 from django.views import View
 
 from apps.subscriptions.models import Plan
 from .services.gifts import GiftService, GiftEmailService
 from .forms import AdminGiftSendForm
+from .permissions import GrowthPermissionRequiredMixin
 
 
-@method_decorator(staff_member_required, name='dispatch')
-class SendGiftAdminView(View):
-    """
-    Admin view for sending gifts.
+class SendGiftAdminView(GrowthPermissionRequiredMixin, View):
+    """Admin view for operators authorised to create gift subscriptions."""
 
-    URL: /admin/growth/send-gift/
-    """
+    permission_required = (
+        "growth.add_giftinvite",
+        "subscriptions.add_giftsubscription",
+        "subscriptions.view_plan",
+    )
     template_name = "admin/growth/send_gift.html"
 
     def get(self, request):
@@ -86,11 +86,10 @@ class SendGiftAdminView(View):
         })
 
 
-@method_decorator(staff_member_required, name='dispatch')
-class SendGiftSuccessAdminView(View):
-    """
-    Success page after sending a gift.
-    """
+class SendGiftSuccessAdminView(GrowthPermissionRequiredMixin, View):
+    """Success page after an authorised gift is created."""
+
+    permission_required = ("growth.add_giftinvite",)
     template_name = "admin/growth/send_gift_success.html"
 
     def get(self, request, gift_invite_id):
