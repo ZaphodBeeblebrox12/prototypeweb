@@ -5555,6 +5555,70 @@ body.builder-dialog-open { overflow:hidden; }
     }
   }
 
+  // Merge the bundled Trading Path Quick Checks into an already-saved draft.
+  // Stable source question IDs make this safe to rerun: existing Q&A is never replaced.
+  function mergeTradingPathQuickChecks(targetCourse, sourceCourse) {
+    const sourceModules = Array.isArray(sourceCourse?.modules) ? sourceCourse.modules : [];
+    const targetModules = Array.isArray(targetCourse?.modules) ? targetCourse.modules : [];
+    let lessonCount = 0;
+    let questionCount = 0;
+
+    sourceModules.forEach((sourceModule, moduleIndex) => {
+      const targetModule = targetModules.find(module =>
+        String(module.id || '') === String(sourceModule.id || '')
+      ) || targetModules.find(module =>
+        String(module.title || '').trim() === String(sourceModule.title || '').trim()
+      ) || targetModules[moduleIndex];
+      if (!targetModule) return;
+
+      const sourceLessons = Array.isArray(sourceModule.lessons) ? sourceModule.lessons : [];
+      const targetLessons = Array.isArray(targetModule.lessons) ? targetModule.lessons : [];
+      sourceLessons.forEach((sourceLesson, lessonIndex) => {
+        const targetLesson = targetLessons.find(lesson =>
+          String(lesson.id || '') === String(sourceLesson.id || '')
+        ) || targetLessons.find(lesson =>
+          String(lesson.title || '').trim() === String(sourceLesson.title || '').trim()
+        ) || targetLessons[lessonIndex];
+        if (!targetLesson) return;
+
+        const sourceQuestions = Array.isArray(sourceLesson.questions) ? sourceLesson.questions : [];
+        if (!sourceQuestions.length) return;
+
+        const existingQuestions = Array.isArray(targetLesson.questions) ? targetLesson.questions : [];
+        const existingIds = new Set(existingQuestions.map(question => String(question?.id || '')).filter(Boolean));
+        const missingQuestions = sourceQuestions.filter(question =>
+          !existingIds.has(String(question?.id || ''))
+        );
+        if (missingQuestions.length) {
+          targetLesson.questions = existingQuestions.concat(
+            missingQuestions.map(question => JSON.parse(JSON.stringify(question)))
+          );
+          questionCount += missingQuestions.length;
+        } else if (!Array.isArray(targetLesson.questions)) {
+          targetLesson.questions = existingQuestions;
+        }
+
+        const finalIds = new Set((targetLesson.questions || []).map(question => String(question?.id || '')));
+        let lessonChanged = missingQuestions.length > 0;
+        if (sourceQuestions.every(question => finalIds.has(String(question?.id || '')))) {
+          const originalContent = String(targetLesson.content || '');
+          const cleanedContent = originalContent
+            .replace(/^##\s*Quick check[^\n]*\r?\n[\s\S]*?(?=^##\s|\s*$)/m, '')
+            .replace(/\r?\n+Answers?:[ \t]*[\s\S]*$/i, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+          if (cleanedContent !== originalContent) {
+            targetLesson.content = cleanedContent;
+            lessonChanged = true;
+          }
+        }
+        if (lessonChanged) lessonCount += 1;
+      });
+    });
+
+    return { lessonCount, questionCount };
+  }
+
   async function syncAcademy() {
     const revisionAtStart=editRevision;
     diagnosticStage('academy-sync-started', {revisionAtStart});
@@ -5903,8 +5967,24 @@ body.builder-dialog-open { overflow:hidden; }
           render();
           const savedRemoteDraft = remoteDrafts.find(item => String(item.slug || '') === desiredSlug);
           if (savedRemoteDraft) {
-            clearTradingPathImportQuery();
-            toast('Opened the existing Your Trading Path draft. No duplicate was created or published.');
+            const migration = mergeTradingPathQuickChecks(importedCourse, requestedTradingPathDraft);
+            if (migration.lessonCount > 0) {
+              clearTimeout(academySaveTimer);
+              try {
+                await saveCurrentToAcademy(false, false);
+                clearTradingPathImportQuery();
+                renderSidebar();
+                renderHeaderState();
+                toast('Moved ' + migration.questionCount + ' Quick Check questions from ' +
+                  migration.lessonCount + ' lessons into Practice & Q&A. Existing Q&A was preserved; nothing was published.');
+              } catch (saveError) {
+                toast('The Quick Checks were merged in the editor, but saving the updated draft failed: ' +
+                  String(saveError?.message || saveError));
+              }
+            } else {
+              clearTradingPathImportQuery();
+              toast('Opened the existing Your Trading Path draft. Its Quick Checks are already in Practice & Q&A; nothing was published.');
+            }
           } else {
             clearTimeout(academySaveTimer);
             try {
