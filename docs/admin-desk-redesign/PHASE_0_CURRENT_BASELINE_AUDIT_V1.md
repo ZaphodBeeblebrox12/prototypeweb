@@ -427,3 +427,73 @@ This audit created/updated planning documentation only. It did not:
 - deploy, merge or rebase any branch.
 
 Implementation remains NOT AUTHORISED.
+
+
+## 12. Test-suite evidence and unauthenticated staging probe — continuation pass
+
+### 12.1 CI status on the deployed source SHA
+
+GitHub Actions was queried for commit `6cdb7b9e78306850902da9b95467e494066baa13`, which is the source SHA currently deployed to Academy staging.
+
+<https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43611322315> — **Verify Django Academy backend**, run 2048:
+- Python 3.11 job: success.
+- Python 3.12 job: success.
+- Both jobs ran Django configuration and Python syntax checks, isolated database migration, sitewide navbar role tests, source-course catalogue validation, draft-import smoke test, Ruff, formatting check, mypy, and the full backend regression suite.
+- Both full-suite results: **1,314 passed, 1 skipped, 512 warnings, 178 subtests passed**.
+
+<https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43611322349> — **Academy backend CI**, run 1888:
+- Python 3.11 backend job: success.
+- Python 3.12 backend job: success.
+- Tiptap bundle and DOM compatibility job: success.
+- Backend jobs ran Render build-script syntax validation, migration-state check, Ruff, Black check, mypy, static collection, focused micro-course image-slot regressions and the full backend suite.
+- Both full-suite results: **1,314 passed, 1 skipped, 178 subtests passed**. The log summary for this workflow did not report a warning count.
+- Tiptap job completed its bundle build and the sidecar/privacy, Markdown, reference, image-extension, sidecar-block, code-marker and full Bollinger Bands course round-trip checks. Its focused Markdown suite reported **19 passed, 4 subtests passed**.
+
+These are CI checks against an isolated test database and test accounts. They do not establish authenticated access or live object visibility in Render staging. A successful Tiptap compatibility job does not make Tiptap the supported/default production Course Builder.
+
+### 12.2 What existing tests cover for Admin Desk access
+
+The reviewed source tests provide meaningful local regression evidence:
+
+| Area | Existing test evidence | Remaining limitation |
+|---|---|---|
+| Account admin API | `apps/accounts/tests/test_admin_auth.py` tests role ADMIN, superuser and plain-user access. | It does not include an explicit ordinary `is_staff=True`, non-superuser, role=STAFF positive/negative case. The production IsRoleAdmin predicate nevertheless explicitly accepts any authenticated `is_staff` user. |
+| Academy review | `apps/academy/test_admin_desk_course_reviews.py` tests review, canonical publish, feedback-required return, constrained cleanup and a staff learner-role account denied with 403. | It does not cover the complete live staff roster or every Builder/Drive/video permission combination. |
+| Support | `apps/support/test_admin_desk.py` tests reviewer-scoped ticket visibility, restricted-plan 404, ticket actions, assignment, public replies and internal notes. | Tests use fixture accounts, not the actual deployed staff role/group matrix. |
+| Customer 360 | `apps/support/test_customer_360.py` tests independent section permissions, profile access denial without a visible ticket/global account permission, plan-scope denial, and hiding internal notes/provider identifiers/security details. | The real staging account/object combinations remain unverified. |
+| Operations Timeline | `apps/support/test_operations_timeline.py` tests non-staff denial, independent technical-feed permissions, plan reviewer scope, PII/payload redaction and job/provisioning detail denial. | Live role assignment and staff-specific route visibility remain unverified. |
+| Subscription lifecycle | `apps/subscriptions/tests/test_admin_actions.py` and `test_lifecycle.py` test idempotent cancellation/extension and reconciliation behaviour; a permission test checks a model-admin change gate. | These tests do not establish a new unified Admin Desk role-to-department matrix or end-of-period cancellation. |
+| Durable jobs/provisioning | `apps/jobs/tests/test_jobs_system.py` covers coalescing, stale-job recovery, invite-link reuse, membership check without resend and idempotent revoke. | It does not expose a new staff retry UI; no such route was verified. |
+| Growth referral overview | The inspected `AdminReferralRewardsView` is still a `LoginRequiredMixin` view. | No staff-only permission gate was found in that view; no corresponding staff authorization regression test was identified in the reviewed test inventory. |
+
+### 12.3 Ordinary-staff API boundary is now confirmed as a test-coverage issue
+
+The current `IsRoleAdmin` implementation accepts any authenticated user where at least one of these is true:
+- `role == ADMIN`
+- `is_superuser`
+- `is_staff`
+
+The existing test docstring itself describes the intended test condition as role ADMIN “AND superuser/staff”. The tests cover superuser and role ADMIN as allowed, and plain user as denied, but not an ordinary approved staff account. Therefore:
+- The implementation's broad staff acceptance is source-verified.
+- The available test suite does not explicitly pin the intended ordinary-staff policy.
+- Do not silently reinterpret the existing behaviour. Resolve the approved capability boundary and add explicit STAFF-only tests before the Staff & Permissions workflow is migrated.
+
+### 12.4 Direct unauthenticated staging probes
+
+An unauthenticated retrieval attempt was made against the following public Academy staging paths:
+- `/health/`
+- `/staff/admin-desk/`
+- `/admin/login/`
+- `/api/admin/staff-approvals/`
+- `/growth/admin/referral-rewards/`
+- `/admin-disputes/`
+
+The available retrieval channel reported each URL as inaccessible and did not return an HTTP response/status. This is **inconclusive**: it does not establish a route failure, authentication redirect, 403, 404 or service outage. No credentials were supplied and no authenticated staging action was attempted.
+
+### 12.5 Updated Phase 0 position
+
+The source/deployment baseline and CI state are now verified, and the source route/action inventory is supplemented by a review of the existing regression tests. This materially reduces uncertainty around code-level behaviour.
+
+**Phase 0 still does not pass its exit gate.** Live authenticated staging checks with representative staff accounts and a superuser, plus the actual staff/group/object-scope matrix, remain outstanding. The web retrieval failure is not a substitute for those checks.
+
+No application code or tests were changed in this continuation. Only this planning audit document was extended.
