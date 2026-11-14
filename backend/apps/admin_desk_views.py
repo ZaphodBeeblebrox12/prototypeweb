@@ -1699,6 +1699,7 @@ def admin_desk_platform(request):
                 "name": "Platform",
                 "items": [
                     access_item("Background jobs", "jobs.view_job"),
+                    access_item("Provider webhook events", "payments.view_webhookevent"),
                     access_item("Provisioning operations", "jobs.view_provisioningoperation"),
                     access_item("Periodic scheduler", "jobs.view_periodicjob"),
                     access_item("Audit log", "audit.view_auditlog"),
