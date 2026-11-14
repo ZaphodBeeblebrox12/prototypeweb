@@ -334,6 +334,71 @@ class AdminDeskTests(TestCase):
                 for key in forbidden_context_keys:
                     self.assertNotIn(key, response.context)
 
+    def test_specialist_overviews_only_build_explicitly_granted_panels(self):
+        from django.contrib.auth.models import Permission
+
+        def staff_with_permission(username, app_label, codename):
+            operator = User.objects.create_user(
+                username=username,
+                email=f"{username}@example.test",
+                is_staff=True,
+            )
+            EmailAddress.objects.create(
+                user=operator, email=operator.email, verified=True, primary=True
+            )
+            permission = Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            operator.user_permissions.add(permission)
+            return operator
+
+        scenarios = (
+            (
+                "academy-specialist",
+                "academy",
+                "view_course",
+                "staff_admin_desk_academy",
+                {"course_summary"},
+                {"review_summary", "offer_summary", "entitlement_summary"},
+            ),
+            (
+                "revenue-specialist",
+                "payments",
+                "view_paymentintent",
+                "staff_admin_desk_revenue",
+                {"payment_summary"},
+                {"invoice_summary", "subscription_summary", "dispute_summary", "business_url"},
+            ),
+            (
+                "growth-specialist",
+                "events",
+                "view_event",
+                "staff_admin_desk_growth",
+                {"purchase_report"},
+                {"email_report", "campaign_report", "promotion_report", "referral_report", "gift_summary"},
+            ),
+            (
+                "platform-specialist",
+                "jobs",
+                "view_job",
+                "staff_admin_desk_platform",
+                {"job_summary"},
+                {"provisioning_summary", "scheduler_summary", "audit_summary", "security_summary"},
+            ),
+        )
+
+        for username, app_label, codename, route_name, allowed_keys, denied_keys in scenarios:
+            with self.subTest(username=username):
+                operator = staff_with_permission(username, app_label, codename)
+                self.client.force_login(operator)
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.content)
+                for key in allowed_keys:
+                    self.assertIn(key, response.context)
+                for key in denied_keys:
+                    self.assertNotIn(key, response.context)
+
     def test_staff_notifications_escape_untrusted_title_and_message(self):
         operator = User.objects.create_user(
             username="notification-render-staff",
