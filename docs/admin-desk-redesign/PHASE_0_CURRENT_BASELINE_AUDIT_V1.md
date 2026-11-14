@@ -6,11 +6,11 @@
 **Application source branch:** my-new-branch  
 **Phase:** 0 — Revalidate the operating baseline  
 **Implementation status:** NOT AUTHORISED  
-**Audit status:** Source and Render baseline verified; authenticated staging/role verification remains outstanding.
+**Audit status:** Source/deployment baseline and initial authenticated learner/admin tests verified; specialist-role and object-scope matrix remains outstanding.
 
 ## 1. Executive finding
 
-The Admin Desk redesign is **not yet implementation-ready**. The current source and Render Academy deployment can now be tied to the same commit, and the source-level route/action inventory has been refreshed against that deployed SHA. However, the required authenticated staging review with representative staff roles and a superuser could not be performed in this audit environment. No live permission matrix, real account-role sample or object-level negative test is therefore signed off.
+The Admin Desk redesign is **not yet implementation-ready**. The current source and Render Academy deployment are tied to the same commit. Authenticated staging checks now include a server-verified non-staff learner session and a server-verified admin/staff session. The learner route-denial checks exposed a high-priority Growth referral rewards access-control failure; the admin baseline successfully loaded the core staff routes and six selected account/ticket detail pages, while the Growth analytics endpoint returned HTTP 500. The specialist-role matrix, true Django superuser verification and cross-persona object-level negative tests remain outstanding.
 
 The current application is a collection of existing staff routes, permission-gated views, Django Admin model surfaces and custom staff endpoints. It is not yet the approved unified six-domain operating shell. Some proposed workspace screens are new presentation layers over existing models; others would require new staff pages or service capabilities.
 
@@ -160,12 +160,12 @@ A separate tradethesis-course-template-preview service points to course-template
 
 ## 5. Authenticated staging and role verification
 
-**Status: NOT VERIFIED — Phase 0 exit blocker.**
+**Status: PARTIALLY VERIFIED — Phase 0 exit blocker remains.**
 
-The audit environment did not have an authenticated browser session for Academy staging or the user's representative staff accounts. The browser retrieval attempt could not open the staging paths; that is a limitation of this audit channel, not proof that the Render service is down or that the routes return an error.
+Authenticated browser-console evidence has now been supplied for one server-verified non-staff learner (`role=user`, `is_staff=false`, `is_admin=false`) and one server-verified admin/staff account (`role=admin`, `is_staff=true`, `is_admin=true`). The admin run verified the core staff route baseline. It did not expose the `is_superuser` flag, so a true Django superuser is not independently confirmed.
 
-No claim is made that the following have been tested live:
-- staff sign-in and superuser sign-in;
+The following remain unverified:
+- true Django superuser sign-in and superuser-only capabilities;
 - representative Support, Academy, Revenue, Growth and Platform role access;
 - Django Group/model permission assignment on actual staff accounts;
 - route-level 401/403/404 behaviour by role;
@@ -663,3 +663,81 @@ The other successful member route `/api/notifications/` remains expected; source
 Before the superuser run, explicitly sign out of Academy staging using the site's own sign-out control, then sign in using the authorised superuser account. In the same tab, check `/api/auth/me/` through the batch. Do not proceed until the server flags are consistent with an elevated account (`is_staff=true`, `is_admin=true` and role appropriate for the account). Then confirm `/admin/` reaches the admin index rather than redirecting to `/admin/login/`. The serializer does not expose `is_superuser`; use Django Admin access and an authorised superuser-only page/capability for final confirmation.
 
 **Phase 0 remains open.** The learner access failure on Growth referral rewards is reproducible. No code or permissions were changed. Implementation remains NOT AUTHORISED.
+
+## 19. Authenticated admin/staff baseline — 14 November 2026 17:17 UTC
+
+**Test host:** `https://tradethesis-academy-staging.onrender.com`  
+**Test page:** `/dashboard/`  
+**Method:** consolidated browser-console GET audit; no state changes.  
+**Operator-entered label:** `Superuser` (descriptive only; not identity proof).
+
+### Server-verified identity
+
+`GET /api/auth/me/` returned HTTP 200 with:
+- `role=admin`
+- `is_staff=true`
+- `is_admin=true`
+
+The browser was top-level (`window.top === window.self`) and same-origin fetches succeeded. The earlier CSP/third-party-context errors were no longer present. The API serializer does not expose `is_superuser`; therefore this evidence verifies an admin/staff account, **not independently the Django superuser flag**.
+
+### Route and object-detail results
+
+The batch tested 20 named endpoints:
+- **19 returned HTTP 200** on the final path without redirect.
+- **1 returned HTTP 500:** `/api/analytics/overview/`.
+- Six selected object-detail GETs returned HTTP 200: three support-ticket detail pages and three learner-account detail pages. The script reported 13 newly discovered fixture links and six saved fixtures; the six detail checks are the object-level positive evidence from this run.
+
+The 19 successful named endpoints were:
+- `/api/auth/me/`, `/health/`;
+- Admin Desk Command Centre, Operations, Accounts, Support, Course approvals and SEO;
+- legacy Course Builder and Tiptap preview;
+- Finance, Subscriptions and Business settings;
+- staff approvals API and own notifications API;
+- Growth referral rewards and Gift sending;
+- `/admin/` and `/admin-disputes/`.
+
+The `/admin/` request reached the Django administration index (HTTP 200). This confirms an active staff/admin account can access Django Admin, but does not alone establish `is_superuser=true`. The `/admin-disputes/` response returned HTTP 200 with the generic base title; visually confirm its rendered heading/content before treating its workspace rendering as passed.
+
+### Analytics overview — source-level defect identified
+
+The live request to `/api/analytics/overview/` returned HTTP 500 (reported duration approximately 2.5 seconds). The deployed source at `my-new-branch` SHA `8832ecf9cc979747dc2715a39ecfeb7a292e55ee` provides a direct code-level explanation:
+
+- `backend/apps/analytics/services/report.py` imports `Count` from `django.db.models`, but does not import `Sum`.
+- `promotion_performance()` calls `Sum("discount_cents")`.
+- `AnalyticsOverviewView.get()` calls `promotion_performance()` while constructing the response.
+
+This will raise `NameError: name 'Sum' is not defined` when the overview view reaches this report. The existing analytics tests cover signup, email and campaign reports but contain no promotion-performance test, which explains why this missing import is not caught by those tests. This is a **source-verified diagnosis consistent with the live 500**; the Render runtime traceback has not been collected.
+
+**Recommended remediation (not applied):** import `Sum` and add a promotion-performance regression test that exercises an empty and a populated CouponRedemption queryset, then rerun analytics tests and the authenticated staging GET.
+
+### Growth referral rewards — non-staff exposure remains open
+
+The earlier non-staff run at 17:05:19 UTC returned HTTP 200 for `/growth/admin/referral-rewards/` while `/api/auth/me/` returned `role=user`, `is_staff=false`, `is_admin=false`. The admin run in this section also returned 200, which is expected for an admin account and does not mitigate the learner exposure.
+
+Source inspection confirms:
+- `backend/apps/growth/views.py::AdminReferralRewardsView` inherits `LoginRequiredMixin, TemplateView` and has no staff/domain permission mixin or method-level authorization check.
+- `backend/apps/growth/urls.py` registers it at `growth/admin/referral-rewards/`.
+- The view's context includes ReferralSettings, global reward aggregates and the latest 20 rewards with referrer/referred-user relations.
+
+This is a confirmed server-side authorization gap for an authenticated non-staff user. The source/template defines the data intended for rendering, but the earlier browser report did not retain the HTML body, so the exact individual values visible to the learner were not inspected.
+
+**Recommended remediation (not applied):** enforce a server-side Growth staff/domain permission (and an explicit denial test for ordinary authenticated users); verify authorised Growth staff and the superuser retain access. Hiding the navigation link is not a fix.
+
+### Phase 0 status after this run
+
+| Area | Status |
+|---|---|
+| Non-staff learner identity and selected route denials | Verified |
+| Admin/staff identity | Verified |
+| Core Admin Desk route baseline | Positive GETs passed |
+| Six selected ticket/account detail pages | Positive GETs passed |
+| Analytics overview | HTTP 500; source defect identified |
+| Growth referral rewards authorization | High-priority failure confirmed on non-staff session |
+| True Django superuser | Not independently verified |
+| Ordinary staff and specialist departments | Not tested |
+| Cross-persona object-level denial | Not tested |
+| POST/action safety and audit trail | Not tested |
+
+**Next required tests:** use a separate ordinary approved staff account, then Support reviewer, Academy editor/approver, Revenue staff, Growth staff and Platform operator accounts. Run the same GET-only batch for each distinct signed-in session. Use the saved account/ticket fixture paths to verify that each role can see only permitted records. Then perform a separate true-superuser check, including a confirmed superuser-only capability. Do not reuse the manually entered persona label as identity evidence.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.** No application code, tests, permissions, migrations, Render settings, deployment, merge or rebase were changed by this audit update.
