@@ -1072,3 +1072,20 @@ The proposal covers Growth Overview, Analytics & Attribution, Campaigns & Audien
 The source pass confirmed material caveats that must remain visible: the campaign send sweep uses a stub provider; additional campaign channels are staged; the analytics “signups” report counts purchase Events; promotion aggregate has an import defect; referral reward unlock logic has a PaymentIntent status mismatch; optional referee bonus credit currently logs only; reward balance helper mixes currencies; and the custom Referral Rewards Overview does not enforce staff-only access.
 
 The Growth screens remain pending owner review and do not authorise implementation.
+
+
+## 20. Platform screen-level specification
+
+The Platform domain has a first screen-level design proposal:
+
+- PLATFORM_WORKSPACE_SPEC_V1.md — detailed Job/PeriodicJob/worker lifecycle, provisioning state, integration/webhook evidence, audit/security, policies/readiness, staff authorization and migration boundaries.
+- PLATFORM_REVIEW_NOTES_V1.md — source boundaries, browser smoke tests and open owner decisions.
+- tradethesis_admin_platform_workspace_v1.html — clickable static prototype using the approved V2 shell.
+
+The proposal covers Platform Overview, Jobs & Scheduler, Access & Provisioning, Integrations & Webhooks, Audit & Security, Policies & Readiness, Staff & Permissions and Migration Boundary.
+
+The most important design constraint is that this extends the existing permission-filtered Operations Timeline and read-only Job/Provisioning detail routes. It does not create a second queue. Durable Jobs, PeriodicJob, ProvisioningOperation, UserChannelAssignment and ChannelMembershipSnapshot retain their distinct meanings. Unknown external state remains unknown and is not treated as failure.
+
+The source pass also identified governance/verification gaps that must stay visible: /health/ is only a primary database SELECT 1 probe; configuration presence is not provider verification; AuditLog lacks an inspected append-only model guard; published PolicyVersion content immutability is not fully enforced; and the IsRoleAdmin API gate includes any is_staff user.
+
+The Platform screens remain pending owner review and do not authorise implementation.
