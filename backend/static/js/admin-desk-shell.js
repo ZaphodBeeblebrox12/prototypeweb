@@ -16,6 +16,7 @@
 
     function setMobileOpen(open) {
       shell.classList.toggle("is-mobile-open", open);
+      document.body.classList.toggle("tt-desk-drawer-open", open);
       if (mobileToggle) mobileToggle.setAttribute("aria-expanded", String(open));
       if (backdrop) backdrop.setAttribute("aria-hidden", String(!open));
       if (open) {
@@ -55,13 +56,39 @@
     });
 
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && shell.classList.contains("is-mobile-open")) {
+      if (!shell.classList.contains("is-mobile-open")) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
         setMobileOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const focusable = Array.from(
+        sidebar.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')
+      ).filter(function (element) {
+        return element.getClientRects().length > 0;
+      });
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     });
 
     mobileQuery.addEventListener("change", function (event) {
-      if (!event.matches) shell.classList.remove("is-mobile-open");
+      if (!event.matches) {
+        shell.classList.remove("is-mobile-open");
+        document.body.classList.remove("tt-desk-drawer-open");
+      }
       if (mobileToggle) mobileToggle.setAttribute("aria-expanded", "false");
     });
   }
