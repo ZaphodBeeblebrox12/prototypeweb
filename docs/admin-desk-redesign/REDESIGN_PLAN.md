@@ -589,7 +589,7 @@ This is a planning-only progress record. It does not alter the original approval
 | Academy | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
 | Customers | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
 | Revenue | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
-| Growth | High-level ownership/relationships documented | Screen-level design not started |
+| Growth | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
 | Platform | High-level ownership/relationships documented | Screen-level design not started |
 | Handoff and resumption | Dedicated `HANDOFF_AND_RESUME.md` created | Update it after each major design pass |
 
@@ -599,9 +599,9 @@ This is a planning-only progress record. It does not alter the original approval
 - **Phase 1 — User jobs, roles and task prioritisation:** initial operating model recorded; complete staff/persona and permission matrix remains open.
 - **Phase 2 — Information architecture:** six top-level domains and order approved; child navigation is proposed and remains reviewable.
 - **Phase 3 — Command Centre concepts:** three concepts prototyped; final composition and prioritisation rules remain open.
-- **Phase 4 — Screen-level wireframes:** Academy, Customers and Revenue V1 screens/specs drafted; Growth and Platform remain.
+- **Phase 4 — Screen-level wireframes:** Academy, Customers, Revenue and Growth V1 screens/specs drafted; Platform remains.
 - **Phase 5 — Visual design system:** common V2 visual direction selected; complete component tokens and accessibility validation remain.
-- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers and Revenue static prototypes created and smoke-tested; Growth and Platform mockups plus end-to-end holistic prototype remain.
+- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers, Revenue and Growth static prototypes created and smoke-tested; Platform mockup and end-to-end holistic prototype remain.
 - **Phase 7 — Review and validation:** owner review is pending for the domain mockups; accessibility and authenticated staging parity remain.
 - **Phase 8 — Implementation handoff:** not started; only begins after the user approves the design and technical plan.
 
@@ -640,4 +640,49 @@ Revenue-specific source boundaries confirmed include the read-only PaymentIntent
 - **Review notes:** `REVENUE_REVIEW_NOTES_V1.md`.
 - **Smoke test:** All Revenue navigation destinations, payment/subscription/plan/invoice/dispute filters, payment/invoice/dispute detail views, modal and external-submission preview, tax confirmation and mobile navigation passed. No JavaScript or console errors; 390px viewport had no horizontal overflow.
 - **Data safety:** all sample amounts, records, IDs and names are illustrative; no live API/provider/database action is connected.
+- **Review state:** V1 is draft for owner review; no implementation is approved.
+
+
+### Growth source files added to the design audit
+
+The Growth workspace pass also inspected these source files on `my-new-branch`:
+
+- `backend/apps/growth/models.py`
+- `backend/apps/growth/admin.py`
+- `backend/apps/growth/admin_views.py`
+- `backend/apps/growth/admin_urls.py`
+- `backend/apps/growth/forms.py`
+- `backend/apps/growth/services/gifts.py`
+- `backend/apps/growth/services/referrals.py`
+- `backend/apps/growth/services/rewards.py`
+- `backend/apps/campaigns/models.py`
+- `backend/apps/campaigns/admin.py`
+- `backend/apps/promotions/models.py`
+- `backend/apps/promotions/services/coupons.py`
+- `backend/apps/advanced_growth/models.py`
+- `backend/apps/advanced_growth/admin.py`
+- `backend/apps/automation/models.py`
+- `backend/apps/automation/admin.py`
+- `backend/apps/analytics/views.py`
+- `backend/apps/analytics/models.py`
+- `backend/apps/analytics/services/report.py`
+- `backend/apps/analytics/services/attribution.py`
+- `backend/apps/emailing/models.py`
+- `backend/apps/emailing/admin.py`
+- `backend/apps/emailing/webhooks.py`
+- `backend/apps/notifications/models.py`
+- `backend/apps/notifications/services.py`
+- `backend/apps/payments/views.py`
+- `backend/apps/payments/services.py`
+- `backend/apps/subscriptions/services.py`
+
+Growth-specific source boundaries confirmed include the admin-only Analytics API and report-data issues, Campaign's frozen recipient snapshot and stub provider send sweep, staged Telegram/in-product campaign actions, coupon eligibility and immutable redemption, referral/reward currency and unlock defects, modern gift invite vs legacy gift-code paths, separate G1 Delivery and transactional EmailLog ledgers, opt-out/suppression rules and Advanced Growth commission/experiment/announcement records.
+
+### Growth screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_growth_workspace_v1.html`.
+- **Specification:** `GROWTH_WORKSPACE_SPEC_V1.md`.
+- **Review notes:** `GROWTH_REVIEW_NOTES_V1.md`.
+- **Smoke test:** All Growth destinations, campaign/coupon/referral/gift/Delivery filters, preview modals, Email Delivery subtabs, Advanced Growth subtabs and mobile drawer passed. No JavaScript or console errors; 390px viewport had no horizontal overflow after a responsive sizing correction.
+- **Data safety:** all sample people, campaigns, amounts, codes and delivery states are illustrative; no API, mail provider, job or database writes are connected.
 - **Review state:** V1 is draft for owner review; no implementation is approved.
