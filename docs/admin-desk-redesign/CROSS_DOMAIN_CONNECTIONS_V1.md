@@ -400,3 +400,66 @@ Key contracts:
 7. Staff approval request → staff-approval API → existing class-level IsRoleAdmin gate (currently admits is_staff/superuser as well as application Admin) → audited role change; redesign only after gate and maker/checker rules are approved.
 
 All cross-links resolve to the canonical owner domain. Platform should not become an alternate payment, subscription, account-ban, course-entitlement or support-action interface.
+
+
+## 15. Holistic six-domain walkthrough contract
+
+The six domains are now connected in a single static walkthrough:
+
+- `HOLISTIC_WALKTHROUGH_V1.md` — canonical ownership, seven end-to-end sequences, stable sample identifiers, permission boundaries and source-level gaps.
+- `HOLISTIC_REVIEW_NOTES_V1.md` — browser validation, owner decisions and implementation blockers.
+- `tradethesis_admin_holistic_workflow_v1.html` — clickable M50 board with 40 fictional records.
+
+### The shared fictional record graph
+
+Primary learner: Maya Chen / USR-1042. Secondary actors: Rohan Patel / USR-1008 and Dev Singh / USR-1177.
+
+The same record IDs connect Academy, Customers, Revenue, Growth, Platform and the member-facing Notifications subsystem. The register uses canonical owner labels and linked record references. It is a design dataset, not a global-search grant or a statement that every staff user may see every record.
+
+### The seven integrated paths
+
+1. CourseImport IMP-241 → published Course CRS-017 → CourseOffer OFR-017 / hidden Plan PLN-COURSE-017 → provider-verified PaymentIntent PI-7001 → direct CourseEntitlement ENT-9001 → protected-video Job JOB-8421 → Customer 360.
+2. Membership Plan PLN-MEMBER-01 / price PP-799 → PaymentIntent PI-7002 → Subscription SUB-8102 → Academy PlanCourseAccess PCA-014 → ProvisioningOperation PROV-8B21 → Customer 360.
+3. Campaign CAM-018 / frozen CampaignRecipient CR-018-1042 → first-touch ATTR-1042 and Referral REF-551 → stub Delivery DLY-018 → membership checkout PI-7002 with referral + COHORT20 → CouponRedemption CRD-0702 + pending reward REW-552.
+4. SupportTicket TCK-4402 → reviewer-scope check + hidden Plan PLN-ACCESS-04 → canonical Subscription grant SUB-8114 → reconcile Job JOB-8432 → ProvisioningOperation PROV-8C14 → ticket Approved.
+5. SupportTicket TCK-4410 → PaymentIntent PI-7001 / Invoice INV-7001 → open Dispute DSP-0091 (funds withdrawn) → source-specific Audit/Event evidence → ticket work state changes independently.
+6. Staff gift creation GST-019 → token GiftInvite GFT-0091 → transactional EmailLog LOG-7712 Failed → Customer 360 invitation context → existing SUB-8102 unchanged because the invite has not been claimed.
+7. CampaignRecipient/Delivery DLY-018 → MarketingPreference/Suppression MKT-1042 → Resend Delivery update path vs Stripe/Razorpay WebhookEvent + durable Job path → Customer 360 communications context → Command Centre routes only when an actionable exception exists. Member Notification NOT-901 is not a staff work item.
+
+### Additional source invariants surfaced during the integrated pass
+
+**Course coupon and analytics split**
+- The inspected payment-start path calculates referral and coupon discounts and stores a coupon code/discount snapshot on PaymentIntent before it knows which fulfilment branch will complete the purchase.
+- The CourseOffer activation branch dispatches to `activate_course_payment`, which atomically claims the PaymentIntent and grants the CourseEntitlement, records an `academy.entitlement_granted` (or simulation) Event, queues personalized-video work and sends a receipt on commit.
+- This course branch returns before the ordinary membership activation path's coupon-redemption block and `purchase.completed` Event write.
+- Therefore a course PaymentIntent may contain coupon fields from checkout without the inspected branch creating a CouponRedemption row. The prototype course sample is coupon-free and the membership sample carries COHORT20. The intended course-coupon policy and analytics/attribution contract require an explicit owner/engineering decision; don't silently reconcile them in UI.
+
+**Membership coupon/referral**
+- The standard membership activation path calls ReferralService completion and the CouponRedemption service on successful activation.
+- PI-7002 therefore connects the referral discount provenance to REF-551 and campaign coupon COHORT20 to CRD-0702, with a separate pending Rohan reward REW-552.
+- The sample labels the coupon as stackable with referral because the Coupon configuration explicitly permits it; this is not a general stacking rule for all coupons.
+
+**Worker and external provisioning**
+- Support access approval enqueues reconciliation inside the transaction with the subscription grant and ticket update.
+- JOB-8432 Succeeded records completion of the reconcile job handler; PROV-8C14 remains Unknown because the external membership result still needs a probe.
+- The same distinction applies to Maya's membership SUB-8102 / PROV-8B21. A successful job, active Subscription or active UserChannelAssignment is not proof that a member is present in the external community.
+
+**Communication and attention**
+- CampaignRecipient status, G1 Delivery state, legacy transactional EmailLog, user Notification and staff Command Centre work state are different records.
+- NOT-901 is a member-facing Notification. It must not be counted as a staff attention item or a support/work resolution.
+- A Command Centre event should only be created from an approved source-to-work mapping with defined permission scope, actionable status, owner and deep link.
+
+### Acceptance checklist for M50
+
+- Each sample ID resolves to one canonical owner.
+- A record referenced in multiple journeys uses the same ID and sample state.
+- A cross-domain context panel does not create a duplicate editable record.
+- All counts, search and record lists are permission-filtered in a real implementation.
+- Course purchase, membership, support grant and gift claim paths remain distinct.
+- Campaign stub Sent and provider-delivered are not conflated.
+- Job completion and external provisioning are not conflated.
+- Member Notification and staff work item are not conflated.
+- Every activity item retains source, actor, visibility and lifecycle provenance.
+- Any action goes through its owning domain's existing service and server-side permission boundary.
+
+The M50 board is a design review artefact. It is not an implementation authorisation.
