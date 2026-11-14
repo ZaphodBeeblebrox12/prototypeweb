@@ -515,6 +515,56 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "plan scope")
         self.assertNotContains(response, "Edit permissions")
 
+    def test_global_search_returns_safe_webhook_results_only_with_view_permission(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import WebhookEvent
+
+        operator = User.objects.create_user(
+            username="global-search-webhook-staff",
+            email="global-search-webhook-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_webhookevent",
+        )
+        operator.user_permissions.add(permission)
+        provider_event_id = "evt_search_private_6812"
+        payload_secret = "webhook-search-secret"
+        internal_error = "webhook-search-internal-error"
+        WebhookEvent.objects.create(
+            provider="stripe",
+            provider_event_id=provider_event_id,
+            event_type="charge.dispute.created",
+            payload={"api_secret": payload_secret},
+            status=WebhookEvent.Status.FAILED,
+            error=internal_error,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "dispute"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        groups = response.context["search_groups"]
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]["name"], "Platform")
+        self.assertEqual(len(groups[0]["results"]), 1)
+        self.assertContains(response, "charge.dispute.created")
+        self.assertContains(response, "Failed")
+        self.assertNotContains(response, provider_event_id)
+        self.assertNotContains(response, payload_secret)
+        self.assertNotContains(response, internal_error)
+        self.assertEqual(
+            groups[0]["results"][0]["url"],
+            reverse("admin:payments_webhookevent_changelist"),
+        )
+
     def test_global_search_preserves_unknown_provisioning_state_without_exposing_id(self):
         from uuid import uuid4
         from django.contrib.auth.models import Permission
