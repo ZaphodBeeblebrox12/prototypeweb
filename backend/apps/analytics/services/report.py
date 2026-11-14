@@ -6,7 +6,7 @@ per-campaign counters, CouponRedemptions for promotion revenue).
 """
 import datetime
 
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.utils import timezone
 
 from apps.campaigns.models import Campaign, CampaignMetrics
