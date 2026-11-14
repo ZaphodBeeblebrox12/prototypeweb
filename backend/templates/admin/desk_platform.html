@@ -185,6 +185,46 @@
   </section>
   {% endif %}
 
+  {% if webhook_summary %}
+  <section class="panel section" aria-labelledby="platform-webhooks-heading">
+    <div class="panel-head">
+      <div><h2 id="platform-webhooks-heading">Provider webhook evidence</h2><p>Stripe / Razorpay · durable webhook records · last 7 days</p></div>
+      <a href="{{ webhook_summary.url }}">Webhook register →</a>
+    </div>
+    <div class="panel-body">
+      <div class="stats">
+        <div class="stat"><strong>{{ webhook_summary.received }}</strong><span>Received · awaiting processing</span></div>
+        <div class="stat"><strong>{{ webhook_summary.processed }}</strong><span>Processed</span></div>
+        <div class="stat alert"><strong>{{ webhook_summary.failed }}</strong><span>Failed processing</span></div>
+        <div class="stat"><strong>{{ webhook_summary.ignored }}</strong><span>Ignored by handler</span></div>
+      </div>
+      <div class="table-wrap" style="margin-top:13px">
+        <table>
+          <thead><tr><th>Provider</th><th>Event type</th><th>Stored state</th><th>Received</th><th>Processed</th></tr></thead>
+          <tbody>
+            {% for item in webhook_items %}
+            <tr>
+              <td><strong>{{ item.get_provider_display }}</strong></td>
+              <td>{{ item.event_type }}</td>
+              <td>
+                <span class="pill {% if item.status == 'failed' %}failed{% elif item.status == 'received' %}pending{% endif %}">
+                  {{ item.get_status_display }}
+                </span>
+              </td>
+              <td>{{ item.received_at|date:"j M Y, H:i" }}</td>
+              <td>{{ item.processed_at|date:"j M Y, H:i"|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty">No provider webhook events were recorded in the last seven days.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:9px">This is durable webhook receipt/processing evidence, not a provider connectivity or settlement health check. Raw event IDs, payloads and error details are intentionally omitted here. Telegram webhook handling does not have a comparable durable event ledger in the inspected source.</p>
+    </div>
+  </section>
+  {% endif %}
+
   {% if audit_summary %}
   <section class="panel section" aria-labelledby="platform-audit-heading">
     <div class="panel-head">
