@@ -371,6 +371,45 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "INR 1,299.00")
         self.assertNotContains(response, "Needle restricted support request")
 
+    def test_platform_access_summary_shows_only_current_staff_permissions(self):
+        from django.contrib.auth.models import Group, Permission
+
+        operator = User.objects.create_user(
+            username="platform-access-staff",
+            email="platform-access-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="jobs",
+            codename="view_job",
+        )
+        operator.user_permissions.add(permission)
+        group = Group.objects.create(name="Platform Operations")
+        operator.groups.add(group)
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_platform"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        access = response.context["my_access"]
+        self.assertEqual(access["identity"]["application_role"], "User")
+        self.assertTrue(access["identity"]["is_staff"])
+        self.assertFalse(access["identity"]["is_superuser"])
+        self.assertEqual(access["groups"], ["Platform Operations"])
+        sections = {section["name"]: section["items"] for section in access["sections"]}
+        platform_items = {item["label"]: item for item in sections["Platform"]}
+        customer_items = {item["label"]: item for item in sections["Customers"]}
+        self.assertTrue(platform_items["Background jobs"]["granted"])
+        self.assertFalse(platform_items["Provisioning operations"]["granted"])
+        self.assertFalse(customer_items["Learner accounts"]["granted"])
+        self.assertTrue(customer_items["Support tickets"]["granted"])
+        self.assertContains(response, "Your access")
+        self.assertContains(response, "plan scope")
+        self.assertNotContains(response, "Edit permissions")
+
     def test_global_search_preserves_unknown_provisioning_state_without_exposing_id(self):
         from uuid import uuid4
         from django.contrib.auth.models import Permission
