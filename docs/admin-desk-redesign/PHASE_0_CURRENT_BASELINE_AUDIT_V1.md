@@ -741,3 +741,28 @@ This is a confirmed server-side authorization gap for an authenticated non-staff
 **Next required tests:** use a separate ordinary approved staff account, then Support reviewer, Academy editor/approver, Revenue staff, Growth staff and Platform operator accounts. Run the same GET-only batch for each distinct signed-in session. Use the saved account/ticket fixture paths to verify that each role can see only permitted records. Then perform a separate true-superuser check, including a confirmed superuser-only capability. Do not reuse the manually entered persona label as identity evidence.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.** No application code, tests, permissions, migrations, Render settings, deployment, merge or rebase were changed by this audit update.
+
+
+## 20. Owner staffing context and revised role-test plan — 14 November 2026
+
+The owner clarified that there are currently no staff members/accounts available for ordinary staff or specialist-department live tests. Do not continue requesting a real Support, Academy, Revenue, Growth or Platform employee account at this stage. This is a test-account availability constraint, not a reason to invent successful role results.
+
+### What the current source model supports
+
+- The custom User model defines three application role values: `admin`, `staff` and `user`.
+- It separately stores `is_staff_approved` and Django's `is_staff`. The model's `approve_staff()` helper sets both approval and Django staff access.
+- Academy's `is_course_content_admin()` helper permits superusers or users whose application role is `admin`; it explicitly does not treat ordinary `is_staff` alone as permission to author/review shared course content.
+- Support's `reviewable_ticket_queryset()` denies inactive/non-staff users, grants superusers all tickets, and filters other staff by plan/affiliate plan ticket approver assignments. Where the relevant plan has no approver configured, the established fallback permits any staff member to see those tickets.
+- The Role enum itself does not define separate Support, Academy, Revenue, Growth or Platform department roles. Those boundaries need to be mapped through Django model permissions, Groups and object/plan assignments before the future staff model can be validated.
+
+### Revised test plan
+
+1. Finish source-level mapping of the current role, Group, model-permission, approval and object-assignment checks across all six Admin Desk domains.
+2. Keep the already verified learner and admin/staff browser results as the only live persona evidence. Do not claim ordinary staff or specialist-role live coverage.
+3. When needed, create **temporary staging-only test accounts** with distinct permission/assignment profiles. Do not create or promote accounts without explicit owner authorisation, and do not use production customer accounts as staff fixtures.
+4. Run each role profile through the same read-only route batch and saved object-detail fixtures, recording both allowed and denied results.
+5. Later, replace or supplement temporary personas with real staff pilot accounts once staff are onboarded.
+
+No staff/test accounts were created as part of this audit. No application code or access permissions were changed.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.**
