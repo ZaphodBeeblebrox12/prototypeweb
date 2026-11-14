@@ -588,7 +588,7 @@ This is a planning-only progress record. It does not alter the original approval
 | Route map | Source-level route-to-workspace inventory created | Recheck deployed HEAD and inspect authenticated live pages / role-specific access |
 | Academy | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
 | Customers | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
-| Revenue | High-level ownership/relationships documented | Screen-level design not started |
+| Revenue | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
 | Growth | High-level ownership/relationships documented | Screen-level design not started |
 | Platform | High-level ownership/relationships documented | Screen-level design not started |
 | Handoff and resumption | Dedicated `HANDOFF_AND_RESUME.md` created | Update it after each major design pass |
@@ -599,12 +599,45 @@ This is a planning-only progress record. It does not alter the original approval
 - **Phase 1 — User jobs, roles and task prioritisation:** initial operating model recorded; complete staff/persona and permission matrix remains open.
 - **Phase 2 — Information architecture:** six top-level domains and order approved; child navigation is proposed and remains reviewable.
 - **Phase 3 — Command Centre concepts:** three concepts prototyped; final composition and prioritisation rules remain open.
-- **Phase 4 — Screen-level wireframes:** Academy and Customers V1 screens/specs drafted; Revenue, Growth and Platform remain.
+- **Phase 4 — Screen-level wireframes:** Academy, Customers and Revenue V1 screens/specs drafted; Growth and Platform remain.
 - **Phase 5 — Visual design system:** common V2 visual direction selected; complete component tokens and accessibility validation remain.
-- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy and Customers static prototypes created and smoke-tested; end-to-end holistic prototype remains.
+- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers and Revenue static prototypes created and smoke-tested; Growth and Platform mockups plus end-to-end holistic prototype remain.
 - **Phase 7 — Review and validation:** owner review is pending for the domain mockups; accessibility and authenticated staging parity remain.
 - **Phase 8 — Implementation handoff:** not started; only begins after the user approves the design and technical plan.
 
 ### Current implementation boundary
 
 No application code, migrations, routes, permissions, API contracts, tests, Render settings or deployments have been changed by this planning branch. Do not begin implementation until the owner explicitly approves the design handoff.
+
+
+### Revenue source files added to the design audit
+
+The Revenue workspace pass also inspected these source files on `my-new-branch`:
+
+- `backend/apps/payments/models.py`
+- `backend/apps/payments/services.py`
+- `backend/apps/payments/views.py`
+- `backend/apps/payments/admin.py`
+- `backend/apps/subscriptions/models.py`
+- `backend/apps/subscriptions/services.py`
+- `backend/apps/subscriptions/admin.py`
+- `backend/apps/disputes/models.py`
+- `backend/apps/disputes/services.py`
+- `backend/apps/disputes/views.py`
+- `backend/apps/disputes/urls.py`
+- `backend/templates/admin/desk_finance.html`
+- `backend/templates/admin/desk_subscriptions.html`
+- `backend/templates/admin/desk_invoice_detail.html`
+- `backend/templates/disputes/dashboard.html`
+- `backend/templates/disputes/detail.html`
+
+Revenue-specific source boundaries confirmed include the read-only PaymentIntent finance view, Django Admin's full manual refund recording action (after provider-side refund), audited Subscription grant/extend/cancel paths, Django Admin Plan/base/geo price configuration, immutable Invoice snapshots and the separate Dispute state machine.
+
+### Revenue screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_revenue_workspace_v1.html`.
+- **Specification:** `REVENUE_WORKSPACE_SPEC_V1.md`.
+- **Review notes:** `REVENUE_REVIEW_NOTES_V1.md`.
+- **Smoke test:** All Revenue navigation destinations, payment/subscription/plan/invoice/dispute filters, payment/invoice/dispute detail views, modal and external-submission preview, tax confirmation and mobile navigation passed. No JavaScript or console errors; 390px viewport had no horizontal overflow.
+- **Data safety:** all sample amounts, records, IDs and names are illustrative; no live API/provider/database action is connected.
+- **Review state:** V1 is draft for owner review; no implementation is approved.
