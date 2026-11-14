@@ -5557,56 +5557,143 @@ body.builder-dialog-open { overflow:hidden; }
 
   // Merge the bundled Trading Path Quick Checks into an already-saved draft.
   // Stable source question IDs make this safe to rerun: existing Q&A is never replaced.
+  function stripTradingPathQuickCheckContent(markdown) {
+    let lines = String(markdown || '').split(/\r?\n/);
+    const kept = [];
+    let insideQuickCheck = false;
+
+    for (const line of lines) {
+      if (insideQuickCheck) {
+        if (/^##\s+/.test(line)) {
+          insideQuickCheck = false;
+          kept.push(line);
+        }
+        continue;
+      }
+      if (/^##\s*Quick check\b/i.test(line.trim())) {
+        insideQuickCheck = true;
+        continue;
+      }
+      kept.push(line);
+    }
+
+    lines = kept;
+    // Earlier imports could lose the Quick Check heading and first item while leaving
+    // items 2 and 3 immediately above Today's action step. Remove that orphaned list too.
+    const actionIndex = lines.findIndex(line =>
+      /^##\s*Today(?:'|’)?s action step\b/i.test(line.trim())
+    );
+    if (actionIndex >= 0) {
+      let cursor = actionIndex - 1;
+      let start = -1;
+      let numberedItems = 0;
+      let scanned = 0;
+      while (cursor >= 0 && scanned < 12) {
+        const line = lines[cursor];
+        if (!line.trim()) {
+          cursor -= 1;
+          scanned += 1;
+          continue;
+        }
+        if (/^\s*\d+[.)]\s+/.test(line)) {
+          numberedItems += 1;
+          start = cursor;
+          cursor -= 1;
+          scanned += 1;
+          if (numberedItems >= 3) break;
+          continue;
+        }
+        if (
+          numberedItems > 0 &&
+          /^\s{2,}\S/.test(line) &&
+          !/^\s*[-*•]/.test(line)
+        ) {
+          cursor -= 1;
+          scanned += 1;
+          continue;
+        }
+        break;
+      }
+      if (numberedItems >= 2 && start >= 0) {
+        lines.splice(start, actionIndex - start);
+      }
+    }
+
+    // Answer keys were appended to the lesson source. The Q&A area now owns
+    // the Quick Check answers and explanations, so none should remain in lesson prose.
+    let answerIndex = -1;
+    lines.forEach((line, index) => {
+      if (/^Answers?:[ \t]*/i.test(line.trim())) answerIndex = index;
+    });
+    if (answerIndex >= 0) lines = lines.slice(0, answerIndex);
+
+    return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   function mergeTradingPathQuickChecks(targetCourse, sourceCourse) {
     const sourceModules = Array.isArray(sourceCourse?.modules) ? sourceCourse.modules : [];
     const targetModules = Array.isArray(targetCourse?.modules) ? targetCourse.modules : [];
+    const targetLessons = targetModules.flatMap(module =>
+      Array.isArray(module.lessons) ? module.lessons : []
+    );
     let lessonCount = 0;
     let questionCount = 0;
 
     sourceModules.forEach((sourceModule, moduleIndex) => {
+      const normalizedModuleTitle = String(sourceModule.title || '')
+        .trim().replace(/^the\s+/i, '').toLowerCase();
       const targetModule = targetModules.find(module =>
-        String(module.id || '') === String(sourceModule.id || '')
+        String(module.title || '').trim().replace(/^the\s+/i, '').toLowerCase() === normalizedModuleTitle
       ) || targetModules.find(module =>
-        String(module.title || '').trim() === String(sourceModule.title || '').trim()
+        String(module.id || '') === String(sourceModule.id || '')
       ) || targetModules[moduleIndex];
-      if (!targetModule) return;
+      const targetModuleLessons = Array.isArray(targetModule?.lessons) ? targetModule.lessons : [];
 
-      const sourceLessons = Array.isArray(sourceModule.lessons) ? sourceModule.lessons : [];
-      const targetLessons = Array.isArray(targetModule.lessons) ? targetModule.lessons : [];
-      sourceLessons.forEach((sourceLesson, lessonIndex) => {
-        const targetLesson = targetLessons.find(lesson =>
-          String(lesson.id || '') === String(sourceLesson.id || '')
-        ) || targetLessons.find(lesson =>
-          String(lesson.title || '').trim() === String(sourceLesson.title || '').trim()
-        ) || targetLessons[lessonIndex];
-        if (!targetLesson) return;
-
+      (Array.isArray(sourceModule.lessons) ? sourceModule.lessons : []).forEach((sourceLesson, lessonIndex) => {
         const sourceQuestions = Array.isArray(sourceLesson.questions) ? sourceLesson.questions : [];
         if (!sourceQuestions.length) return;
 
+        const targetLesson = targetLessons.find(lesson =>
+          String(lesson.title || '').trim() === String(sourceLesson.title || '').trim()
+        ) || targetLessons.find(lesson =>
+          String(lesson.id || '') === String(sourceLesson.id || '')
+        ) || targetModuleLessons[lessonIndex];
+        if (!targetLesson) return;
+
         const existingQuestions = Array.isArray(targetLesson.questions) ? targetLesson.questions : [];
-        const existingIds = new Set(existingQuestions.map(question => String(question?.id || '')).filter(Boolean));
-        const missingQuestions = sourceQuestions.filter(question =>
-          !existingIds.has(String(question?.id || ''))
-        );
-        if (missingQuestions.length) {
+        const existingIds = new Set(existingQuestions.map(question =>
+          String(question?.id || '')
+        ).filter(Boolean));
+        const normalizePrompt = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const existingPrompts = new Set(existingQuestions.map(question =>
+          normalizePrompt(question?.prompt)
+        ).filter(Boolean));
+        const missingQuestions = sourceQuestions.filter(question => {
+          const id = String(question?.id || '');
+          const prompt = normalizePrompt(question?.prompt);
+          return (!id || !existingIds.has(id)) && (!prompt || !existingPrompts.has(prompt));
+        });
+
+        if (missingQuestions.length || !Array.isArray(targetLesson.questions)) {
           targetLesson.questions = existingQuestions.concat(
             missingQuestions.map(question => JSON.parse(JSON.stringify(question)))
           );
           questionCount += missingQuestions.length;
-        } else if (!Array.isArray(targetLesson.questions)) {
-          targetLesson.questions = existingQuestions;
         }
 
-        const finalIds = new Set((targetLesson.questions || []).map(question => String(question?.id || '')));
+        const finalQuestions = Array.isArray(targetLesson.questions) ? targetLesson.questions : [];
+        const allSourceQuestionsPresent = sourceQuestions.every(sourceQuestion => {
+          const sourceId = String(sourceQuestion?.id || '');
+          const sourcePrompt = normalizePrompt(sourceQuestion?.prompt);
+          return finalQuestions.some(question =>
+            (sourceId && String(question?.id || '') === sourceId) ||
+            (sourcePrompt && normalizePrompt(question?.prompt) === sourcePrompt)
+          );
+        });
         let lessonChanged = missingQuestions.length > 0;
-        if (sourceQuestions.every(question => finalIds.has(String(question?.id || '')))) {
+        if (allSourceQuestionsPresent) {
           const originalContent = String(targetLesson.content || '');
-          const cleanedContent = originalContent
-            .replace(/^##\s*Quick check[^\n]*\r?\n[\s\S]*?(?=^##\s|\s*$)/m, '')
-            .replace(/\r?\n+Answers?:[ \t]*[\s\S]*$/i, '')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
+          const cleanedContent = stripTradingPathQuickCheckContent(originalContent);
           if (cleanedContent !== originalContent) {
             targetLesson.content = cleanedContent;
             lessonChanged = true;
@@ -5843,6 +5930,24 @@ body.builder-dialog-open { overflow:hidden; }
         stateChanged = true;
         autoImportedEmaStrategy = true;
       }
+      if (quickCheckSource && !autoMigratedTradingPathQuestions) {
+        const targetTradingPath = state.courses.find(course =>
+          String(course.slug || '') === String(quickCheckSource.slug || '')
+        ) || state.courses.find(course =>
+          String(course.slug || '') === 'trading-path'
+        ) || state.courses.find(course =>
+          /trading path/i.test(String(course.title || ''))
+        );
+        if (targetTradingPath) {
+          const migration = mergeTradingPathQuickChecks(targetTradingPath, quickCheckSource);
+          if (migration.lessonCount > 0) {
+            autoMigratedTradingPathQuestions = true;
+            tradingPathDraftForQuickCheckSave = targetTradingPath;
+            stateChanged = true;
+          }
+        }
+      }
+
       const selectedTradingPath = state.courses.find(course =>
         String(course.id) === String(state.selectedCourseId || '') &&
         String(course.slug || '') === 'your-trading-path-import-draft'
@@ -6055,7 +6160,7 @@ body.builder-dialog-open { overflow:hidden; }
           }
         }
       }
-      if (autoMigratedTradingPathQuestions && tradingPathDraftForQuickCheckSave) {
+      if (autoMigratedTradingPathQuestions && tradingPathDraftForQuickCheckSave && !autoImportedTradingPath) {
         clearTimeout(academySaveTimer);
         try {
           await saveCurrentToAcademy(false, false, tradingPathDraftForQuickCheckSave);
