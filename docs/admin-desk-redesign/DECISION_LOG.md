@@ -50,14 +50,25 @@
 - **Approved by:** User
 - **Date:** 2026-11-14
 
+### Decision 4 — Six-domain information architecture
+
+- **Decision:** Use six top-level domains in the shared Admin Desk navigation.
+- **Options considered:** Separate administration destinations; fewer consolidated domains; or the six-domain model.
+- **Chosen option:** Command Centre, Academy, Customers, Revenue, Growth and Platform, in that order.
+- **Reason:** This matches how the owner thinks about operating TradeThesis and keeps the six major responsibilities distinct inside one coherent workspace.
+- **Affected screens/workflows:** Global sidebar, breadcrumbs, Command Centre overview, domain landing pages and cross-domain links.
+- **Open risks:** The top-level grouping and order are approved; submenu labels, exact destinations, role-based visibility, counts and mobile navigation remain design decisions to validate.
+- **Approved by:** User
+- **Date:** 2026-11-14
+
 ## Decisions still to make together
 
 ### 1. Navigation hierarchy
 - [x] Use one shared sidebar for the Admin Desk domains.
-- [x] Include the proposed domains: Command Centre, Academy, Customers, Revenue, Growth and Platform.
-- [ ] Finalise labels, grouping, nesting and order.
+- [x] Approve the six top-level domains and their order: Command Centre, Academy, Customers, Revenue, Growth, Platform.
+- [ ] Finalise submenu labels, destinations, nesting and role-based visibility.
 - [ ] Define role-based visibility and the location/label for Advanced Administration.
-- Notes: The unified shell is approved; detailed information architecture remains open.
+- Notes: The six-domain grouping/order is approved. The submenu-level information architecture remains open.
 
 ### 2. Overview philosophy
 - [x] Action queue first.
