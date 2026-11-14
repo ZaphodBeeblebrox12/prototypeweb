@@ -263,6 +263,59 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "Your assignment changed")
         self.assertNotContains(response, "Private notification")
 
+    def test_growth_referral_summary_requires_reward_and_settings_permissions(self):
+        from django.contrib.auth.models import Permission
+
+        operator = User.objects.create_user(
+            username="growth-referral-report-staff",
+            email="growth-referral-report-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        reward_permission = Permission.objects.get(
+            content_type__app_label="growth",
+            codename="view_referralreward",
+        )
+        settings_permission = Permission.objects.get(
+            content_type__app_label="growth",
+            codename="view_referralsettings",
+        )
+        operator.user_permissions.add(reward_permission)
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertNotIn("referral_report", response.context)
+        self.assertFalse(response.context["can_view_referrals"])
+
+        operator.user_permissions.add(settings_permission)
+        response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn("referral_report", response.context)
+        self.assertTrue(response.context["can_view_referrals"])
+
+    def test_growth_email_report_uses_marked_sent_not_delivered_language(self):
+        owner = User.objects.create_superuser(
+            username="growth-email-report-owner",
+            email="growth-email-report-owner@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=owner, email=owner.email, verified=True, primary=True
+        )
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("staff_admin_desk_growth"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Marked sent")
+        self.assertContains(
+            response,
+            "A Sent state is not presented as provider-confirmed Delivered",
+        )
+
     def test_global_search_respects_domain_permissions_and_ticket_reviewer_scope(self):
         from django.contrib.auth.models import Permission
         from apps.payments.models import PaymentIntent
