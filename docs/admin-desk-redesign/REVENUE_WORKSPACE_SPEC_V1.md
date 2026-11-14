@@ -72,7 +72,7 @@ However, PaymentIntent Django Admin does expose a bulk action named “Record FU
 - Applies the existing full-refund access policy.
 - Sends the existing refund notification.
 
-It does not send the refund request to Stripe or Razorpay. It is not a partial manual refund form. The action is currently in Advanced Administration and must remain there until an equivalent workflow is designed, permission-audited, tested and explicitly migrated. The prototype deliberately does not offer this action.
+It does not send the refund request to Stripe or Razorpay. It is not a partial manual refund form. PaymentIntent Django Admin also provides a “Mark selected payments as CHARGED BACK” action which reuses the same confirmed-chargeback service and notification path. Do not create a second manual access-revoke path in Revenue; dispute outcomes and that legacy admin action must continue through the canonical exactly-once chargeback service. These actions are currently in Advanced Administration and must remain there until an equivalent workflow is designed, permission-audited, tested and explicitly migrated. The prototype deliberately does not offer either action.
 
 ### 2.3 Refund eligibility and policy evidence
 
