@@ -15,12 +15,9 @@ from .permissions import GrowthPermissionRequiredMixin
 
 
 class SendGiftAdminView(GrowthPermissionRequiredMixin, View):
-    permission_required = ("growth.add_giftinvite",)
-    """
-    Admin view for sending gifts.
+    """Admin view for operators authorised to create gift subscriptions."""
 
-    URL: /admin/growth/send-gift/
-    """
+    permission_required = ("growth.add_giftinvite",)
     template_name = "admin/growth/send_gift.html"
 
     def get(self, request):
