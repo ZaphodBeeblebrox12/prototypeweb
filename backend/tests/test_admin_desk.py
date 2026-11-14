@@ -293,6 +293,11 @@ class AdminDeskTests(TestCase):
                 response = self.client.get(reverse(route_name))
                 self.assertEqual(response.status_code, 200, response.content)
 
+        growth = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertContains(growth, "Simulation only")
+        self.assertContains(growth, "not sent to provider")
+        self.assertContains(growth, "Marked sent")
+
     def test_staff_domain_overviews_do_not_expose_unpermitted_panels(self):
         operator = User.objects.create_user(
             username="domain-overview-staff",
