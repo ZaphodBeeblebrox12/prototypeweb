@@ -5325,8 +5325,8 @@ body.builder-dialog-open { overflow:hidden; }
       catch (error) { toast('Local changes are kept in this browser, but the Academy save failed: ' + error.message); }
     }, 900);
   }
-  async function saveCurrentToAcademy(submit, notify=false) {
-    const course = currentCourse();
+  async function saveCurrentToAcademy(submit, notify=false, courseOverride=null) {
+    const course = courseOverride || currentCourse();
     if (!course) return;
     // A manual save must include text that is still waiting in the rich-editor debounce.
     flushVisualEditorSync();
@@ -5746,6 +5746,32 @@ body.builder-dialog-open { overflow:hidden; }
         state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
         stateChanged = true;
       }
+      // Reconcile the bundled Quick Checks against an existing Trading Path draft
+      // on every ordinary Builder load, not only when the special import URL is used.
+      let autoMigratedTradingPathQuestions = false;
+      let tradingPathDraftForQuickCheckSave = null;
+      const quickCheckSource = result.trading_path_quick_checks_source;
+      if (quickCheckSource && quickCheckSource.slug) {
+        const savedTradingPath = remoteDrafts.find(remote =>
+          String(remote.slug || '') === String(quickCheckSource.slug)
+        );
+        if (savedTradingPath) {
+          const targetTradingPath = state.courses.find(course =>
+            (savedTradingPath.serverDraftId &&
+              String(course.serverDraftId || '') === String(savedTradingPath.serverDraftId)) ||
+            String(course.slug || '') === String(quickCheckSource.slug)
+          );
+          if (targetTradingPath) {
+            const migration = mergeTradingPathQuickChecks(targetTradingPath, quickCheckSource);
+            if (migration.lessonCount > 0) {
+              autoMigratedTradingPathQuestions = true;
+              tradingPathDraftForQuickCheckSave = targetTradingPath;
+              stateChanged = true;
+            }
+          }
+        }
+      }
+
       // The bundled Trading Path is imported once into the shared Academy draft store.
       // Do this on the ordinary Builder route too, so authors do not need a special URL.
       let autoImportedTradingPath = false;
@@ -6027,6 +6053,18 @@ body.builder-dialog-open { overflow:hidden; }
               toast('Support & Resistance is loaded in the Builder, but saving to the shared Academy failed: ' + String(saveError?.message || saveError));
             }
           }
+        }
+      }
+      if (autoMigratedTradingPathQuestions && tradingPathDraftForQuickCheckSave) {
+        clearTimeout(academySaveTimer);
+        try {
+          await saveCurrentToAcademy(false, false, tradingPathDraftForQuickCheckSave);
+          renderSidebar();
+          renderHeaderState();
+          toast('Moved the missing Trading Path Quick Checks into Practice & Q&A and saved the existing draft. Existing Q&A was preserved; nothing was published.');
+        } catch (saveError) {
+          toast('Trading Path Quick Checks were merged locally, but the existing draft could not be saved: ' +
+            String(saveError?.message || saveError));
         }
       }
       if (requestedOpenCourseSlug && requestedOpenCourseFound) {
