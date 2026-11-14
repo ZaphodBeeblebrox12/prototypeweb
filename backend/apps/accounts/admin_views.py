@@ -1,9 +1,8 @@
 """Admin API: user ban/unban and staff approval.
 
-Pre-existing debt: the User model had ban()/unban()/approve_staff() and the
-audit model existed, but no HTTP layer or routes were ever wired. These views
-implement the exact contract the tests define, reusing the existing model
-methods and AuditLog.log() convention. Admin endpoints require role=ADMIN.
+These endpoints are restricted to the application Admin role or Django
+superusers. Generic Django staff accounts must not be able to administer
+other users or approve/reject staff accounts.
 """
 from django.contrib.auth import get_user_model
 from rest_framework import permissions, status
@@ -19,15 +18,15 @@ class IsRoleAdmin(permissions.BasePermission):
     """Require an authenticated user with role=ADMIN (the app's admin notion)."""
 
     def has_permission(self, request, view):
-        # ACCOUNTS AUDIT: a Django superuser/staff must also be able to use the
-        # operational admin endpoints (ban/approve); gating ONLY on role=ADMIN
-        # excluded the standard Django admin path.  Role=ADMIN OR elevated Django
-        # perms all grant access (BanUserView still refuses to ban an admin target).
         u = request.user
         return bool(
-            u and u.is_authenticated
-            and (getattr(u, "role", None) == User.Role.ADMIN
-                 or u.is_superuser or u.is_staff)
+            u
+            and u.is_authenticated
+            and u.is_active
+            and (
+                getattr(u, "role", None) == User.Role.ADMIN
+                or u.is_superuser
+            )
         )
 
 
