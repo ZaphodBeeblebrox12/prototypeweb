@@ -100,7 +100,7 @@ def add_note(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def generate(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     pkg = services.generate_package(d, actor=request.user)
@@ -110,7 +110,7 @@ def generate(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def submit_latest(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     pkg = d.packages.first()
@@ -126,7 +126,7 @@ def submit_latest(request, pk):
 
 
 @require_POST
-@permission_required("disputes.change_dispute", raise_exception=True)
+@dispute_permission_required("disputes.view_dispute", "disputes.change_dispute")
 def resolve(request, pk):
     d = get_object_or_404(Dispute, pk=pk)
     try:
