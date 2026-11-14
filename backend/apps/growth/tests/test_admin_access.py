@@ -77,7 +77,7 @@ class GiftWorkflowAccessTests(TestCase):
         self.assertEqual(post_response.status_code, 403)
         self.assertEqual(GiftInvite.objects.count(), 0)
 
-    def test_growth_staff_with_add_permission_can_open_gift_form(self):
+    def test_growth_staff_with_all_gift_creation_permissions_can_open_form(self):
         staff = make_user("gift-growth-staff", is_staff=True)
         grant(staff, GiftInvite, "add_giftinvite")
         grant(staff, GiftSubscription, "add_giftsubscription")
