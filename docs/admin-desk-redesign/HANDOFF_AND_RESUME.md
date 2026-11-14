@@ -72,6 +72,7 @@ Screen-level specifications:
 - `REVENUE_WORKSPACE_SPEC_V1.md`
 - `GROWTH_WORKSPACE_SPEC_V1.md`
 - `PLATFORM_WORKSPACE_SPEC_V1.md`
+- `HOLISTIC_WALKTHROUGH_V1.md`
 
 Review notes:
 - `M01_M02_REVIEW_NOTES.md`
@@ -79,6 +80,7 @@ Review notes:
 - `REVENUE_REVIEW_NOTES_V1.md`
 - `GROWTH_REVIEW_NOTES_V1.md`
 - `PLATFORM_REVIEW_NOTES_V1.md`
+- `HOLISTIC_REVIEW_NOTES_V1.md`
 
 ## 5. Completed design work
 
@@ -159,6 +161,7 @@ Prototype artifact:
 - `tradethesis_admin_revenue_workspace_v1.html`
 - `tradethesis_admin_growth_workspace_v1.html`
 - `tradethesis_admin_platform_workspace_v1.html`
+- `tradethesis_admin_holistic_workflow_v1.html`
 - `tradethesis_admin_growth_workspace_v1.html`
 
 ### Growth — M18 and M34–M41
@@ -281,18 +284,20 @@ Critical lifecycle distinctions:
 - Revenue: detailed V1 prototype/spec/review notes exist; owner review pending.
 - Growth: detailed V1 prototype/spec/review notes exist; owner review pending.
 - Platform: detailed V1 prototype/spec/review notes exist; owner review pending.
+- M50 Holistic Workflow: integrated V1 board covers seven end-to-end journeys and a shared 40-record fictional dataset; owner review pending.
 - Global accessibility, keyboard navigation, contrast and authenticated staging parity are not complete.
 
 Do not mark a mockup as approved because it was created or smoke-tested. Record owner feedback and decision status.
 
 ## 8. Recommended next steps
 
-1. Review Academy, Customers, Revenue, Growth and Platform V1 prototypes/specifications with the owner; record requested changes and decisions.
+1. Review Academy, Customers, Revenue, Growth, Platform and M50 Holistic Workflow V1 with the owner; record requested changes and decisions.
 2. Revise the relevant screens and update the decision log/mockup register.
-3. Run the six-domain holistic walkthrough with the same fictional learner, course, payment, subscription, ticket, campaign, referral, gift, job and provisioning records.
-4. Complete the cross-domain role/permission matrix and Django Admin migration inventory, including the Platform governance hardening items.
+3. Use HOLISTIC_WALKTHROUGH_V1.md and HOLISTIC_REVIEW_NOTES_V1.md to resolve the course coupon/analytics contract, referral reward, campaign delivery, notification/work and external provisioning state questions.
+4. Complete the cross-domain role/permission matrix and Django Admin migration inventory, including Platform governance hardening items.
 5. Perform authenticated staging visual/role audit and verify the actual deployed source before producing an implementation handoff.
-6. Obtain explicit implementation approval before changing application code.
+6. Produce a phased migration plan with parity/acceptance criteria and explicit rollback boundaries.
+7. Obtain explicit implementation approval before changing application code.
 
 ## 9. Prototype artifact availability
 
@@ -303,7 +308,7 @@ The current conversation includes downloadable HTML prototypes:
 - `tradethesis_admin_customers_workspace_v1.html`
 - `tradethesis_admin_revenue_workspace_v1.html`
 
-The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v4.zip` contains the seven current main prototypes, domain preview images, Growth and Platform build/test scripts, Revenue smoke tests and the V4 resume README. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
+The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v5.zip` contains the seven domain/shell prototypes, the M50 holistic walkthrough, domain and holistic preview images, Growth/Platform/Holistic build and test scripts, Revenue smoke tests and the V5 resume README. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
 
 ## 10. Safety and scope checklist for the next chat
 
@@ -316,3 +321,15 @@ The written specifications and design decisions are saved in this GitHub branch.
 - [ ] Do not silently add new actions or state transitions.
 - [ ] Do not change app code, merge, deploy or alter Render settings before explicit approval.
 - [ ] Update `MOCKUP_REGISTER.md`, relevant specs and this handoff after each major design pass.
+
+
+## 11. M50 holistic walkthrough checkpoint — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_holistic_workflow_v1.html`.
+- **Specification:** `HOLISTIC_WALKTHROUGH_V1.md`.
+- **Review notes:** `HOLISTIC_REVIEW_NOTES_V1.md`.
+- **Dataset:** 40 fictional shared records; primary learner Maya Chen (USR-1042), referrer Rohan Patel (USR-1008), access requester Dev Singh (USR-1177).
+- **Journeys:** mini-course publication/purchase; membership/community access; campaign/referral acquisition; support access request; billing/refund/dispute; gift invitation/email failure; email delivery/operational evidence.
+- **Smoke test:** 159/159 browser checks passed. Desktop shell geometry, all seven journeys, every linked Inspect preview, 40-record register, search/owner filter, mobile drawer and 390px overflow checks passed. No JS/console errors.
+- **Important source findings:** CourseOffer activation writes `academy.entitlement_granted` rather than `purchase.completed` and exits before the ordinary membership CouponRedemption block. The course sample is coupon-free; the membership sample carries COHORT20. Referral reward unlock status mismatch remains. A reconcile Job may be Succeeded while its ProvisioningOperation remains Unknown. Member Notification NOT-901 is not staff Command Centre work.
+- **Review status:** M50 is draft for owner review. It is a static architecture test only, not implementation approval.
