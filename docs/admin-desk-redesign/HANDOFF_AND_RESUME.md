@@ -4,14 +4,14 @@
 **Repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Planning branch:** `admin-desk-redesign-planning`  
 **Source/code baseline:** `my-new-branch`  
-**Current phase:** Information architecture, workflow design and clickable mockups.  
+**Current phase:** Owner decisions consolidated; implementation-readiness planning and mockup review.  
 **Implementation status:** Not authorised. Do not modify app code or deploy.
 
 ## 1. Resume instruction for a new chat
 
 Start a new chat and say:
 
-> Resume the TradeThesis Admin Desk redesign. Read `docs/admin-desk-redesign/HANDOFF_AND_RESUME.md` on branch `admin-desk-redesign-planning`, then inspect the latest Decision Log, Mockup Register, Domain Workspace Blueprint and screen specifications. Continue from the next unreviewed design task. Keep all work on the planning branch and do not implement or deploy until I explicitly approve.
+> Resume the TradeThesis Admin Desk redesign. Read `docs/admin-desk-redesign/HANDOFF_AND_RESUME.md` on branch `admin-desk-redesign-planning`, then inspect the latest Decision Log, Owner Decision Register, Implementation Readiness & Sequence, Mockup Register, Domain Workspace Blueprint and screen specifications. Continue from the next unreviewed design task. Keep all work on the planning branch and do not implement or deploy until I explicitly approve.
 
 The resume document is intended to restore project context without depending on the previous chat transcript.
 
@@ -333,3 +333,42 @@ The written specifications and design decisions are saved in this GitHub branch.
 - **Smoke test:** 159/159 browser checks passed. Desktop shell geometry, all seven journeys, every linked Inspect preview, 40-record register, search/owner filter, mobile drawer and 390px overflow checks passed. No JS/console errors.
 - **Important source findings:** CourseOffer activation writes `academy.entitlement_granted` rather than `purchase.completed` and exits before the ordinary membership CouponRedemption block. The course sample is coupon-free; the membership sample carries COHORT20. Referral reward unlock status mismatch remains. A reconcile Job may be Succeeded while its ProvisioningOperation remains Unknown. Member Notification NOT-901 is not staff Command Centre work.
 - **Review status:** M50 is draft for owner review. It is a static architecture test only, not implementation approval.
+
+
+## 12. Owner decision and implementation-readiness checkpoint — 14 November 2026
+
+### Owner decisions completed
+
+- The owner completed 12 decision rounds and approved **60 decisions**.
+- The full register is `OWNER_DECISION_REGISTER_V1.md`.
+- The recommended migration order, dependencies, known source gaps, exit gates and hard-stop boundary are in `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md`.
+- Do not reopen these product decisions unless the owner asks or new source evidence demonstrates a material conflict.
+
+### Decisions now fixed
+
+- One unified V2 Admin Desk with the six approved domains in the established order.
+- Shared foundations first, followed by phased workflow/domain rollout and a representative staff pilot.
+- Department-scoped permissions, multiple department memberships, personal activity workspace, team visibility subject to permissions, assigned departmental and central owners.
+- Sensitive actions require permission checks and confirmation; no universal second-person approval. Preserve current action-specific reason constraints.
+- Low-risk-only bulk operations; safe retries only where supported and idempotent.
+- Financial and provider truth must be evidenced externally; completed financial records remain immutable.
+- Academy course approval/revision workflow, dedicated course-coupon redemption and a unified purchase event contract.
+- Growth campaign approval, consent/suppression enforcement, automated referral eligibility and payout evidence.
+- Platform health, job, provisioning, integration, security and emergency controls are role-gated.
+- Customer privacy, export, erasure and retention are controlled and auditable.
+- Department owners sign off before a workflow is cut over; do not rank employees.
+
+### Reconciliation and blockers
+
+- **Django Admin access:** decision 9 states the target boundary is superusers only; decision 52 says ordinary staff access is removed workflow by workflow after parity. Treat this as a cutover-policy clarification. Do not change permissions until the exact transition is reconciled against the live role model and actual staff workflows.
+- **Refund initiation:** the inspected current manual-refund path records a refund after provider-side processing; it does not initiate a PSP refund. The approved staff refund capability requires a supported provider operation and permission-checked service path before the interface may claim to initiate a refund.
+- **Source-contract gaps:** one-time course coupon redemption and `purchase.completed` emission, referral reward status/currency/persistence, campaign stub-vs-provider status, safe job retry service, provider health evidence, AuditLog/PolicyVersion immutability and privacy/retention enforcement remain readiness items for their respective phases.
+- **Live verification:** authenticated staging role/permission audit, deployed SHA and Render settings were not completed by the design-only pass. Refresh them before implementation planning is finalised.
+
+### Recommended immediate next step
+
+Run Phase 0 in `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md`: refresh the source/deployment baseline, complete authenticated staging and role-specific verification, and produce the current route/action/permission inventory. This is still an audit/planning phase, not implementation.
+
+### Scope boundary reaffirmed
+
+No application code, migration, route, API contract, permission, test, Render setting, deployment, merge or rebase has been changed as part of the 60-decision consolidation. Explicit owner implementation approval remains required.
