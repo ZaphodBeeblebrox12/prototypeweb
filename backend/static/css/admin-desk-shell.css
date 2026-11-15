@@ -475,37 +475,34 @@
 }
 
 
-/* Admin Desk header grid placement only; switcher appearance lives in sitewide-nav.css. */
+/* Admin Desk retains the complete shared staff header; only column placement is route-specific. */
 .sitewide-header--admin-desk .nav {
-  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto auto auto;
 }
 .sitewide-header--admin-desk .tt-admin-workspace-switcher {
-  grid-column: 3;
+  grid-column: 4;
 }
 .sitewide-header--admin-desk .tt-account-menu {
-  grid-column: 4;
+  grid-column: 5;
   justify-self: end;
 }
 @media (max-width: 1120px) {
   .sitewide-header--admin-desk .nav {
-    grid-template-columns: minmax(150px, 195px) minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(150px, 195px) minmax(0, 1fr) auto auto auto;
     gap: 12px;
   }
   .sitewide-header--admin-desk .brand-logo { width: 195px; }
 }
 @media (max-width: 820px) {
   .sitewide-header--admin-desk .nav {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
     gap: 10px;
+  }
+  .sitewide-header--admin-desk .tt-admin-workspace-switcher {
+    grid-column: auto;
   }
 }
 
-/* Unified staff header: marketing navigation is intentionally reduced on Admin Desk routes. */
-.sitewide-header--admin-desk .navlinks,
-.sitewide-header--admin-desk .mobile-toggle,
-.sitewide-header--admin-desk .mobilelinks {
-  display: none !important;
-}
 .sitewide-header--admin-desk {
   position: relative;
   z-index: 40;
