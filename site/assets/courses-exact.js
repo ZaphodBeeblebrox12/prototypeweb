@@ -189,7 +189,7 @@
     $('#modalTitle').textContent = course.title || 'Course title';
     $('#modalHook').textContent = course.hook ? '“' + course.hook + '”' : '';
     $('#modalDescription').textContent = course.description || course.problem || '';
-    $('#modalPrice').textContent = course.price || 'Details to follow';
+    $('#modalPrice').textContent = course.price || course.priceNote || 'Price details on course page';
     const outcomes = [course.outcome,course.focus,course.why].filter(value => String(value||'').trim());
     $('#modalOutcomes').innerHTML = outcomes.map(item => '<li>' + esc(item) + '</li>').join('');
     $('#modalOutline').innerHTML = (course.modules || []).map((module,index) =>
@@ -199,14 +199,14 @@
     const enrol = $('#enrolButton');
     if (course.academyUrl && course.status !== 'coming-soon' && course.status !== 'in-development') {
       enrol.disabled = false;
-      enrol.textContent = 'Open in Academy ↗';
-      enrol.onclick = () => window.open(course.academyUrl,'_blank','noopener,noreferrer');
+      enrol.textContent = 'View course & enrol ↗';
+      enrol.onclick = () => window.location.assign(course.academyUrl);
     } else {
       enrol.disabled = true;
       enrol.textContent = course.status === 'coming-soon' ? 'Coming soon' : 'Academy link not returned';
       enrol.onclick = null;
     }
-    $('.modal-note').textContent = 'Course descriptions and outlines come from the TradeThesis catalogue. Published Academy links are supplied by the live catalogue when available.';
+    $('.modal-note').textContent = 'Open the Academy course page to review the full outline, current price for your market, access terms and secure enrolment options.';
     modalBackdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
     $('.modal-close',modalBackdrop).focus();
@@ -328,7 +328,7 @@
           target.shareMessage = incoming.shareMessage || '';
           target.price = incoming.priceConfigured
             ? (incoming.price || '')
-            : ((prior && prior.price) || incoming.price || '');
+            : (incoming.status === 'coming-soon' ? 'Coming soon' : '');
           target.priceNote = incoming.priceNote || (prior && prior.priceNote) || '';
           target.catalogueRole = role;
           target.catalogueOrder = Number.isFinite(Number(incoming.catalogueOrder))
