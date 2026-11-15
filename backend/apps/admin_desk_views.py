@@ -2005,7 +2005,7 @@ def admin_desk_revenue(request):
 def admin_desk_plans(request):
     """Read-only Plans & Pricing workspace over canonical Product/Plan records."""
     _guard(request, "subscriptions.view_plan")
-    from apps.subscriptions.models import GeoPlanPrice, Plan, PlanPrice, Product
+    from apps.subscriptions.models import Plan, Product
 
     can_view_products = _allowed(request.user, "subscriptions.view_product")
     can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
@@ -2089,6 +2089,8 @@ def admin_desk_plans(request):
                 "subscriptions.change_planprice",
                 "subscriptions.change_geoplanprice",
                 "subscriptions.change_planfeature",
+                "subscriptions.change_product",
+                "bot_integration.change_planchannelmapping",
             )
         ),
         "advanced_admin_url": reverse("admin:subscriptions_plan_changelist"),
@@ -2183,7 +2185,7 @@ def admin_desk_plan_detail(request, plan_id):
                 "subscriptions.change_planfeature",
             )
         ),
-        "advanced_admin_url": reverse("admin:subscriptions_plan_change", args=[plan.pk]),
+        "advanced_admin_url": reverse("admin:subscriptions_plan_changelist"),
         "plans_url": reverse("staff_admin_desk_plans"),
         "subscriptions_url": reverse("staff_admin_desk_subscriptions"),
         "desk_nav": _nav(request),
