@@ -1822,6 +1822,9 @@ def admin_desk_growth(request):
                 "subscriptions.view_plan",
             ),
         ),
+        "can_view_audiences": has_growth_permission(
+            request.user, "campaigns.view_audience"
+        ),
         "referrals_url": "/growth/admin/referral-rewards/",
     }
 
