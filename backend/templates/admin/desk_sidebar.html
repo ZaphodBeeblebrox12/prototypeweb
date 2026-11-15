@@ -11,13 +11,6 @@
   <div class="tt-desk-workspace">
     <span class="tt-desk-kicker">Workspace</span>
     <span class="tt-desk-workspace-name"><span class="tt-desk-workspace-dot" aria-hidden="true"></span>Administration</span>
-    <form class="tt-desk-global-search" method="get" action="{% url 'staff_admin_desk_search' %}" role="search">
-      <label class="tt-desk-global-search-label" for="ttDeskGlobalSearch">Search workspace</label>
-      <div class="tt-desk-global-search-control">
-        <input id="ttDeskGlobalSearch" type="search" name="q" value="{{ request.GET.q|default:'' }}" maxlength="120" minlength="2" placeholder="People, tickets, plans, refunds, disputes…" autocomplete="off">
-        <button type="submit" aria-label="Search workspace"><i class="bi bi-search" aria-hidden="true"></i></button>
-      </div>
-    </form>
   </div>
 
   <nav class="tt-desk-nav">

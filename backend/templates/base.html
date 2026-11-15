@@ -55,6 +55,22 @@
     <div class="tt-admin-desk-layout" data-admin-desk-shell>
         {% include "admin/desk_sidebar.html" %}
         <main class="main-content tt-admin-desk-main" id="mainContent" tabindex="-1">
+            <header class="tt-desk-topbar" aria-label="Staff workspace tools">
+                <div class="tt-desk-topbar-crumbs">
+                    <span class="tt-desk-topbar-brand">TradeThesis</span>
+                    <span aria-hidden="true">/</span>
+                    <strong>Administration</strong>
+                </div>
+                <form class="tt-desk-topbar-search" method="get" action="{% url 'staff_admin_desk_search' %}" role="search">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <label class="visually-hidden" for="ttDeskHeaderSearch">Search learners, tickets, courses and payments</label>
+                    <input id="ttDeskHeaderSearch" type="search" name="q" value="{{ request.GET.q|default:'' }}" minlength="2" maxlength="120" placeholder="Search learners, tickets, courses, payments…" autocomplete="off">
+                    <kbd>Enter</kbd>
+                </form>
+                <a class="tt-desk-topbar-notifications" href="/notifications/" aria-label="Open staff notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i><span>Notifications</span>
+                </a>
+            </header>
             <button class="tt-desk-mobile-trigger" type="button" data-desk-mobile-toggle aria-expanded="false" aria-controls="ttDeskSidebar">
                 <i class="bi bi-list" aria-hidden="true"></i> Admin Desk navigation
             </button>
@@ -66,7 +82,11 @@
 <header class="page-context{% if request.resolver_match.url_name == 'staff_admin_desk' %} page-context--site-grid{% endif %}">
             <div>
                 <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                {% if request.path|slice:":17" == "/staff/admin-desk" %}
+                <p>TradeThesis operating workspace</p>
+                {% else %}
                 <p>Welcome back, {{ user.first_name|default:user.username }}</p>
+                {% endif %}
             </div>
             <div class="page-context-status">
                 {% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}

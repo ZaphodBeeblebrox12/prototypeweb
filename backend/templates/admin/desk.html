@@ -125,16 +125,39 @@
   </section>
 
   <section class="section" aria-labelledby="daily-management-heading">
-    <div class="section-head"><h2 id="daily-management-heading">Jump to a workspace</h2><p>Open the canonical area for learner, commercial and learning operations.</p></div>
-    <ul class="link-list">
-      <li><a href="{% url 'staff_admin_desk_operations_timeline' %}">Operations timeline &amp; incident signals →</a></li>
-      <li><a href="{% url 'staff_admin_desk_customers' %}">Customers workspace →</a></li>
-      {% if desk_access.accounts %}<li><a href="{% url 'staff_admin_desk_accounts' %}">Manage learner accounts →</a></li>{% endif %}
-      {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
-      {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
-      {% if desk_access.business %}<li><a href="{% url 'staff_admin_desk_business' %}">Business details &amp; tax settings →</a></li>{% endif %}
-      {% if can_manage_course_content %}<li><a href="{% url 'staff_admin_desk_seo' %}">SEO &amp; discoverability →</a></li>{% endif %}
-    </ul>
+    <div class="section-head"><h2 id="daily-management-heading">Your workspaces</h2><p>One entry point for each operating domain.</p></div>
+    <div class="tt-desk-workspace-grid">
+      {% if can_manage_course_content %}
+      <a class="tt-desk-workspace-card" href="{% url 'staff_admin_desk_academy' %}">
+        <div class="tt-desk-workspace-card-top"><span class="tt-desk-workspace-icon"><i class="bi bi-mortarboard" aria-hidden="true"></i></span><strong>Academy</strong></div>
+        <p>Course catalogue, approvals, lesson content, offers and learner access.</p><span class="tt-desk-card-open">Open Academy →</span>
+      </a>
+      {% endif %}
+      <a class="tt-desk-workspace-card" href="{% url 'staff_admin_desk_customers' %}">
+        <div class="tt-desk-workspace-card-top"><span class="tt-desk-workspace-icon"><i class="bi bi-people" aria-hidden="true"></i></span><strong>Customers</strong></div>
+        <p>Learner accounts, reviewer-scoped support tickets and Customer 360.</p><span class="tt-desk-card-open">Open Customers →</span>
+      </a>
+      {% if desk_access.finance or desk_access.subscriptions or desk_access.business %}
+      <a class="tt-desk-workspace-card" href="{% url 'staff_admin_desk_revenue' %}">
+        <div class="tt-desk-workspace-card-top"><span class="tt-desk-workspace-icon"><i class="bi bi-currency-exchange" aria-hidden="true"></i></span><strong>Revenue</strong></div>
+        <p>Payments, refunds, invoices, plans, subscriptions and business settings.</p><span class="tt-desk-card-open">Open Revenue →</span>
+      </a>
+      {% endif %}
+      {% if user.is_superuser or user.role == "admin" %}
+      <a class="tt-desk-workspace-card" href="{% url 'staff_admin_desk_growth' %}">
+        <div class="tt-desk-workspace-card-top"><span class="tt-desk-workspace-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span><strong>Growth</strong></div>
+        <p>Campaigns, audiences, referrals, rewards and acquisition signals.</p><span class="tt-desk-card-open">Open Growth →</span>
+      </a>
+      {% endif %}
+      <a class="tt-desk-workspace-card" href="{% url 'staff_admin_desk_platform' %}">
+        <div class="tt-desk-workspace-card-top"><span class="tt-desk-workspace-icon"><i class="bi bi-hdd-stack" aria-hidden="true"></i></span><strong>Platform</strong></div>
+        <p>Background jobs, provisioning, integrations, audit and system health.</p><span class="tt-desk-card-open">Open Platform →</span>
+      </a>
+      <a class="tt-desk-workspace-card" href="{% url 'staff_admin_desk_operations_timeline' %}">
+        <div class="tt-desk-workspace-card-top"><span class="tt-desk-workspace-icon"><i class="bi bi-activity" aria-hidden="true"></i></span><strong>Operations timeline</strong></div>
+        <p>Investigate cross-domain incidents and recurring customer-impact signals.</p><span class="tt-desk-card-open">Open Operations →</span>
+      </a>
+    </div>
   </section>
 
   {% if support_tickets %}
@@ -284,16 +307,6 @@
   </section>
   {% endif %}
 
-  {% if accounts or subscriptions %}
-  <section class="section" aria-labelledby="membership-heading">
-    <div class="section-head"><h2 id="membership-heading">Membership &amp; learners</h2><p>Open existing management screens</p></div>
-    <ul class="link-list">
-      {% if accounts.links.users %}<li><a href="{{ accounts.links.users }}">Manage learner accounts →</a></li>{% endif %}
-      {% if subscriptions.links.all %}<li><a href="{{ subscriptions.links.all }}">Manage subscriptions →</a></li>{% endif %}
-      {% if subscriptions.links.expiring_soon %}<li><a href="{{ subscriptions.links.expiring_soon }}">Review subscriptions expiring in 7 days ({{ subscriptions.expiring_soon }}) →</a></li>{% endif %}
-    </ul>
-  </section>
-  {% endif %}
 
   <section class="section" aria-labelledby="attention-heading">
     <div class="section-head"><h2 id="attention-heading">Items to check</h2><p>Only metrics allowed by your account permissions are shown</p></div>
