@@ -2338,12 +2338,24 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   text-align:center;
 }
 .tt-learning-arc__eyebrow{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:9px;
   margin:0 0 5px;
   color:#b96343;
   font-size:9px;
   font-weight:750;
   letter-spacing:.19em;
   line-height:1.4;
+}
+.tt-learning-arc__eyebrow:before{
+  content:"";
+  display:inline-block;
+  width:19px;
+  height:2px;
+  flex:0 0 19px;
+  background:var(--tomato);
 }
 .tt-learning-arc h2{
   margin:0;
