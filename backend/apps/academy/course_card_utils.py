@@ -57,6 +57,32 @@ def is_course_card_recommendable(title, summary, description=""):
     """Only recommend a published course when its visible title and copy are ready."""
     return not course_card_publication_issue(title, summary, description)
 
+_DISCOVERY_TEST_TITLE_RE = re.compile(
+    r"\b(?:test|sample|demo)\s+(?:course|programme|program)\b",
+    re.IGNORECASE,
+)
+_DISCOVERY_TEST_COPY_RE = re.compile(
+    r"\b(?:asdf|qwerty|lorem\s+ipsum|placeholder|sample\s+text|test\s+description)\b",
+    re.IGNORECASE,
+)
+
+
+def is_course_discovery_ready(title, summary, description=""):
+    """Keep test records and thin/starter copy out of learner-facing recommendations."""
+    if not is_course_card_recommendable(title, summary, description):
+        return False
+    title_text = " ".join(str(title or "").split())
+    if _DISCOVERY_TEST_TITLE_RE.search(title_text):
+        return False
+
+    copy = " ".join(str(summary or description or "").split())
+    words = re.findall(r"[A-Za-z][A-Za-z'-]*", copy)
+    if len(copy) < 40 or len(words) < 6:
+        return False
+    if len({word.casefold() for word in words}) < 5:
+        return False
+    return not _DISCOVERY_TEST_COPY_RE.search(copy)
+
 
 def compact_course_topic(value):
     """Turn learning outcomes into the short topic chips used by Option 4."""

@@ -74,7 +74,7 @@
               <h2 id="recommended-courses-title">Explore published courses</h2>
               <p>Compare real course outlines and access details before you decide.</p>
             </div>
-            <a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">View full course library →</a>
+            <a class="no-purchase-quiet-link" href="{{ public_site_url }}/courses.html">{% if member_discovery_total == 1 %}View all 1 course →{% elif member_discovery_total %}View all {{ member_discovery_total }} courses →{% else %}View course library →{% endif %}</a>
           </div>
           {% if member_discovery_courses %}
           <div class="no-purchase-course-grid">
@@ -85,7 +85,7 @@
                 {% if item.course.category %}<span class="no-purchase-course-category">{{ item.course.category }}</span>{% endif %}
               </div>
               <h3>{{ item.course.title }}</h3>
-              <p>{{ item.course.summary }}</p>
+              <p>{{ item.course.summary|default:item.course.description }}</p>
               {% if item.course.level or item.course.estimated_duration %}
               <div class="no-purchase-course-meta">
                 {% if item.course.level %}<span>{{ item.course.level }}</span>{% endif %}

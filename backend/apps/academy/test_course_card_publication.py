@@ -19,6 +19,24 @@ from .models import Course, CourseImport
 User = get_user_model()
 
 
+class CourseDiscoveryReadinessTests(SimpleTestCase):
+    def test_test_course_and_placeholder_copy_are_not_recommended(self):
+        self.assertFalse(
+            is_course_discovery_ready(
+                "This is test course",
+                "aadfa asdf adf asdfasdf",
+            )
+        )
+
+    def test_real_course_with_substantive_copy_remains_recommendable(self):
+        self.assertTrue(
+            is_course_discovery_ready(
+                "Support and Resistance",
+                "A practical guide to identifying useful price zones and reviewing market reactions.",
+            )
+        )
+
+
 class CoursePublicationReadinessTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(

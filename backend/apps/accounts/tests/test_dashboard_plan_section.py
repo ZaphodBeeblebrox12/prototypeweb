@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.academy.models import (
-    Course, CourseEntitlement, CourseModule, Lesson, LessonProgress,
+    Course, CourseEntitlement, CourseModule, CourseOffer, Lesson, LessonProgress,
 )
 from apps.bot_integration.models import BotConfig
 from apps.subscriptions.models import (
@@ -311,6 +311,28 @@ class MemberCourseDashboardDataTests(TestCase):
             is_preview=True,
             is_published=False,
         )
+        self._add_paid_offer(self.course)
+
+    def _add_paid_offer(self, course):
+        product = Product.objects.create(
+            name=f"{course.title} course offer",
+            slug=f"{course.slug[:35]}-offer-product",
+        )
+        plan = make_plan(
+            f"{course.title} offer",
+            "basic",
+            50,
+            product=product,
+            is_hidden=True,
+        )
+        make_price(plan, 1999, interval="one_time")
+        return CourseOffer.objects.create(
+            course=course,
+            name=f"{course.title} offer",
+            slug=f"{course.slug[:35]}-offer",
+            plan=plan,
+            is_active=True,
+        )
 
     def test_new_member_dashboard_recommends_real_published_courses(self):
         response = self.client.get(reverse("dashboard"))
@@ -320,6 +342,12 @@ class MemberCourseDashboardDataTests(TestCase):
         self.assertEqual(len(recommendations), 1)
         self.assertEqual(recommendations[0]["course"].pk, self.course.pk)
         self.assertEqual(recommendations[0]["role_label"], "Mini-course")
+        self.assertEqual(response.context["member_discovery_total"], 1)
+        self.assertContains(response, "View all 1 course")
+        self.assertContains(
+            response,
+            f'href="{response.context["public_site_url"]}/courses.html"',
+        )
         self.assertContains(
             response,
             reverse("academy:course-detail", args=[self.course.slug]),
@@ -334,6 +362,19 @@ class MemberCourseDashboardDataTests(TestCase):
             catalogue_role=Course.CatalogueRole.FLAGSHIP,
             status=Course.Status.PUBLISHED,
             position=50,
+        )
+        self._add_paid_offer(flagship)
+        flagship_module = CourseModule.objects.create(
+            course=flagship,
+            title="Programme foundations",
+            slug="programme-foundations",
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=flagship_module,
+            title="First principles",
+            slug="first-principles",
+            is_published=True,
         )
         Course.objects.create(
             title="Hidden Course",
@@ -363,6 +404,84 @@ class MemberCourseDashboardDataTests(TestCase):
             [item["course"].pk for item in recommendations],
             [flagship.pk, self.course.pk],
         )
+
+    def test_discovery_excludes_test_copy_and_paid_courses_without_active_offers(self):
+        test_course = Course.objects.create(
+            title="This is test course",
+            slug="this-is-test-course",
+            summary="aadfa asdf adf asdfasdf",
+            catalogue_role=Course.CatalogueRole.MINI,
+            status=Course.Status.PUBLISHED,
+        )
+        test_module = CourseModule.objects.create(
+            course=test_course,
+            title="Test module",
+            slug="test-module",
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=test_module,
+            title="Test lesson",
+            slug="test-lesson",
+            is_published=True,
+        )
+        self._add_paid_offer(test_course)
+
+        no_offer_course = Course.objects.create(
+            title="A complete course with no active offer",
+            slug="no-active-course-offer",
+            summary="A practical guide to reading market structure and evaluating trade context.",
+            catalogue_role=Course.CatalogueRole.MINI,
+            status=Course.Status.PUBLISHED,
+        )
+        no_offer_module = CourseModule.objects.create(
+            course=no_offer_course,
+            title="Market structure",
+            slug="market-structure",
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=no_offer_module,
+            title="Reading structure",
+            slug="reading-structure",
+            is_published=True,
+        )
+
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["member_discovery_total"], 1)
+        self.assertNotContains(response, "This is test course")
+        self.assertNotContains(response, "A complete course with no active offer")
+
+    def test_discovery_caps_featured_cards_at_three_but_counts_full_catalogue(self):
+        for index in range(4):
+            course = Course.objects.create(
+                title=f"Additional course {index + 1}",
+                slug=f"additional-course-{index + 1}",
+                summary="A practical guide to reading price action and improving trading decisions.",
+                catalogue_role=Course.CatalogueRole.MINI,
+                position=index + 1,
+                status=Course.Status.PUBLISHED,
+            )
+            module = CourseModule.objects.create(
+                course=course,
+                title="Foundations",
+                slug="foundations",
+                is_published=True,
+            )
+            Lesson.objects.create(
+                module=module,
+                title="First principles",
+                slug="first-principles",
+                is_published=True,
+            )
+            self._add_paid_offer(course)
+
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["member_discovery_courses"]), 3)
+        self.assertEqual(response.context["member_discovery_total"], 5)
+        self.assertContains(response, "View all 5 courses")
 
     def test_missing_telegram_bot_config_is_explained_in_connections(self):
         response = self.client.get(reverse("dashboard"))

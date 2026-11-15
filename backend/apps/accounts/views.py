@@ -518,8 +518,20 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
 
         # TradeThesis Member Desk: build the course cards from this account's
         # published catalogue, active entitlements, and saved lesson progress.
-        from apps.academy.models import Course, CourseEntitlement, Lesson, LessonProgress
+        from apps.academy.models import (
+            Course,
+            CourseEntitlement,
+            CourseOffer,
+            Lesson,
+            LessonProgress,
+            PlanCourseAccess,
+        )
         from apps.academy.services import get_resume_lesson
+        from apps.subscriptions.models import (
+            FREE_MEMBERSHIP_PRODUCT_SLUG,
+            Plan,
+            PlanPrice,
+        )
 
         now = timezone.now()
         active_entitlements = list(
@@ -612,12 +624,68 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             ).exists()
         )
 
-        # Recommend real, learner-ready courses on the new-member dashboard.
-        # Flagship programmes come first, followed by supporting programmes
-        # and focused mini-courses. Drafts, hidden courses and starter-copy
-        # records are never surfaced as recommendations.
+        # Keep dashboard recommendations aligned with the learner-visible catalogue:
+        # published curriculum, usable copy, and a real route to enrolment/access.
+        # Paid courses need a live one-time offer; membership courses need the
+        # active TradeThesis Free mapping. Three are featured, but the count
+        # represents every eligible course in the full catalogue.
         from django.db.models import Case, IntegerField, Value, When
-        from apps.academy.course_card_utils import is_course_card_recommendable
+        from apps.academy.course_card_utils import is_course_discovery_ready
+
+        saleable_course_ids = set(
+            CourseOffer.objects.filter(
+                is_active=True,
+                course__status=Course.Status.PUBLISHED,
+                course__access_type__in=[
+                    Course.AccessType.PAID,
+                    Course.AccessType.MIXED,
+                ],
+                plan__is_active=True,
+                plan__prices__interval=PlanPrice.Interval.ONE_TIME,
+                plan__prices__is_active=True,
+            ).values_list("course_id", flat=True).distinct()
+        )
+        saleable_course_ids.update(
+            CourseOffer.objects.filter(
+                is_active=True,
+                course__status=Course.Status.PUBLISHED,
+                course__access_type__in=[
+                    Course.AccessType.PAID,
+                    Course.AccessType.MIXED,
+                ],
+                plan__is_active=True,
+                plan__geo_prices__interval=PlanPrice.Interval.ONE_TIME,
+                plan__geo_prices__is_active=True,
+            ).values_list("course_id", flat=True).distinct()
+        )
+
+        free_membership_course_ids = set()
+        free_membership_mappings = (
+            PlanCourseAccess.objects.filter(
+                is_active=True,
+                course__access_type__in=[
+                    Course.AccessType.MEMBERSHIP,
+                    Course.AccessType.MIXED,
+                ],
+                plan__product__slug=FREE_MEMBERSHIP_PRODUCT_SLUG,
+                plan__product__is_active=True,
+                plan__tier=Plan.Tier.FREE,
+                plan__is_trial=False,
+                plan__is_active=True,
+                plan__is_hidden=False,
+                plan__prices__interval=PlanPrice.Interval.MONTHLY,
+                plan__prices__is_active=True,
+                plan__prices__price_cents=0,
+            )
+            .select_related("plan")
+            .distinct()
+        )
+        for mapping in free_membership_mappings:
+            if mapping.plan.prices.filter(is_active=True).exclude(price_cents=0).exists():
+                continue
+            if mapping.plan.geo_prices.filter(is_active=True).exclude(price_cents=0).exists():
+                continue
+            free_membership_course_ids.add(mapping.course_id)
 
         course_role_priority = Case(
             When(catalogue_role=Course.CatalogueRole.FLAGSHIP, then=Value(0)),
@@ -626,27 +694,48 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             output_field=IntegerField(),
         )
         member_discovery_courses = []
+        member_discovery_total = 0
         discovery_queryset = (
-            Course.objects.filter(status=Course.Status.PUBLISHED)
+            Course.objects.filter(
+                status=Course.Status.PUBLISHED,
+                modules__is_published=True,
+                modules__lessons__is_published=True,
+            )
             .exclude(catalogue_role=Course.CatalogueRole.HIDDEN)
             .annotate(_member_course_priority=course_role_priority)
             .order_by("_member_course_priority", "position", "title")
+            .distinct()
         )
         for course in discovery_queryset:
-            if not is_course_card_recommendable(
+            if not is_course_discovery_ready(
                 course.title, course.summary, course.description
             ):
                 continue
-            member_discovery_courses.append({
-                "course": course,
-                "role_label": course.get_catalogue_role_display(),
-            })
-            if len(member_discovery_courses) == 3:
-                break
+            if course.access_type == Course.AccessType.FREE:
+                access_ready = True
+            elif course.access_type == Course.AccessType.MEMBERSHIP:
+                access_ready = course.pk in free_membership_course_ids
+            elif course.access_type == Course.AccessType.MIXED:
+                access_ready = (
+                    course.pk in free_membership_course_ids
+                    or course.pk in saleable_course_ids
+                )
+            else:
+                access_ready = course.pk in saleable_course_ids
+            if not access_ready:
+                continue
+
+            member_discovery_total += 1
+            if len(member_discovery_courses) < 3:
+                member_discovery_courses.append({
+                    "course": course,
+                    "role_label": course.get_catalogue_role_display(),
+                })
 
         context.update({
             "member_course_cards": member_course_cards,
             "member_discovery_courses": member_discovery_courses,
+            "member_discovery_total": member_discovery_total,
             "member_owned_courses": [
                 card for card in member_course_cards if card["entitlement"] is not None
             ],
