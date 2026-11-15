@@ -40,16 +40,10 @@ def _audit(action, actor, object_type, object_id, metadata=None):
 
 
 def _admin_desk_course_offer_readiness(offer, course):
-    """Describe the stored offer state and current source-backed saleability checks."""
-    if not offer.is_active:
-        return {
-            "saleable": False,
-            "label": "Inactive",
-            "reasons": ["The CourseOffer is marked inactive."],
-            "price_ready": False,
-        }
-
+    """Describe offer state and source-backed saleability checks independently."""
     reasons = []
+    if not offer.is_active:
+        reasons.append("The CourseOffer is marked inactive.")
     if course.status != course.Status.PUBLISHED:
         reasons.append("The course is not published.")
     if course.access_type not in (course.AccessType.PAID, course.AccessType.MIXED):
@@ -67,9 +61,17 @@ def _admin_desk_course_offer_readiness(offer, course):
         if not price_ready:
             reasons.append("No active one-time base or geo price is recorded.")
 
+    saleable = not reasons
+    if not offer.is_active:
+        label = "Inactive"
+    elif saleable:
+        label = "Saleable"
+    else:
+        label = "Active · needs attention"
+
     return {
-        "saleable": not reasons,
-        "label": "Saleable" if not reasons else "Active · needs attention",
+        "saleable": saleable,
+        "label": label,
         "reasons": reasons,
         "price_ready": price_ready,
     }
