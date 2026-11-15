@@ -1805,23 +1805,33 @@ def admin_desk_growth(request):
 
     if has_growth_permission(request.user, "events.view_event"):
         context["purchase_report"] = report.signup_analytics(days=30)
-        context["events_url"] = reverse("admin:events_event_changelist")
+        context["events_url"] = (
+            reverse("admin:events_event_changelist")
+            if _allowed(request.user, "events.view_event") else ""
+        )
         context["has_growth_data"] = True
 
     if has_growth_permission(request.user, "emailing.view_delivery"):
         context["email_report"] = report.email_performance(days=30)
-        context["email_url"] = reverse("admin:emailing_delivery_changelist")
+        context["email_url"] = (
+            reverse("admin:emailing_delivery_changelist")
+            if _allowed(request.user, "emailing.view_delivery") else ""
+        )
         context["has_growth_data"] = True
 
     if has_growth_permission(request.user, "campaigns.view_campaign"):
         context["campaign_report"] = report.campaign_performance()[:8]
-        context["campaign_url"] = reverse("admin:campaigns_campaign_changelist")
+        context["campaign_url"] = (
+            reverse("admin:campaigns_campaign_changelist")
+            if _allowed(request.user, "campaigns.view_campaign") else ""
+        )
         context["has_growth_data"] = True
 
     if has_growth_permission(request.user, "promotions.view_couponredemption"):
         context["promotion_report"] = report.promotion_performance()[:8]
-        context["promotion_url"] = reverse(
-            "admin:promotions_couponredemption_changelist"
+        context["promotion_url"] = (
+            reverse("admin:promotions_couponredemption_changelist")
+            if _allowed(request.user, "promotions.view_couponredemption") else ""
         )
         context["has_growth_data"] = True
 
@@ -1845,7 +1855,10 @@ def admin_desk_growth(request):
             "expired": GiftInvite.objects.filter(
                 status=GiftInvite.Status.EXPIRED
             ).count(),
-            "url": reverse("admin:growth_giftinvite_changelist"),
+            "url": (
+                reverse("admin:growth_giftinvite_changelist")
+                if _allowed(request.user, "growth.view_giftinvite") else ""
+            ),
         }
         context["has_growth_data"] = True
 
