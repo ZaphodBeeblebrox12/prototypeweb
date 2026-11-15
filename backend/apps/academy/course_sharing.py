@@ -7,9 +7,8 @@ DEFAULT_SHARE_MESSAGE = (
     "TradeThesis — Conviction before Execution."
 )
 
-# Tailored fallback invitations for courses whose subject benefits from a
-# more specific introduction. An editor-authored Course.share_message still
-# takes precedence, so copy can be managed from the course itself later.
+# Explicit course-specific invitations. These overrides intentionally take
+# precedence over legacy generic copy saved on the individual Course record.
 COURSE_SHARE_MESSAGE_OVERRIDES = {
     "candlestick-patterns": (
         "Most traders see a green or red candle and stop there. This course shows "
