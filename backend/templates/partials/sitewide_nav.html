@@ -4,7 +4,6 @@
     <a aria-label="TradeThesis home" class="brand" href="{{ public_site_url }}/index.html">
       <img class="brand-logo brand-logo-header" src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis — Conviction before execution">
     </a>
-    {% if request.path|slice:":17" != "/staff/admin-desk" %}
     <nav aria-label="Main navigation" class="navlinks">
       <a href="{{ public_site_url }}/index.html#approach">Our approach</a>
       <a href="{{ public_site_url }}/courses.html">Courses</a>
@@ -23,7 +22,6 @@
         <a class="tt-live-watch-link" href="https://www.youtube.com/" data-youtube-live-watch target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>
       </div>
     </div>
-    {% endif %}
     {% if user.is_authenticated and user.is_staff %}
       <details class="tt-admin-workspace-switcher">
         <summary aria-label="Switch workspace" aria-haspopup="true">
@@ -78,11 +76,8 @@
         </div>
       </details>
     {% endif %}
-    {% if request.path|slice:":17" != "/staff/admin-desk" %}
     <button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle" type="button" data-sitewide-toggle>☰</button>
-    {% endif %}
   </div>
-  {% if request.path|slice:":17" != "/staff/admin-desk" %}
   <nav aria-label="Mobile navigation" class="wrap mobilelinks" data-sitewide-mobile>
     <a href="{{ public_site_url }}/index.html#approach">Our approach</a>
     <a href="{{ public_site_url }}/courses.html">Courses</a>
@@ -103,5 +98,4 @@
       <a class="mobile-menu-cta" href="{% url 'account_login' %}">Member Area ↗</a>
     {% endif %}
   </nav>
-  {% endif %}
 </header>
