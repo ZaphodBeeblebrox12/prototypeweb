@@ -3033,7 +3033,7 @@ def admin_desk_academy(request):
     context = {
         "can_review_courses": is_course_content_admin(request.user),
         "can_build_courses": is_course_content_admin(request.user),
-        "can_view_courses": is_course_content_admin(request.user),
+        "can_view_courses": _allowed(request.user, "academy.view_course"),
         "can_view_offers": _allowed(request.user, "academy.view_courseoffer"),
         "can_view_entitlements": _allowed(
             request.user, "academy.view_courseentitlement"
@@ -3051,7 +3051,7 @@ def admin_desk_academy(request):
             "archived": Course.objects.filter(
                 status=Course.Status.ARCHIVED
             ).count(),
-            "url": reverse("staff_admin_desk_courses"),
+            "url": (\n                reverse("staff_admin_desk_courses")\n                if is_course_content_admin(request.user) else ""\n            ),
         }
 
     if context["can_review_courses"]:
