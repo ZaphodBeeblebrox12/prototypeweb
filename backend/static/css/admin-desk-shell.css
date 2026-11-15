@@ -475,6 +475,18 @@
 }
 
 
+/* The member-area CTA is for learner-facing navigation, not staff tooling.
+   Without this rule it occupies the authenticated header's flexible nav column. */
+.sitewide-header--admin-desk .member-area-link {
+  display: none !important;
+}
+.sitewide-header--admin-desk .nav {
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto;
+}
+.sitewide-header--admin-desk .tt-account-menu {
+  grid-column: 3;
+}
+
 /* Unified staff header: marketing navigation is intentionally reduced on Admin Desk routes. */
 .sitewide-header--admin-desk .navlinks,
 .sitewide-header--admin-desk .mobile-toggle,
