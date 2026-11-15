@@ -475,16 +475,36 @@
 }
 
 
-/* The member-area CTA is for learner-facing navigation, not staff tooling.
-   Without this rule it occupies the authenticated header's flexible nav column. */
-.sitewide-header--admin-desk .member-area-link {
-  display: none !important;
-}
+/* Keep Member Area available to staff, but size it as a compact action.
+   The empty middle track remains the flexible spacer; neither action can stretch into it. */
 .sitewide-header--admin-desk .nav {
-  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto auto;
+}
+.sitewide-header--admin-desk .member-area-link {
+  display: inline-flex !important;
+  grid-column: 3;
+  justify-self: end;
+  width: max-content;
+  min-width: 0;
+  min-height: 38px;
+  padding: 9px 15px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 .sitewide-header--admin-desk .tt-account-menu {
-  grid-column: 3;
+  grid-column: 4;
+  justify-self: end;
+}
+@media (max-width: 1120px) {
+  .sitewide-header--admin-desk .nav {
+    grid-template-columns: minmax(150px, 195px) minmax(0, 1fr) auto auto;
+    gap: 12px;
+  }
+  .sitewide-header--admin-desk .brand-logo { width: 195px; }
+  .sitewide-header--admin-desk .member-area-link {
+    padding-inline: 12px;
+    font-size: 11px;
+  }
 }
 
 /* Unified staff header: marketing navigation is intentionally reduced on Admin Desk routes. */
