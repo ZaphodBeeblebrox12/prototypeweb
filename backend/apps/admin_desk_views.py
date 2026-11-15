@@ -1722,6 +1722,17 @@ def admin_desk_platform(request):
                         "events.view_event",
                         "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
                     ),
+                    {
+                        "label": "Campaigns workspace",
+                        "granted": (
+                            has_growth_permission(request.user, "campaigns.view_campaign")
+                            or has_growth_permission(request.user, "campaigns.view_audience")
+                        ),
+                        "detail": "Campaign and Audience permissions are independent; each panel is separately gated",
+                    },
+                    access_item("Saved Audiences", "campaigns.view_audience"),
+                    access_item("Frozen campaign recipients", "campaigns.view_campaignrecipient"),
+                    access_item("Campaign metrics cache", "campaigns.view_campaignmetrics"),
                     access_item(
                         "Campaign register",
                         "campaigns.view_campaign",
