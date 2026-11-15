@@ -45,7 +45,8 @@
     <link rel="stylesheet" href="{% static 'css/tradethesis-design-system.css' %}">
     {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
     <link rel="stylesheet" href="{% static 'css/admin-desk-shell.css' %}">
-    {% endif %}\n{% block extra_css %}{% endblock %}
+    {% endif %}
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <a class="tt-skip-link" href="#mainContent">Skip to main content</a>
