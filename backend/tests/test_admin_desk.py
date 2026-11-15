@@ -558,7 +558,7 @@ class AdminDeskTests(TestCase):
             reverse("staff_admin_desk_course_detail", args=[course.pk])
         )
         self.assertEqual(detail.status_code, 200, detail.content)
-        self.assertContains(detail, "Course Detail")
+        self.assertContains(detail, "Course overview")
         self.assertContains(detail, "Visible Lesson Outline")
         self.assertContains(detail, "SEO &amp; discoverability")
         self.assertNotContains(detail, "PRIVATE LESSON BODY MUST NOT APPEAR")
