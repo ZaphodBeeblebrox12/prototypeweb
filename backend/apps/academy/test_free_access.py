@@ -87,6 +87,23 @@ class FreeAcademyAccessTests(TestCase):
         self.assertEqual(CourseEntitlement.objects.filter(user=self.user, course=self.course).count(), 1)
         self.assertEqual(CourseEntitlementEvent.objects.filter(entitlement=entitlement).count(), 1)
 
+    def test_learning_room_lists_only_courses_the_learner_can_access(self):
+        response = self.client.get(reverse("academy:home"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertNotContains(response, self.course.title)
+        self.assertContains(response, "Browse course catalogue")
+        self.assertContains(response, "/courses.html")
+
+        self.client.post(
+            reverse("academy:enrol-free-course", args=[self.course.slug])
+        )
+        enrolled_response = self.client.get(reverse("academy:home"))
+
+        self.assertEqual(enrolled_response.status_code, 200, enrolled_response.content)
+        self.assertContains(enrolled_response, self.course.title)
+        self.assertContains(enrolled_response, "Continue learning")
+
     def test_free_course_detail_offers_enrolment_without_payment(self):
         response = self.client.get(
             reverse("academy:course-detail", args=[self.course.slug])
