@@ -480,14 +480,14 @@
 .sitewide-header--admin-desk .nav {
   grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto auto;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-switcher {
+.sitewide-header--staff .tt-admin-workspace-switcher {
   position: relative;
   grid-column: 3;
   justify-self: end;
   z-index: 100;
   font-family: var(--sans);
 }
-.sitewide-header--admin-desk .tt-admin-workspace-switcher > summary {
+.sitewide-header--staff .tt-admin-workspace-switcher > summary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -506,24 +506,24 @@
   line-height: 1.2;
   box-shadow: 0 2px 0 #25433420;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-switcher > summary::-webkit-details-marker {
+.sitewide-header--staff .tt-admin-workspace-switcher > summary::-webkit-details-marker {
   display: none;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-switcher > summary:hover,
-.sitewide-header--admin-desk .tt-admin-workspace-switcher[open] > summary {
+.sitewide-header--staff .tt-admin-workspace-switcher > summary:hover,
+.sitewide-header--staff .tt-admin-workspace-switcher[open] > summary {
   background: #294b39;
   border-color: #294b39;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-caret {
+.sitewide-header--staff .tt-admin-workspace-caret {
   color: #e6d7ad;
   font-size: 14px;
   line-height: 1;
   transition: transform .15s ease;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-switcher[open] .tt-admin-workspace-caret {
+.sitewide-header--staff .tt-admin-workspace-switcher[open] .tt-admin-workspace-caret {
   transform: rotate(180deg);
 }
-.sitewide-header--admin-desk .tt-admin-workspace-dropdown {
+.sitewide-header--staff .tt-admin-workspace-dropdown {
   position: absolute;
   top: calc(100% + 9px);
   right: 0;
@@ -535,14 +535,14 @@
   background: #fffefa;
   box-shadow: 0 14px 32px #25382e20;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-eyebrow {
+.sitewide-header--staff .tt-admin-workspace-eyebrow {
   margin: 5px 9px 7px;
   color: #858d84;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .11em;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-dropdown a {
+.sitewide-header--staff .tt-admin-workspace-dropdown a {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -552,19 +552,19 @@
   color: #29382e;
   text-decoration: none;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-dropdown a:hover,
-.sitewide-header--admin-desk .tt-admin-workspace-dropdown a:focus-visible {
+.sitewide-header--staff .tt-admin-workspace-dropdown a:hover,
+.sitewide-header--staff .tt-admin-workspace-dropdown a:focus-visible {
   background: #f1f3ed;
   outline: none;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-dropdown a.is-current {
+.sitewide-header--staff .tt-admin-workspace-dropdown a.is-current {
   background: #f2f4ee;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-option-title {
+.sitewide-header--staff .tt-admin-workspace-option-title {
   font-size: 12px;
   font-weight: 750;
 }
-.sitewide-header--admin-desk .tt-admin-workspace-dropdown small {
+.sitewide-header--staff .tt-admin-workspace-dropdown small {
   color: #778178;
   font-size: 10px;
 }
@@ -578,7 +578,7 @@
     gap: 12px;
   }
   .sitewide-header--admin-desk .brand-logo { width: 195px; }
-  .sitewide-header--admin-desk .tt-admin-workspace-switcher > summary {
+  .sitewide-header--staff .tt-admin-workspace-switcher > summary {
     padding-inline: 12px;
     font-size: 11px;
   }

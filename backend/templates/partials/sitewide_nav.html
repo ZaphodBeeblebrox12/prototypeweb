@@ -1,5 +1,5 @@
 {% load static %}
-<header class="sitewide-header{% if user.is_authenticated %} sitewide-header--authenticated{% endif %}{% if request.path|slice:":17" == "/staff/admin-desk" %} sitewide-header--admin-desk{% endif %}" data-sitewide-nav>
+<header class="sitewide-header{% if user.is_authenticated %} sitewide-header--authenticated{% endif %}{% if user.is_authenticated and user.is_staff %} sitewide-header--staff{% endif %}{% if request.path|slice:":17" == "/staff/admin-desk" %} sitewide-header--admin-desk{% endif %}" data-sitewide-nav>
   <div class="wrap nav">
     <a aria-label="TradeThesis home" class="brand" href="{{ public_site_url }}/index.html">
       <img class="brand-logo brand-logo-header" src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis — Conviction before execution">
@@ -24,25 +24,34 @@
       </div>
     </div>
     {% endif %}
-    {% if request.path|slice:":17" == "/staff/admin-desk" %}
-      {% if user.is_authenticated and user.is_staff %}
-        <details class="tt-admin-workspace-switcher">
-          <summary aria-label="Switch workspace" aria-haspopup="true">
-            <span>Member Area</span><span class="tt-admin-workspace-caret" aria-hidden="true">⌄</span>
-          </summary>
-          <div class="tt-admin-workspace-dropdown" aria-label="Available workspaces">
-            <p class="tt-admin-workspace-eyebrow">SWITCH WORKSPACE</p>
-            <a class="is-current" href="{% url 'staff_admin_desk' %}" aria-current="page">
-              <span class="tt-admin-workspace-option-title">Admin Desk</span>
-              <small>Current workspace</small>
-            </a>
-            <a href="{% url 'dashboard' %}">
-              <span class="tt-admin-workspace-option-title">Member Area</span>
-              <small>Open learner dashboard</small>
-            </a>
-          </div>
-        </details>
-      {% endif %}
+    {% if user.is_authenticated and user.is_staff %}
+      <details class="tt-admin-workspace-switcher">
+        <summary aria-label="Switch workspace" aria-haspopup="true">
+          <span>Member Area</span><span class="tt-admin-workspace-caret" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="tt-admin-workspace-dropdown" aria-label="Available workspaces">
+          <p class="tt-admin-workspace-eyebrow">SWITCH WORKSPACE</p>
+          {% if request.path|slice:":17" == "/staff/admin-desk" %}
+          <a href="{% url 'dashboard' %}">
+            <span class="tt-admin-workspace-option-title">Member Area</span>
+            <small>Open learner dashboard</small>
+          </a>
+          <a class="is-current" href="{% url 'staff_admin_desk' %}" aria-current="page">
+            <span class="tt-admin-workspace-option-title">Admin Desk</span>
+            <small>Current workspace</small>
+          </a>
+          {% else %}
+          <a class="is-current" href="{% url 'dashboard' %}" aria-current="page">
+            <span class="tt-admin-workspace-option-title">Member Area</span>
+            <small>Current workspace</small>
+          </a>
+          <a href="{% url 'staff_admin_desk' %}">
+            <span class="tt-admin-workspace-option-title">Admin Desk</span>
+            <small>Open staff workspace</small>
+          </a>
+          {% endif %}
+        </div>
+      </details>
     {% elif user.is_authenticated %}
       <a class="button member-area-link" href="{% url 'dashboard' %}">Member Area ↗</a>
     {% elif request.path == '/accounts/login/' %}
@@ -60,8 +69,6 @@
           <span class="tt-account-caret" aria-hidden="true">⌄</span>
         </summary>
         <div class="tt-account-dropdown">
-          <a href="{% url 'dashboard' %}">Member area</a>
-          {% if user.is_staff %}<a href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% endif %}
           <a href="{% url 'profile' %}">Profile &amp; security</a>
           <a href="{% url 'growth:referral_dashboard' %}">Referral credits</a>
           <form method="post" action="{% url 'account_logout' %}" class="tt-account-logout-form">
@@ -81,8 +88,7 @@
     <a href="{{ public_site_url }}/courses.html">Courses</a>
     <a href="{{ public_site_url }}/community.html">Community</a>
     {% if user.is_authenticated %}
-      <a class="mobile-menu-cta" href="{% url 'dashboard' %}">Member Area ↗</a>
-      {% if user.is_staff %}<a href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% endif %}
+      {% if not user.is_staff %}<a class="mobile-menu-cta" href="{% url 'dashboard' %}">Member Area ↗</a>{% endif %}
       <a href="{% url 'profile' %}">Profile &amp; security</a>
       <a href="{% url 'growth:referral_dashboard' %}">Referral credits</a>
       <form method="post" action="{% url 'account_logout' %}" class="mobile-menu-logout-form">
