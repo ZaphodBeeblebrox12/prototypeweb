@@ -1360,6 +1360,37 @@ class AdminDeskTests(TestCase):
         self.assertEqual(campaigns_response.status_code, 200, campaigns_response.content)
         self.assertContains(campaigns_response, "Campaigns &amp; Audiences")
         self.assertContains(campaigns_response, "Frozen audience snapshots")
+
+        from apps.campaigns.models import Audience, Campaign
+        from apps.emailing.models import Template, TemplateVersion
+
+        template = Template.objects.create(name="Admin Desk Campaign Detail Test")
+        template_version = TemplateVersion.objects.create(
+            template=template,
+            version_number=1,
+            editor_mode=TemplateVersion.EditorMode.HTML,
+            subject="Campaign detail test",
+            html="<p>Campaign detail test</p>",
+        )
+        audience = Audience.objects.create(
+            name="Campaign detail test audience",
+            description="Disposable test audience",
+            rules={"is_active": True},
+        )
+        campaign = Campaign.objects.create(
+            name="Campaign detail test",
+            template_version=template_version,
+            audience=audience,
+        )
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200, detail_response.content)
+        self.assertContains(detail_response, "Campaign lifecycle")
+        self.assertContains(detail_response, "Audience context")
+        self.assertContains(detail_response, "Template snapshot")
+        self.assertContains(detail_response, "This page is read-only")
+
         self.assertFalse(growth_response.context.get("campaign_url"))
         self.assertFalse(growth_response.context.get("email_url"))
         self.assertFalse(growth_response.context.get("promotion_url"))
