@@ -449,7 +449,7 @@ class AdminDeskTests(TestCase):
         from django.contrib.auth.models import Permission
 
         from apps.academy.models import CourseOffer
-        from apps.subscriptions.models import Plan
+        from apps.subscriptions.models import Plan, PlanPrice
 
         course = Course.objects.create(
             title="Offers Register Course",
@@ -461,6 +461,13 @@ class AdminDeskTests(TestCase):
             name="Private Revenue Plan Must Stay Hidden",
             tier=Plan.Tier.BASIC,
             is_hidden=False,
+        )
+        PlanPrice.objects.create(
+            plan=private_plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=1200,
+            currency="INR",
+            is_active=True,
         )
         offer = CourseOffer.objects.create(
             course=course,
@@ -481,6 +488,10 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "Offers Register Course")
         self.assertContains(response, "Offers Register Offer")
         self.assertContains(response, "Inactive")
+        self.assertContains(response, "Active one-time price recorded")
+        offer_row = response.context["offers_page"][0]
+        self.assertFalse(offer_row["readiness"]["saleable"])
+        self.assertTrue(offer_row["readiness"]["price_ready"])
         self.assertTrue(response.context["can_open_course_detail"])
 
         limited = User.objects.create_user(
