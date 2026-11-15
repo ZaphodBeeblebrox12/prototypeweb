@@ -449,6 +449,7 @@ class AdminDeskTests(TestCase):
         from django.contrib.auth.models import Permission
 
         from apps.academy.models import CourseOffer
+        from apps.subscriptions.models import Plan
 
         course = Course.objects.create(
             title="Offers Register Course",
@@ -456,10 +457,16 @@ class AdminDeskTests(TestCase):
             status=Course.Status.PUBLISHED,
             access_type=Course.AccessType.PAID,
         )
+        private_plan = Plan.objects.create(
+            name="Private Revenue Plan Must Stay Hidden",
+            tier=Plan.Tier.BASIC,
+            is_hidden=False,
+        )
         offer = CourseOffer.objects.create(
             course=course,
             name="Offers Register Offer",
             slug="offers-register-offer",
+            plan=private_plan,
             is_active=False,
         )
 
@@ -493,10 +500,38 @@ class AdminDeskTests(TestCase):
         limited_response = self.client.get(reverse("staff_admin_desk_course_offers"))
         self.assertEqual(limited_response.status_code, 200, limited_response.content)
         self.assertContains(limited_response, "Offers Register Offer")
+        self.assertContains(limited_response, "Commercial checks restricted")
+        self.assertNotContains(limited_response, "Private Revenue Plan Must Stay Hidden")
+        self.assertNotContains(limited_response, "Not hidden")
         self.assertFalse(limited_response.context["can_open_course_detail"])
         self.assertNotContains(limited_response, reverse(
             "staff_admin_desk_course_detail", args=[course.pk]
         ))
+
+        content_operator = User.objects.create_user(
+            username="academy-content-admin-without-revenue",
+            email="academy-content-admin-without-revenue@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        content_operator.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_course"
+            ),
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_courseoffer"
+            ),
+        )
+        self.client.force_login(content_operator)
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_course_detail", args=[course.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200, detail_response.content)
+        self.assertContains(detail_response, "Commercial checks restricted")
+        self.assertContains(detail_response, "Commercial checks require Revenue permissions")
+        self.assertNotContains(detail_response, "Private Revenue Plan Must Stay Hidden")
+        self.assertNotContains(detail_response, "One-time price configured")
+        self.assertNotContains(detail_response, "No active one-time price")
 
         denied = User.objects.create_user(
             username="academy-offers-no-grant",
