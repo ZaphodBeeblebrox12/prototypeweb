@@ -2064,9 +2064,28 @@ def admin_desk_plans(request):
         queryset = queryset.order_by("display_order", "tier", "name")
 
     page = Paginator(queryset, 30).get_page(request.GET.get("page"))
+    products_page = None
+    if can_view_products:
+        products_queryset = Product.objects.all()
+        if query:
+            products_queryset = products_queryset.filter(
+                Q(name__icontains=query) | Q(slug__icontains=query)
+            )
+        products_queryset = products_queryset.annotate(
+            plan_count=Count("plans", distinct=True),
+            active_public_plan_count=Count(
+                "plans",
+                filter=Q(plans__is_active=True, plans__is_hidden=False),
+                distinct=True,
+            ),
+        ).order_by("display_order", "name")
+        products_page = Paginator(
+            products_queryset, 20
+        ).get_page(request.GET.get("product_page"))
     all_plans = Plan.objects.all()
     context = {
         "plans_page": page,
+        "products_page": products_page,
         "query": query,
         "tier_filter": tier_filter,
         "state_filter": state_filter,
