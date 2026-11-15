@@ -2071,6 +2071,10 @@ def admin_desk_plans(request):
         "tier_filter": tier_filter,
         "state_filter": state_filter,
         "tier_choices": Plan.Tier.choices,
+        "plan_table_columns": (
+            5 + int(can_view_products) + int(can_view_base_prices)
+            + int(can_view_geo_prices)
+        ),
         "plan_summary": {
             "total": all_plans.count(),
             "active": all_plans.filter(is_active=True, is_hidden=False).count(),
@@ -2115,7 +2119,10 @@ def admin_desk_plan_detail(request, plan_id):
     can_view_channel_mappings = _allowed(
         request.user, "bot_integration.view_planchannelmapping"
     )
-    plan = get_object_or_404(Plan.objects.select_related("product"), pk=plan_id)
+    plan_queryset = Plan.objects.all()
+    if can_view_product:
+        plan_queryset = plan_queryset.select_related("product")
+    plan = get_object_or_404(plan_queryset, pk=plan_id)
 
     base_prices = []
     if can_view_base_prices:
