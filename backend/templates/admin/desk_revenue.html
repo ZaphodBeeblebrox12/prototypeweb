@@ -50,7 +50,7 @@
     </div>
   </header>
 
-  {% if payment_summary or invoice_summary or subscription_summary or dispute_summary or business_url %}
+  {% if payment_summary or invoice_summary or subscription_summary or dispute_summary or business_url or plans_url %}
   <div class="grid">
     {% if payment_summary %}
     <section class="panel" aria-labelledby="revenue-payments-heading">
@@ -107,6 +107,18 @@
           <div class="stat"><strong>{{ subscription_summary.pending }}</strong><span>Pending</span></div>
           <div class="stat alert"><strong>{{ subscription_summary.expiring_soon }}</strong><span>Expire in next 72 hours</span></div>
         </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if plans_url %}
+    <section class="panel" aria-labelledby="revenue-plans-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-plans-heading">Plans &amp; Pricing</h2><p>Products, plan configuration, global prices and geo overrides</p></div>
+        <a href="{{ plans_url }}">Open catalogue →</a>
+      </div>
+      <div class="panel-body">
+        <p class="note" style="margin-top:0">Inspect configured commercial offers and the country → region → global price-resolution chain. Changes remain in Advanced Administration.</p>
       </div>
     </section>
     {% endif %}
