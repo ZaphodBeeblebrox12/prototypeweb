@@ -142,9 +142,14 @@
         <i class="bi bi-send" aria-hidden="true"></i><span>Send a Gift</span>
       </a>
       {% endif %}
+      {% if user.is_superuser or user.role == "admin" or perms.campaigns.view_campaign or perms.campaigns.view_audience %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_campaigns' or request.resolver_match.url_name == 'staff_admin_desk_campaign_detail' %} is-active{% endif %}" href="{% url 'staff_admin_desk_campaigns' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_campaigns' or request.resolver_match.url_name == 'staff_admin_desk_campaign_detail' %} aria-current="page"{% endif %}>
+        <i class="bi bi-megaphone" aria-hidden="true"></i><span>Campaigns &amp; Audiences</span>
+      </a>
+      {% endif %}
       {% if perms.campaigns.view_campaign %}
-      <a class="tt-desk-nav-link" href="{% url 'admin:campaigns_campaign_changelist' %}" aria-label="Campaigns in Advanced Administration">
-        <i class="bi bi-megaphone" aria-hidden="true"></i><span>Campaigns</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
+      <a class="tt-desk-nav-link" href="{% url 'admin:campaigns_campaign_changelist' %}" aria-label="Campaign configuration in Advanced Administration">
+        <i class="bi bi-sliders" aria-hidden="true"></i><span>Campaign configuration</span><i class="bi bi-arrow-up-right tt-desk-external" aria-hidden="true"></i>
       </a>
       {% endif %}
       {% if perms.emailing.view_delivery %}
