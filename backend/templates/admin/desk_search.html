@@ -54,7 +54,7 @@
 
   <form class="search-form" method="get" action="{% url 'staff_admin_desk_search' %}" role="search">
     <label class="sr-only" for="ttDeskSearchQuery">Search records</label>
-    <input id="ttDeskSearchQuery" type="search" name="q" value="{{ query }}" minlength="2" maxlength="120" placeholder="Search a learner, ticket, course, payment, invoice or job…" autocomplete="off" autofocus>
+    <input id="ttDeskSearchQuery" type="search" name="q" value="{{ query }}" minlength="2" maxlength="120" placeholder="Search a learner, ticket, course, payment, dispute or job…" autocomplete="off" autofocus>
     <button type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
   </form>
 
@@ -98,6 +98,6 @@
     Try a username, email address, ticket wording, course title, invoice number or job type. Results are limited to records your current permissions allow you to see.
   </div>
   {% endif %}
-  <p class="scope-note">Search results are capped per record type. Private Support notes, payment payloads, claim tokens and raw provisioning identifiers are not searched or displayed.</p>
+  <p class="scope-note">Search results are capped per record type. Private Support notes, payment and webhook payloads, provider webhook IDs, claim tokens and raw provisioning identifiers are not searched or displayed.</p>
 </div>
 {% endblock %}
