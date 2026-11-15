@@ -160,6 +160,22 @@
 }
 
 
+/* Staff header uses five slots: brand, public links, live status, workspace switcher and account. */
+.sitewide-header--staff .nav {
+  grid-template-columns: minmax(170px, 220px) minmax(0, 1fr) auto auto auto;
+}
+@media (max-width: 1120px) {
+  .sitewide-header--staff .nav {
+    grid-template-columns: minmax(150px, 195px) minmax(0, 1fr) auto auto auto;
+    gap: 14px;
+  }
+}
+@media (max-width: 820px) {
+  .sitewide-header--staff .nav {
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+  }
+}
+
 /* Staff workspace switcher — shared global header treatment on Member Area and Admin Desk. */
 .sitewide-header--staff .tt-admin-workspace-switcher {
   position: relative;
