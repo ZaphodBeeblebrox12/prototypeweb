@@ -593,7 +593,7 @@ class AdminDeskTests(TestCase):
 
     def test_plans_workspace_shows_only_individually_permitted_pricing_and_mappings(self):
         from django.contrib.auth.models import Permission
-        from apps.subscriptions.models import Plan, PlanFeature, PlanPrice, Product
+        from apps.subscriptions.models import Plan, PlanFeature, PlanPrice, Product, Subscription
         from apps.subscriptions.models import GeoPlanPrice
         from apps.bot_integration.models import PlanChannelMapping
 
