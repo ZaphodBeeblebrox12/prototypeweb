@@ -610,6 +610,9 @@ class AdminDeskTests(TestCase):
             name="Visible Pro Market Plan",
             tier=Plan.Tier.PRO,
             description="Inspectable plan summary.",
+            is_hidden=True,
+            grant_duration_days=30,
+            notice_channel="email",
             is_trial=True,
             trial_duration_days=14,
         )
@@ -691,6 +694,9 @@ class AdminDeskTests(TestCase):
         self.assertContains(detail, "Region APAC")
         self.assertContains(detail, "Authorised feature bullet")
         self.assertContains(detail, "Authorised Trading Channel")
+        self.assertContains(detail, "30 days")
+        self.assertContains(detail, "Email")
+        self.assertContains(detail, "Any staff (default)")
         self.assertNotContains(detail, external_channel_id)
         self.assertContains(
             detail,
