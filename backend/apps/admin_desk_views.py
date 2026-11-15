@@ -274,7 +274,9 @@ def admin_desk_course_offers(request):
     from django.core.paginator import Paginator
 
     from apps.academy.models import CourseOffer
+    from apps.academy.permissions import is_course_content_admin
 
+    can_open_course_detail = is_course_content_admin(request.user)
     can_view_plans = _allowed(request.user, "subscriptions.view_plan")
     can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
     can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
@@ -343,8 +345,9 @@ def admin_desk_course_offers(request):
             "plan_url": plan_url,
             "price_state": price_state,
             "readiness": readiness,
-            "detail_url": reverse(
-                "staff_admin_desk_course_detail", args=[offer.course_id]
+            "detail_url": (
+                reverse("staff_admin_desk_course_detail", args=[offer.course_id])
+                if can_open_course_detail else ""
             ),
         })
 
@@ -3171,7 +3174,10 @@ def admin_desk_academy(request):
         context["offer_summary"] = {
             "active": CourseOffer.objects.filter(is_active=True).count(),
             "inactive": CourseOffer.objects.filter(is_active=False).count(),
-            "url": reverse("admin:academy_courseoffer_changelist"),
+            "url": (
+                reverse("staff_admin_desk_course_offers")
+                if context["can_view_courses"] else ""
+            ),
         }
 
     if context["can_view_entitlements"]:
