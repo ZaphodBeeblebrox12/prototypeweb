@@ -139,6 +139,7 @@ def admin_desk_courses(request):
     from django.conf import settings
     from django.core.paginator import Paginator
 
+    from apps.academy.models import Course
     from apps.academy.permissions import is_course_content_admin
     from apps.academy.seo_admin import _course_indexability_reasons
 
