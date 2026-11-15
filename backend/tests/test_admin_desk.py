@@ -685,6 +685,7 @@ class AdminDeskTests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.context["tab"], "refunds")
         self.assertTrue(response.context["can_view_refunds"])
+        self.assertTrue(response.context["desk_nav"]["finance"])
         platform_access = self.client.get(reverse("staff_admin_desk_platform"))
         self.assertEqual(platform_access.status_code, 200)
         revenue_access = next(
