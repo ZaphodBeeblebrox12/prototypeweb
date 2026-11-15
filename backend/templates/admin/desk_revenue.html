@@ -46,11 +46,11 @@
     <div>
       <p class="eyebrow">Revenue / Payments &amp; commercial operations</p>
       <h1>Revenue overview</h1>
-      <p class="intro">A permission-scoped view of payments, invoices, subscriptions and disputes. Simulated payments are excluded from payment counts; amounts remain separated by currency. This page reports source records and does not create refunds or change financial state.</p>
+      <p class="intro">A permission-scoped view of payments, refunds, invoices, subscriptions and disputes. Simulated payments are excluded from payment counts; amounts remain separated by currency. This page reports source records and does not create refunds or change financial state.</p>
     </div>
   </header>
 
-  {% if payment_summary or invoice_summary or subscription_summary or dispute_summary or business_url or plans_url %}
+  {% if payment_summary or refund_summary or invoice_summary or subscription_summary or dispute_summary or business_url or plans_url %}
   <div class="grid">
     {% if payment_summary %}
     <section class="panel" aria-labelledby="revenue-payments-heading">
@@ -76,6 +76,32 @@
         <p class="empty">No successful non-simulated payments were recorded in this period.</p>
         {% endif %}
         <p class="note">Amounts are stored in minor currency units (cents). Currencies are not combined or converted.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if refund_summary %}
+    <section class="panel" aria-labelledby="revenue-refunds-heading">
+      <div class="panel-head">
+        <div><h2 id="revenue-refunds-heading">Recorded refunds</h2><p>Refund ledger entries · last {{ period_days }} days</p></div>
+        <a href="{{ refund_summary.url }}">Refund ledger →</a>
+      </div>
+      <div class="panel-body">
+        <div class="stats" style="grid-template-columns:minmax(0,180px)">
+          <div class="stat"><strong>{{ refund_summary.count }}</strong><span>Recorded refund entries</span></div>
+        </div>
+        {% if refund_summary.by_currency %}
+        <div class="table-wrap">
+          <table><thead><tr><th>Currency</th><th>Refund entries</th><th>Amount · minor units</th></tr></thead><tbody>
+            {% for row in refund_summary.by_currency %}
+            <tr><td>{{ row.currency }}</td><td>{{ row.refunds }}</td><td>{{ row.amount_cents }}</td></tr>
+            {% endfor %}
+          </tbody></table>
+        </div>
+        {% else %}
+        <p class="note">No Refund ledger entries were recorded in this period.</p>
+        {% endif %}
+        <p class="note">Amounts are grouped by stored currency and remain separate. These are ledger entries, not refund requests or cash-settlement confirmation.</p>
       </div>
     </section>
     {% endif %}
