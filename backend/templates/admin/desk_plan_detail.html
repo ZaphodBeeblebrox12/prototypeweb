@@ -146,6 +146,65 @@
     </section>
     {% endif %}
 
+    {% if can_view_subscriptions %}
+    <section class="panel full" aria-labelledby="plan-subscriptions-heading">
+      <div class="panel-head"><h2 id="plan-subscriptions-heading">Subscriptions using this Plan</h2></div>
+      <div class="panel-body">
+        <div class="facts" style="margin-bottom:12px">
+          <div class="fact"><span>Recorded subscriptions</span><strong>{{ subscription_summary.total }}</strong></div>
+          <div class="fact"><span>Active access</span><strong>{{ subscription_summary.active }}</strong></div>
+          <div class="fact"><span>Pending</span><strong>{{ subscription_summary.pending }}</strong></div>
+        </div>
+        {% if subscription_rows %}
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Learner</th><th>State</th><th>Source</th><th>Purchased price snapshot</th><th>Started</th><th>Expires</th></tr></thead>
+            <tbody>
+              {% for subscription in subscription_rows %}
+              <tr>
+                <td>{{ subscription.learner }}</td>
+                <td>{% if subscription.is_active %}<span class="pill">Active access</span>{% else %}<span class="pill alert">{{ subscription.status }}</span>{% endif %}</td>
+                <td>{{ subscription.source }}</td>
+                <td>{{ subscription.price }}</td>
+                <td>{{ subscription.started_at|date:"d M Y" }}</td>
+                <td>{{ subscription.expires_at|date:"d M Y"|default:"No expiry recorded" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="empty">No Subscription records currently reference this Plan.</p>
+        {% endif %}
+        <p class="muted" style="margin:10px 0 0">The table shows up to eight recent Subscription records. Subscription state is access history, not a count of verified payments or CourseEntitlements.</p>
+        <p class="muted"><a href="{{ subscription_summary.url }}">Open the filtered Subscription workspace →</a></p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_course_offer %}
+    <section class="panel full" aria-labelledby="plan-course-offer-heading">
+      <div class="panel-head"><h2 id="plan-course-offer-heading">Academy CourseOffer relationship</h2></div>
+      <div class="panel-body">
+        {% if course_offer %}
+        <div class="facts">
+          <div class="fact"><span>Offer</span><strong>{{ course_offer.name }}</strong></div>
+          <div class="fact"><span>Course</span><strong>{{ course_offer.course_title }}</strong></div>
+          <div class="fact"><span>Offer state</span><strong>{% if course_offer.active %}<span class="pill">Active</span>{% else %}<span class="pill alert">Inactive</span>{% endif %}</strong></div>
+          <div class="fact"><span>Course publication</span><strong>{{ course_offer.course_status }}</strong></div>
+          <div class="fact"><span>Course access type</span><strong>{{ course_offer.access_type }}</strong></div>
+          <div class="fact"><span>Individual access duration</span><strong>{{ course_offer.access_duration }}</strong></div>
+          <div class="fact"><span>Catalogue eligibility</span><strong>{% if course_offer.catalogue_eligible %}<span class="pill">Eligible by current course/offer state</span>{% else %}<span class="pill alert">Not currently eligible</span>{% endif %}</strong></div>
+        </div>
+        <p class="muted" style="margin:12px 0 0">A CourseOffer is a separate Academy record. Its catalogue eligibility does not prove a checkout has been tested or a payment collected.</p>
+        <p class="muted"><a href="{{ course_offer.url }}">CourseOffer register in Advanced Administration ↗</a></p>
+        {% else %}
+        <p class="empty">No CourseOffer is linked to this Plan. A subscription Plan does not automatically grant a one-time course purchase.</p>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
     <section class="panel full" aria-labelledby="plan-pricing-resolution-heading">
       <div class="panel-head"><h2 id="plan-pricing-resolution-heading">How checkout resolves a price</h2></div>
       <div class="panel-body">
