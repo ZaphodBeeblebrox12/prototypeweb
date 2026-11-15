@@ -2991,6 +2991,44 @@ def admin_desk_search(request):
                     dispute_url,
                 )
 
+        if _allowed(request.user, "payments.view_refund"):
+            from apps.payments.models import Refund
+
+            refunds = Refund.objects.filter(
+                Q(provider_refund_id__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+                | Q(payment_intent__user__email__icontains=query)
+                | Q(payment_intent__plan__name__icontains=query)
+                | Q(payment_intent__provider_reference__icontains=query)
+            ).select_related(
+                "payment_intent", "payment_intent__user", "payment_intent__plan"
+            ).only(
+                "provider", "amount_cents", "currency", "source",
+                "commercial_context", "refunded_at",
+                "payment_intent__user__username", "payment_intent__plan__name",
+            ).order_by("-refunded_at")[:5]
+            refund_url = (
+                reverse("staff_admin_desk_finance")
+                + "?"
+                + urlencode({"q": query, "tab": "refunds"})
+            )
+            for refund in refunds:
+                add_result(
+                    "Revenue",
+                    "Refund record",
+                    (
+                        f"{refund.payment_intent.user.username} · "
+                        f"{refund.payment_intent.plan.name}"
+                    ),
+                    (
+                        f"{refund.get_provider_display()} · "
+                        f"{refund.get_source_display()} · "
+                        f"{refund.get_commercial_context_display()} · "
+                        f"{refund.currency} {refund.amount_cents / 100:,.2f}"
+                    ),
+                    refund_url,
+                )
+
         if _allowed(request.user, "campaigns.view_campaign"):
             from apps.campaigns.models import Campaign
 
