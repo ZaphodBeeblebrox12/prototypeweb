@@ -445,6 +445,90 @@ class AdminDeskTests(TestCase):
         self.assertTrue(audience_growth_response.context["can_view_audiences"])
         self.assertContains(audience_growth_response, "Campaigns &amp; Audiences workspace")
 
+    def test_academy_catalogue_and_course_detail_use_content_admin_boundary(self):
+        from django.contrib.auth.models import Permission
+
+        from apps.academy.models import CourseModule, Lesson
+
+        course = Course.objects.create(
+            title="Admin Desk Catalogue Course",
+            slug="admin-desk-catalogue-course",
+            summary="A searchable course summary",
+            description="Course detail description",
+            status=Course.Status.PUBLISHED,
+            catalogue_role=Course.CatalogueRole.MINI,
+            access_type=Course.AccessType.PAID,
+        )
+        module = CourseModule.objects.create(
+            course=course,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=module,
+            title="Visible Lesson Outline",
+            slug="visible-lesson-outline",
+            summary="A lesson summary",
+            position=1,
+            duration_minutes=12,
+            is_published=True,
+            content_markdown="PRIVATE LESSON BODY MUST NOT APPEAR",
+        )
+
+        content_admin = User.objects.create_user(
+            username="academy-content-admin",
+            email="academy-content-admin@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(content_admin)
+
+        catalogue = self.client.get(
+            reverse("staff_admin_desk_courses") + "?q=admin-desk-catalogue-course"
+        )
+        self.assertEqual(catalogue.status_code, 200, catalogue.content)
+        self.assertContains(catalogue, "Admin Desk Catalogue Course")
+        self.assertContains(catalogue, "Course Catalogue")
+
+        detail = self.client.get(
+            reverse("staff_admin_desk_course_detail", args=[course.pk])
+        )
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertContains(detail, "Course Detail")
+        self.assertContains(detail, "Visible Lesson Outline")
+        self.assertContains(detail, "SEO &amp; discoverability")
+        self.assertNotContains(detail, "PRIVATE LESSON BODY MUST NOT APPEAR")
+
+        limited_staff = User.objects.create_user(
+            username="academy-model-permission-only",
+            email="academy-model-permission-only@example.test",
+            is_staff=True,
+        )
+        course_permission = Permission.objects.get(
+            content_type__app_label="academy",
+            codename="view_course",
+        )
+        limited_staff.user_permissions.add(course_permission)
+        self.client.force_login(limited_staff)
+
+        denied_catalogue = self.client.get(reverse("staff_admin_desk_courses"))
+        self.assertEqual(denied_catalogue.status_code, 403)
+        denied_detail = self.client.get(
+            reverse("staff_admin_desk_course_detail", args=[course.pk])
+        )
+        self.assertEqual(denied_detail.status_code, 403)
+
+        academy_overview = self.client.get(reverse("staff_admin_desk_academy"))
+        self.assertEqual(academy_overview.status_code, 200, academy_overview.content)
+        self.assertIn("course_summary", academy_overview.context)
+        self.assertFalse(academy_overview.context["course_summary"]["url"])
+        self.assertContains(
+            academy_overview,
+            "Catalogue access requires the Academy content-admin role",
+        )
+
     def test_growth_email_report_uses_marked_sent_not_delivered_language(self):
         owner = User.objects.create_superuser(
             username="growth-email-report-owner",
