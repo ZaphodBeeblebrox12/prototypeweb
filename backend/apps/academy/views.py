@@ -303,20 +303,42 @@ def _active_entitlements(user, at=None):
 
 @login_required
 def academy_home(request):
-    """Member landing page: purchased courses, progress, and available offers."""
+    """Private learner library: show courses this account can currently access."""
     from .services import has_active_plan_access
 
     entitlements = list(_active_entitlements(request.user).select_related("course"))
     entitlements_by_course = {ent.course_id: ent for ent in entitlements}
+    # Purchased and complimentary entitlements are the source of truth for
+    # individual course access. Do not populate this library from every
+    # published catalogue row.
     courses_by_id = {
-        course.pk: course for course in Course.objects.filter(status=Course.Status.PUBLISHED)
+        entitlement.course_id: entitlement.course
+        for entitlement in entitlements
     }
-    for entitlement in entitlements:
-        courses_by_id.setdefault(entitlement.course_id, entitlement.course)
+
+    # Some courses are included in an active membership rather than purchased
+    # as individual course entitlements. Include only those mapped courses
+    # when the learner's membership currently grants access.
+    membership_courses = Course.objects.filter(
+        status=Course.Status.PUBLISHED,
+        access_type__in=[Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED],
+    ).order_by("position", "title")
+    for course in membership_courses:
+        if has_active_plan_access(request.user, course):
+            courses_by_id.setdefault(course.pk, course)
 
     course_cards = []
-    for course in sorted(courses_by_id.values(), key=lambda c: (c.position, c.title.casefold())):
+    for course in sorted(
+        courses_by_id.values(),
+        key=lambda item: (item.position, item.title.casefold()),
+    ):
         entitlement = entitlements_by_course.get(course.pk)
+        has_access = bool(
+            entitlement or has_active_plan_access(request.user, course)
+        )
+        if not has_access:
+            continue
+
         visible_lesson_ids = list(
             Lesson.objects.filter(
                 module__course=course,
@@ -334,7 +356,7 @@ def academy_home(request):
             {
                 "course": course,
                 "entitlement": entitlement,
-                "has_access": bool(entitlement or has_active_plan_access(request.user, course)),
+                "has_access": True,
                 "total_lessons": total,
                 "completed_lessons": done,
                 "progress_percent": round(done * 100 / total) if total else 0,
@@ -342,35 +364,14 @@ def academy_home(request):
             }
         )
 
-    offers = (
-        CourseOffer.objects.filter(
-            is_active=True,
-            course__status=Course.Status.PUBLISHED,
-            course__access_type__in=[Course.AccessType.PAID, Course.AccessType.MIXED],
-            plan__is_active=True,
-        )
-        .select_related("course", "plan")
-        .order_by("position", "name")
-    )
-    offers = [
-        offer
-        for offer in offers
-        if offer.is_saleable
-        and offer.course_id not in entitlements_by_course
-        and (
-            offer.course.access_type != Course.AccessType.MIXED
-            or not has_active_plan_access(request.user, offer.course)
-        )
-    ]
     return render(
         request,
         "academy/home.html",
         {
             "course_cards": course_cards,
-            "offers": offers,
+            "public_site_url": settings.TRADETHESIS_PUBLIC_SITE_URL.rstrip("/"),
         },
     )
-
 
 @require_GET
 def course_share(request, course_slug):
