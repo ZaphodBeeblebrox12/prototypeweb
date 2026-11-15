@@ -732,3 +732,40 @@ The prior failure on head `ac0bf948b0a02c7dd1bcec4f7327215bc7d3395c` was isolate
 - Standalone learner-level access/progress workflows remain deferred pending dedicated object-scope and permission review.
 - Tiptap remains non-default; legacy Course Builder remains the production authoring path.
 - Do not globally lock down Django Admin until each legacy workflow has parity and cutover approval.
+
+
+## 15. Admin Desk V2 merged into integration branch — 15 November 2026
+
+**Merged PR:** [#68 — TradeThesis Admin Desk V2 unified workspace](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/68)  
+**Merge method:** squash  
+**Merge commit / new `my-new-branch` HEAD:** `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`  
+**Merged at:** 15 November 2026, 12:43 IST  
+**Validated PR head before merge:** `0468bfca2530a641f9b88586fb8a8969e5ec2afe`
+
+### Pre-merge validation
+
+The PR was marked ready for review and merged only after the exact head and base were rechecked. GitHub reported `my-new-branch` as base, a clean/mergeable state and all head checks green.
+
+- Academy backend CI: Python 3.11 and 3.12 passed; Tiptap compatibility passed.
+- Django verification: Python 3.11 and 3.12 passed.
+- Integration-target enforcement passed.
+- Each Python job reported 1,363 passed, 1 skipped and 197 subtests passed.
+
+### Post-merge validation still running
+
+The merge commit triggered fresh post-merge runs:
+
+- Academy backend CI [run 43688949572](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43688949572)
+- Django verification [run 43688949570](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43688949570)
+
+Do not treat post-merge CI as green until both workflows complete on merge commit `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`.
+
+### Delivery boundary
+
+- PR #68 is merged and closed. The implementation is now on `my-new-branch`.
+- **No Render deployment was triggered.** The merge approval did not include staging or production deployment.
+- Do not deploy public-static staging or production.
+- Academy staging deployment and the consolidated browser/persona/manual/UAT campaign remain separate approval gates.
+- Continue preserving legacy Course Builder as the production authoring path; Tiptap remains non-default.
+- Learner-level Access & Progress M09 remains deferred for dedicated object-scope/permission review.
+- Do not globally restrict Django Admin until workflow parity and cutover are separately approved.
