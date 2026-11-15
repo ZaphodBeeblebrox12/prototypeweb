@@ -44,7 +44,6 @@ def admin_desk_course_reviews(request):
     """List course submissions awaiting administrator approval."""
     _guard(request)
     from apps.academy.permissions import is_course_content_admin
-    from apps.growth.permissions import has_growth_permission
 
     if not is_course_content_admin(request.user):
         raise PermissionDenied
@@ -1589,6 +1588,7 @@ def admin_desk_platform(request):
             context["policy_readiness"] = readiness
 
     from apps.academy.permissions import is_course_content_admin
+    from apps.growth.permissions import has_growth_permission
 
     def access_granted(permission):
         return _allowed(request.user, permission)
