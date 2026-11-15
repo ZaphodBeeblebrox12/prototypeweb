@@ -701,3 +701,34 @@ At the time of this update, a fresh CI run is active against `c085fcdeb1d85dd399
 - No PR merge, branch rebase, Render configuration change or global Django Admin cutover has been performed.
 - Standalone learner-level access/progress workflows remain subject to dedicated object-scope and permission review; the current Course Detail only shows separately permission-gated aggregate summaries.
 - Tiptap remains non-default. The legacy Course Builder remains the production authoring path.
+
+
+## 14. Admin Desk V2 CI closeout — 15 November 2026
+
+**Implementation branch:** `admin-desk-v2-implementation`  
+**Draft PR:** [#68 — TradeThesis Admin Desk V2 unified workspace](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/68)  
+**Validated PR head:** `0468bfca2530a641f9b88586fb8a8969e5ec2afe`  
+**Base:** `my-new-branch`
+
+### Current-head CI result
+
+All CI jobs passed on the validated PR head:
+
+- Academy backend CI [run 43687512992](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43687512992): Python 3.11 and 3.12 passed; Tiptap bundle/DOM compatibility passed.
+- Django verification [run 43687513012](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43687513012): Python 3.11 and 3.12 passed.
+- Integration-target enforcement [run 43687512997](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43687512997): passed.
+- Each of the four Python jobs reports **1,363 passed, 1 skipped and 197 subtests passed**.
+- Ruff, Black, mypy, Django configuration/syntax, migration checks, static collection, focused micro-course image-slot regressions, import smoke checks and the full backend suites passed.
+
+The prior failure on head `ac0bf948b0a02c7dd1bcec4f7327215bc7d3395c` was isolated to the newly added Offers & Access permission test fixture: it created two ungrouped Plans with the same `(tier, is_trial)` pair. The second fixture now uses `Plan.Tier.PRO` instead of duplicating `Plan.Tier.BASIC`. No application logic changed for this fix.
+
+**This CI closeout supersedes the in-progress engineering-gate notes above that refer to older heads.** The current implementation branch is automated-CI green at the validated SHA.
+
+### Remaining delivery gates
+
+- PR #68 remains open and draft; do not merge without explicit owner approval.
+- No Academy staging, public-static staging or production deployment has been triggered by this implementation.
+- The consolidated manual/browser/persona/end-to-end/accessibility test campaign remains outstanding. Run it only after the implementation is accepted for staging and a staging deployment is separately authorised.
+- Standalone learner-level access/progress workflows remain deferred pending dedicated object-scope and permission review.
+- Tiptap remains non-default; legacy Course Builder remains the production authoring path.
+- Do not globally lock down Django Admin until each legacy workflow has parity and cutover approval.
