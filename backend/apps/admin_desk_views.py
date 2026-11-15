@@ -1660,6 +1660,7 @@ def admin_desk_platform(request):
                     access_item("Change subscriptions", "subscriptions.change_subscription"),
                     access_item("Plan catalogue", "subscriptions.view_plan"),
                     access_item("Product catalogue", "subscriptions.view_product"),
+                    access_item("Change plan configuration", "subscriptions.change_plan"),
                     access_item("Global base prices", "subscriptions.view_planprice"),
                     access_item("Geo price overrides", "subscriptions.view_geoplanprice"),
                     access_item("Plan feature bullets", "subscriptions.view_planfeature"),
