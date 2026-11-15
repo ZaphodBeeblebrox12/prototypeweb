@@ -80,6 +80,40 @@
     <a class="button secondary" href="{% url 'staff_admin_desk_plans' %}">Clear</a>
   </form>
 
+  {% if can_view_products %}
+  <section class="panel" aria-labelledby="product-catalogue-heading">
+    <div class="panel-head">
+      <h2 id="product-catalogue-heading">Products</h2>
+      <span class="muted">{{ products_page.paginator.count }} matching product{{ products_page.paginator.count|pluralize }}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Slug</th><th>State</th><th>Plans</th><th>Active &amp; public</th></tr></thead>
+        <tbody>
+          {% for product in products_page %}
+          <tr>
+            <td><strong>{{ product.name }}</strong><span class="muted" style="display:block">{{ product.description|truncatechars:100 }}</span></td>
+            <td>{{ product.slug }}</td>
+            <td>{% if product.is_active %}<span class="pill">Active</span>{% else %}<span class="pill alert">Inactive</span>{% endif %}</td>
+            <td>{{ product.plan_count }}</td>
+            <td>{{ product.active_public_plan_count }}</td>
+          </tr>
+          {% empty %}
+          <tr><td class="empty" colspan="5">No products match this search.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if products_page.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Product catalogue pages">
+      {% if products_page.has_previous %}<a href="?product_page={{ products_page.previous_page_number }}&amp;q={{ query|urlencode }}&amp;tier={{ tier_filter|urlencode }}&amp;state={{ state_filter|urlencode }}">Previous</a>{% endif %}
+      <span>Page {{ products_page.number }} of {{ products_page.paginator.num_pages }}</span>
+      {% if products_page.has_next %}<a href="?product_page={{ products_page.next_page_number }}&amp;q={{ query|urlencode }}&amp;tier={{ tier_filter|urlencode }}&amp;state={{ state_filter|urlencode }}">Next</a>{% endif %}
+    </nav>
+    {% endif %}
+  </section>
+  {% endif %}
+
   <section class="panel" aria-labelledby="plan-catalogue-heading">
     <div class="panel-head">
       <h2 id="plan-catalogue-heading">Plan catalogue</h2>
