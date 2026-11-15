@@ -475,23 +475,14 @@
 }
 
 
-/* Admin Desk retains the complete shared staff header; only column placement is route-specific. */
-.sitewide-header--admin-desk .nav {
-  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto auto auto;
-}
+/* Admin Desk uses the canonical landing-page header container and sizing.
+   Keep only the extra staff-menu column placement needed by the workspace switcher. */
 .sitewide-header--admin-desk .tt-admin-workspace-switcher {
   grid-column: 4;
 }
 .sitewide-header--admin-desk .tt-account-menu {
   grid-column: 5;
   justify-self: end;
-}
-@media (max-width: 1120px) {
-  .sitewide-header--admin-desk .nav {
-    grid-template-columns: minmax(150px, 195px) minmax(0, 1fr) auto auto auto;
-    gap: 12px;
-  }
-  .sitewide-header--admin-desk .brand-logo { width: 195px; }
 }
 @media (max-width: 820px) {
   .sitewide-header--admin-desk .nav {
@@ -501,22 +492,6 @@
   .sitewide-header--admin-desk .tt-admin-workspace-switcher {
     grid-column: auto;
   }
-}
-
-.sitewide-header--admin-desk {
-  position: relative;
-  z-index: 40;
-  border-bottom: 1px solid var(--tt-desk-line);
-  background: var(--tt-desk-paper);
-}
-.sitewide-header--admin-desk .wrap.nav {
-  width: min(1800px, 100%);
-  min-height: 68px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-.sitewide-header--admin-desk .brand-logo {
-  max-height: 42px;
 }
 .tt-desk-topbar {
   position: sticky;
