@@ -181,7 +181,8 @@
       <div class="workflow-links">
         {% if can_view_referrals %}<a class="workflow-link" href="{{ referrals_url }}">Referrals &amp; Rewards →</a>{% endif %}
         {% if can_send_gifts %}<a class="workflow-link" href="/admin/growth/send-gift/">Send a gift →</a>{% endif %}
-        {% if campaign_url %}<a class="workflow-link" href="{{ campaign_url }}">Campaigns ↗</a>{% endif %}
+        {% if campaign_workspace_url %}<a class="workflow-link" href="{{ campaign_workspace_url }}">Campaigns &amp; Audiences →</a>{% endif %}
+        {% if campaign_url %}<a class="workflow-link" href="{{ campaign_url }}">Campaign configuration · Advanced Admin ↗</a>{% endif %}
         {% if email_url %}<a class="workflow-link" href="{{ email_url }}">Email delivery ↗</a>{% endif %}
         {% if promotion_url %}<a class="workflow-link" href="{{ promotion_url }}">Coupon redemptions ↗</a>{% endif %}
       </div>
