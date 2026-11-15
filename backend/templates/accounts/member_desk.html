@@ -100,7 +100,7 @@
           <div class="no-purchase-course-empty">
             <strong>New courses will appear here when they are published.</strong>
             <p>The course library is the best place to check what is currently available.</p>
-            <a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">Open the course library →</a>
+            <a class="no-purchase-quiet-link" href="{{ public_site_url }}/courses.html">Browse the course catalogue →</a>
           </div>
           {% endif %}
         </section>
@@ -217,7 +217,7 @@
       <article class="card learning-list" aria-label="Your courses and saved progress">
         <div class="learning-list-heading">
           <div><div class="kicker">YOUR LEARNING</div><h2>Pick up where you left off.</h2></div>
-          <a class="btn secondary" href="{% url 'academy:home' %}">Explore more courses ↗</a>
+          <a class="btn secondary" href="{{ public_site_url }}/courses.html">Explore more courses ↗</a>
         </div>
         {% for item in member_course_cards %}<div class="learning-card"><div class="course-mark">{{ item.course.title|slice:":2"|upper }}</div><div class="learning-copy"><h3>{{ item.course.title }}</h3><p>{{ item.course.summary|default:item.course.description|truncatechars:180 }}</p><div class="learning-meta">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</div><div class="progress-track" role="progressbar" aria-label="{{ item.course.title }} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.progress_percent }}"><div class="progress-fill" style="width:{{ item.progress_percent }}%"></div></div><span class="course-access-state{% if not item.entitlement %} explore{% endif %}">{% if item.entitlement %}Access active{% else %}Saved progress · no active entitlement{% endif %}</span></div>{% if item.resume_lesson %}<a class="btn{% if not item.entitlement %} secondary{% endif %}" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.entitlement %}Continue learning ↗{% else %}Open preview ↗{% endif %}</a>{% else %}<a class="btn secondary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Review course ↗{% else %}View course ↗{% endif %}</a>{% endif %}</div>{% endfor %}
       </article>
@@ -229,7 +229,7 @@
           <h2 id="learning-empty-title">Nothing to resume just yet</h2>
           <p>You have no active course access or saved learning progress in this preview. Explore the catalogue to find a suitable starting point; the dashboard should never invent a lesson or completion percentage.</p>
           <div class="learning-empty-actions">
-            <a class="btn" href="{% url 'academy:home' %}">Explore the course catalogue ↗</a>
+            <a class="btn" href="{{ public_site_url }}/courses.html">Explore the course catalogue ↗</a>
             <button class="btn secondary" type="button" data-goto="overview">Back to overview</button>
           </div>
         </div>
