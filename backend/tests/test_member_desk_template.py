@@ -34,6 +34,17 @@ class MemberDeskTemplateContractTests(SimpleTestCase):
         self.assertIn('id="page-profile"', rendered)
         self.assertIn('id="page-help"', rendered)
 
+    def test_new_member_overview_uses_course_specific_discovery_cards(self):
+        source = get_template("accounts/member_desk.html").template.source
+
+        self.assertIn('id="recommended-courses"', source)
+        self.assertIn('href="#recommended-courses"', source)
+        self.assertIn("{% for item in member_discovery_courses %}", source)
+        self.assertIn("{% url 'academy:course-detail' item.course.slug %}", source)
+        self.assertIn("View course &amp; access details", source)
+        self.assertNotIn("no-purchase-choice-card", source)
+        self.assertIn('data-goto="learning"', source)
+
     def test_my_learning_uses_access_aware_empty_state_and_return_action(self):
         source = get_template("accounts/member_desk.html").template.source
         self.assertIn("{% if member_course_cards %}", source)
