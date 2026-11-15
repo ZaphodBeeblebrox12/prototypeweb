@@ -685,6 +685,16 @@ class AdminDeskTests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.context["tab"], "refunds")
         self.assertTrue(response.context["can_view_refunds"])
+        platform_access = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(platform_access.status_code, 200)
+        revenue_access = next(
+            section for section in platform_access.context["my_access"]["sections"]
+            if section["name"] == "Revenue"
+        )
+        refund_access = {
+            item["label"]: item for item in revenue_access["items"]
+        }
+        self.assertTrue(refund_access["Refund ledger"]["granted"])
         self.assertFalse(response.context["can_view_payments"])
         self.assertFalse(response.context["can_view_invoices"])
         self.assertEqual(
@@ -748,6 +758,16 @@ class AdminDeskTests(TestCase):
         self.assertEqual(payment_only_response.status_code, 200)
         self.assertEqual(payment_only_response.context["tab"], "payments")
         self.assertFalse(payment_only_response.context["can_view_refunds"])
+        payment_platform_access = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(payment_platform_access.status_code, 200)
+        payment_revenue_access = next(
+            section for section in payment_platform_access.context["my_access"]["sections"]
+            if section["name"] == "Revenue"
+        )
+        payment_refund_access = {
+            item["label"]: item for item in payment_revenue_access["items"]
+        }
+        self.assertFalse(payment_refund_access["Refund ledger"]["granted"])
         self.assertNotContains(payment_only_response, "href=\"?tab=refunds")
 
         payment_only_search = self.client.get(
@@ -876,6 +896,7 @@ class AdminDeskTests(TestCase):
         revenue_access = sections["Revenue"]
         self.assertTrue(revenue_access["Disputes"]["granted"])
         self.assertTrue(revenue_access["Change disputes"]["granted"])
+        self.assertFalse(revenue_access["Refund ledger"]["granted"])
 
         growth_access = sections["Growth"]
         self.assertTrue(growth_access["Growth overview & reporting"]["granted"])
