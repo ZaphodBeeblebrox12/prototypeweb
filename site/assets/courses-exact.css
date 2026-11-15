@@ -256,6 +256,8 @@ button{font:inherit}
 .share-options a,.share-options button{display:flex;align-items:center;gap:8px;min-width:0;min-height:35px;padding:6px 7px;border:1px solid var(--line);background:#fffefa;color:var(--ink-soft);font:800 8px var(--sans);letter-spacing:.055em;text-transform:uppercase;text-align:left;text-decoration:none;cursor:pointer;transition:border-color .16s,background .16s}
 .share-options a:hover,.share-options button:hover{border-color:#c6a99a;background:var(--paper);text-decoration:none}
 .share-channel-icon{display:grid;flex:0 0 22px;place-items:center;width:22px;height:22px;background:var(--sage-pale);color:#425943;font:900 9px var(--sans);letter-spacing:0}
+.share-channel-icon svg{display:block;width:14px;height:14px;fill:currentColor}
+.share-channel-arrow{margin-left:auto;color:#9a9a8d;font-size:13px}
 .share-channel-icon.wa{background:#e5eee6;color:#416b4a}.share-channel-icon.tg{background:#e8ecee;color:#496779}.share-channel-icon.in{background:#e8ecee;color:#425f7b}.share-channel-icon.fb{background:#e8ecee;color:#425f7b}.share-channel-icon.xx{background:#efeee8;color:#252d2b}.share-channel-icon.more{background:var(--terra-pale);color:var(--terra-deep)}
 .share-link-area{margin-top:auto;padding-top:14px}
 .share-link-label{display:block;margin-bottom:5px;color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
