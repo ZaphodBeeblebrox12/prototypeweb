@@ -1836,6 +1836,7 @@ def admin_desk_growth(request):
             reverse("admin:campaigns_campaign_changelist")
             if _allowed(request.user, "campaigns.view_campaign") else ""
         )
+        context["campaign_workspace_url"] = reverse("staff_admin_desk_campaigns")
         context["has_growth_data"] = True
 
     if has_growth_permission(request.user, "promotions.view_couponredemption"):
@@ -1879,6 +1880,274 @@ def admin_desk_growth(request):
     context["can_view_purchases"] = "purchase_report" in context
     context["can_view_referral_metrics"] = "referral_report" in context
     return render(request, "admin/desk_growth.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_campaigns(request):
+    """Read-only Campaigns and Audiences workspace over canonical Growth records."""
+    _guard(request)
+    from apps.growth.permissions import has_growth_permission
+
+    can_view_campaigns = has_growth_permission(
+        request.user, "campaigns.view_campaign"
+    )
+    can_view_audiences = has_growth_permission(
+        request.user, "campaigns.view_audience"
+    )
+    if not (can_view_campaigns or can_view_audiences):
+        raise PermissionDenied
+
+    from apps.campaigns.models import Audience, Campaign, CampaignRecipient
+
+    can_view_recipients = has_growth_permission(
+        request.user, "campaigns.view_campaignrecipient"
+    )
+    can_view_template_versions = has_growth_permission(
+        request.user, "emailing.view_templateversion"
+    )
+    can_change_campaigns = has_growth_permission(
+        request.user, "campaigns.change_campaign"
+    )
+    can_change_audiences = has_growth_permission(
+        request.user, "campaigns.change_audience"
+    )
+
+    query = request.GET.get("q", "").strip()[:120]
+    state_filter = request.GET.get("state", "").strip().lower()
+    audience_id = request.GET.get("audience", "").strip()
+
+    context = {
+        "query": query,
+        "state_filter": state_filter,
+        "can_view_campaigns": can_view_campaigns,
+        "can_view_audiences": can_view_audiences,
+        "can_view_recipients": can_view_recipients,
+        "can_view_template_versions": can_view_template_versions,
+        "campaign_admin_url": (
+            reverse("admin:campaigns_campaign_changelist")
+            if _allowed(request.user, "campaigns.change_campaign") else ""
+        ),
+        "audience_admin_url": (
+            reverse("admin:campaigns_audience_changelist")
+            if _allowed(request.user, "campaigns.change_audience") else ""
+        ),
+        "desk_nav": _nav(request),
+    }
+
+    if can_view_campaigns:
+        campaigns = Campaign.objects.all()
+        if can_view_audiences:
+            campaigns = campaigns.select_related("audience")
+        if can_view_template_versions:
+            campaigns = campaigns.select_related(
+                "template_version", "template_version__template"
+            )
+        if query:
+            campaigns = campaigns.filter(name__icontains=query)
+        if state_filter in {value for value, _label in Campaign.State.choices}:
+            campaigns = campaigns.filter(state=state_filter)
+        else:
+            state_filter = ""
+        if audience_id and can_view_audiences:
+            campaigns = campaigns.filter(audience_id=audience_id)
+        elif audience_id:
+            audience_id = ""
+        if can_view_recipients:
+            campaigns = campaigns.annotate(
+                frozen_recipient_count=Count("recipients", distinct=True)
+            )
+        campaigns = campaigns.order_by("-created_at")
+        campaign_page = Paginator(
+            campaigns, 20
+        ).get_page(request.GET.get("page"))
+
+        campaign_rows = []
+        for campaign in campaign_page:
+            row = {
+                "id": campaign.pk,
+                "name": campaign.name,
+                "state": campaign.get_state_display(),
+                "state_value": campaign.state,
+                "created_at": campaign.created_at,
+                "scheduled_at": campaign.scheduled_at,
+                "snapshot_at": campaign.snapshot_at,
+                "detail_url": reverse(
+                    "staff_admin_desk_campaign_detail", args=[campaign.pk]
+                ),
+            }
+            if can_view_audiences:
+                row["audience_name"] = campaign.audience.name
+                if campaign.snapshot_at:
+                    row["live_audience_estimate"] = None
+                else:
+                    try:
+                        row["live_audience_estimate"] = (
+                            campaign.audience.members().count()
+                        )
+                    except Exception:  # malformed/stale audience filters are not evaluated in the UI
+                        row["live_audience_estimate"] = "Unable to estimate"
+            if can_view_recipients:
+                row["frozen_recipient_count"] = campaign.frozen_recipient_count
+            if can_view_template_versions:
+                row["template_version"] = (
+                    f"{campaign.template_version.template.name} "
+                    f"v{campaign.template_version.version_number}"
+                )
+                row["template_subject"] = campaign.subject_override or (
+                    campaign.template_version.subject
+                )
+            campaign_rows.append(row)
+        context["campaign_page"] = campaign_page
+        context["campaign_rows"] = campaign_rows
+
+    if can_view_audiences:
+        audiences = Audience.objects.all()
+        if query:
+            audiences = audiences.filter(name__icontains=query)
+        audiences_page = Paginator(
+            audiences.order_by("name"), 20
+        ).get_page(request.GET.get("audience_page"))
+        audience_rows = []
+        for audience in audiences_page:
+            try:
+                live_count = audience.members().count()
+            except Exception:  # malformed/stale audience filters should not break the register
+                live_count = None
+            audience_rows.append({
+                "id": audience.pk,
+                "name": audience.name,
+                "description": audience.description,
+                "created_at": audience.created_at,
+                "live_count": live_count,
+                "campaign_count": (
+                    audience.campaigns.count() if can_view_campaigns else None
+                ),
+            })
+        context["audiences_page"] = audiences_page
+        context["audience_rows"] = audience_rows
+        context["selected_audience"] = audience_id
+
+    return render(request, "admin/desk_campaigns.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_campaign_detail(request, campaign_id):
+    """Inspect a Campaign's live Audience, frozen snapshot and delivery evidence."""
+    _guard(request)
+    from apps.growth.permissions import has_growth_permission
+
+    if not has_growth_permission(request.user, "campaigns.view_campaign"):
+        raise PermissionDenied
+
+    from apps.campaigns.models import Campaign, CampaignMetrics, CampaignRecipient
+    from apps.emailing.models import Delivery
+
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    can_view_audience = has_growth_permission(
+        request.user, "campaigns.view_audience"
+    )
+    can_view_recipients = has_growth_permission(
+        request.user, "campaigns.view_campaignrecipient"
+    )
+    can_view_metrics = has_growth_permission(
+        request.user, "campaigns.view_campaignmetrics"
+    )
+    can_view_template = has_growth_permission(
+        request.user, "emailing.view_templateversion"
+    )
+    can_view_delivery = has_growth_permission(
+        request.user, "emailing.view_delivery"
+    )
+
+    audience_context = None
+    if can_view_audience:
+        try:
+            live_count = campaign.audience.members().count()
+            estimate_note = "Current live membership estimate"
+        except Exception:
+            live_count = None
+            estimate_note = "Current audience rules could not be evaluated"
+        audience_context = {
+            "name": campaign.audience.name,
+            "description": campaign.audience.description,
+            "live_count": live_count,
+            "estimate_note": estimate_note,
+            "snapshot_at": campaign.snapshot_at,
+        }
+
+    recipient_summary = None
+    if can_view_recipients:
+        recipient_summary = {
+            row["status"]: row["count"]
+            for row in CampaignRecipient.objects.filter(
+                campaign=campaign
+            ).values("status").annotate(count=Count("pk"))
+        }
+
+    metrics = None
+    if can_view_metrics:
+        metric = CampaignMetrics.objects.filter(campaign=campaign).first()
+        if metric:
+            metrics = {
+                "total": metric.total,
+                "sent": metric.sent,
+                "failed": metric.failed,
+                "bounced": metric.bounced,
+                "complained": metric.complained,
+                "suppressed": metric.suppressed,
+                "updated_at": metric.updated_at,
+            }
+
+    template_version = None
+    if can_view_template:
+        from apps.emailing.models import TemplateVersion
+
+        version = TemplateVersion.objects.select_related("template").filter(
+            pk=campaign.template_version_id
+        ).first()
+        if version:
+            template_version = {
+                "name": version.template.name,
+                "version_number": version.version_number,
+                "subject": campaign.subject_override or version.subject,
+                "editor_mode": version.get_editor_mode_display(),
+                "kind": version.template.get_kind_display(),
+            }
+
+    delivery_rows = []
+    if can_view_delivery:
+        delivery_rows = list(
+            Delivery.objects.filter(
+                campaign_recipients__campaign=campaign
+            ).values("provider", "state").annotate(
+                count=Count("pk", distinct=True)
+            ).order_by("provider", "state")
+        )
+
+    context = {
+        "campaign": campaign,
+        "audience_context": audience_context,
+        "recipient_summary": recipient_summary,
+        "metrics": metrics,
+        "template_version": template_version,
+        "delivery_rows": delivery_rows,
+        "can_view_audience": can_view_audience,
+        "can_view_recipients": can_view_recipients,
+        "can_view_metrics": can_view_metrics,
+        "can_view_template": can_view_template,
+        "can_view_delivery": can_view_delivery,
+        "can_open_advanced_admin": _allowed(
+            request.user, "campaigns.change_campaign"
+        ),
+        "advanced_admin_url": reverse(
+            "admin:campaigns_campaign_change", args=[campaign.pk]
+        ),
+        "campaigns_url": reverse("staff_admin_desk_campaigns"),
+        "desk_nav": _nav(request),
+    }
+    return render(request, "admin/desk_campaign_detail.html", context)
 
 
 @login_required
@@ -3413,24 +3682,41 @@ def admin_desk_search(request):
                     refund_url,
                 )
 
-        if _allowed(request.user, "campaigns.view_campaign"):
+        from apps.growth.permissions import has_growth_permission
+        if has_growth_permission(request.user, "campaigns.view_campaign"):
             from apps.campaigns.models import Campaign
 
             campaigns = Campaign.objects.filter(
                 name__icontains=query
-            ).only("name", "state", "created_at").order_by("-created_at")[:5]
-            campaign_url = (
-                reverse("admin:campaigns_campaign_changelist")
-                + "?"
-                + urlencode({"q": query})
-            )
+            ).only("id", "name", "state", "created_at").order_by("-created_at")[:5]
             for campaign in campaigns:
                 add_result(
                     "Growth",
                     "Campaign",
                     campaign.name,
-                    f"{campaign.get_state_display()} · Campaign register",
-                    campaign_url,
+                    f"{campaign.get_state_display()} · Campaign workspace",
+                    reverse(
+                        "staff_admin_desk_campaign_detail", args=[campaign.pk]
+                    ),
+                )
+
+        if has_growth_permission(request.user, "campaigns.view_audience"):
+            from apps.campaigns.models import Audience
+
+            audiences = Audience.objects.filter(
+                name__icontains=query
+            ).only("id", "name", "description").order_by("name")[:5]
+            for audience in audiences:
+                add_result(
+                    "Growth",
+                    "Campaign audience",
+                    audience.name,
+                    audience.description or "Saved audience rules",
+                    (
+                        reverse("staff_admin_desk_campaigns")
+                        + "?"
+                        + urlencode({"audience": str(audience.pk)})
+                    ),
                 )
 
         if _allowed(request.user, "growth.view_giftinvite"):
