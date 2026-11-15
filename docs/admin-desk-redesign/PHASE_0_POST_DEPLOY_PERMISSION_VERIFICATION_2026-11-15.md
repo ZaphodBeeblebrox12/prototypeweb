@@ -143,3 +143,47 @@ The immediate console output `Promise { <state>: "pending" }` was only the async
 - Support object-level ticket scope and Platform detail access remain outstanding.
 
 **Status:** Admin-session navigation/route smoke test is 25/25 PASS. Overall consolidated acceptance remains open.
+
+
+## 8. Admin Desk V2 generic-staff route verification — 15 November 2026
+
+**Staging deployment:** `dep-dbslvagae00c738ef8n0`  
+**Deployed source:** `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`  
+**Persona:** ordinary generic Django Staff account (not owner Admin and not a department specialist)  
+**Method:** authenticated same-origin GET requests; no state-changing requests.
+
+| Area | Expected | Observed | Result |
+|---|---:|---:|---|
+| Command Centre | 200 | 200 | PASS |
+| Operations | 200 | 200 | PASS |
+| Support Tickets | 200 | 200 | PASS |
+| Own notifications API | 200 | 200 | PASS |
+| Learner Accounts | 403 | 403 | PASS |
+| Course Approvals | 403 | 403 | PASS |
+| SEO | 403 | 403 | PASS |
+| Legacy Course Builder | 403 | 403 | PASS |
+| Tiptap Builder | 403 | 403 | PASS |
+| Finance | 403 | 403 | PASS |
+| Subscriptions | 403 | 403 | PASS |
+| Business Settings | 403 | 403 | PASS |
+| Referral Rewards | 403 | 403 | PASS |
+| Gift Sending | 403 | 403 | PASS |
+| Disputes | 403 | 403 | PASS |
+| Staff Approvals API | 403 | 403 | PASS |
+| Growth Analytics | 403 | 403 | PASS |
+| **Total** | **17 decisions** | **17 matched** | **17/17 PASS** |
+
+The browser network transcript explicitly showed HTTP 403 for all 13 restricted requests. The console table visible in the owner's pasted message was cut off after row 11, but the missing rows are accounted for by the network log. The first four allowed responses and their final paths were visible in the table.
+
+The immediate `Promise { <state>: "pending" }` line is the normal initial display of the async console invocation, not an indication of a failed test; the subsequent route outputs show completion.
+
+### Interpretation and limits
+
+- Generic staff can reach the shared Command Centre, Operations, Support queue and their own notifications API.
+- The tested generic staff account is denied from the tested restricted customer, Academy authoring/review, Revenue, Growth, staff-approval and disputes routes.
+- This confirms route-level permission boundaries for this one generic Staff persona on the V2 deployment.
+- It does not establish that a staff member can see only tickets within their assigned approver/plan scope; a known out-of-scope ticket URL still needs a negative test.
+- Department specialist roles (Academy, Revenue, Growth and Platform), Platform job/provisioning details, response field minimisation and action-level permissions remain unverified.
+- All requests were GET-only; no ticket, account, subscription, gift, approval, refund, dispute or other business record was changed.
+
+**Updated outcome:** The V2 owner Admin route matrix is 25/25 PASS (recorded in Section 7 and the handoff); the V2 generic Staff matrix is 17/17 PASS. Overall acceptance and Phase 0 remain open pending object-scope, specialist-role and remaining workflow checks.
