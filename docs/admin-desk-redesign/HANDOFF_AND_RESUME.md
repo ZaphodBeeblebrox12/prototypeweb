@@ -659,7 +659,7 @@ Use the existing promoted staff account (`role=user`, `is_staff=true`, `is_admin
 
 **Current implementation branch:** `admin-desk-v2-implementation`  
 **Draft PR:** [#68 — TradeThesis Admin Desk V2 unified workspace](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/68)  
-**Latest recorded implementation head:** `c085fcdeb1d85dd39911b3d12683c56144780be5`  
+**Latest recorded implementation head:** `ac0bf948b0a02c7dd1bcec4f7327215bc7d3395c`  
 **Current state:** active implementation; do not merge or deploy on the basis of this update.
 
 ### Additional implementation completed after the initial handoff
@@ -690,6 +690,9 @@ The implementation test suite now covers:
 ### Latest engineering gate
 
 At the time of this update, a fresh CI run is active against `c085fcdeb1d85dd39911b3d12683c56144780be5`. The integration-target check and Tiptap compatibility suite are green; Python 3.11/3.12 full backend suites and Django verification are still running. Do not record CI as fully green until all jobs complete on the latest PR head.
+
+**Follow-up implementation note (15 November):** The Offers & Access register now preserves stored offer activation separately from derived price readiness. Revenue-owned Plan and price fields are not fetched or rendered for users without the corresponding Revenue permissions. Regression coverage includes an inactive offer with an active one-time price and an Academy content-admin who lacks Revenue access. Latest full Python and verification suites are still running on `ac0bf948b0a02c7dd1bcec4f7327215bc7d3395c`; wait for all jobs to finish before treating the implementation as engineering-ready.
+
 
 ### Still deferred / not authorised
 
