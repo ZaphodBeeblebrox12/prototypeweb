@@ -641,6 +641,8 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
                     Course.AccessType.MIXED,
                 ],
                 plan__is_active=True,
+                plan__is_hidden=True,
+                plan__is_trial=False,
                 plan__prices__interval=PlanPrice.Interval.ONE_TIME,
                 plan__prices__is_active=True,
             ).values_list("course_id", flat=True).distinct()
@@ -654,6 +656,8 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
                     Course.AccessType.MIXED,
                 ],
                 plan__is_active=True,
+                plan__is_hidden=True,
+                plan__is_trial=False,
                 plan__geo_prices__interval=PlanPrice.Interval.ONE_TIME,
                 plan__geo_prices__is_active=True,
             ).values_list("course_id", flat=True).distinct()

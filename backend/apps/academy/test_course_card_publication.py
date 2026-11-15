@@ -12,6 +12,7 @@ from .course_card_utils import (
     course_card_publication_issue,
     course_topic_tags,
     is_course_card_recommendable,
+    is_course_discovery_ready,
 )
 from .importing import publish_course_import, validate_import_for_publish
 from .models import Course, CourseImport
@@ -25,6 +26,12 @@ class CourseDiscoveryReadinessTests(SimpleTestCase):
             is_course_discovery_ready(
                 "This is test course",
                 "aadfa asdf adf asdfasdf",
+            )
+        )
+        self.assertFalse(
+            is_course_card_recommendable(
+                "This is test course",
+                "A practical guide to reading market structure and evaluating trade context.",
             )
         )
 

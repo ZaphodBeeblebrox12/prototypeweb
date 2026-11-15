@@ -55,7 +55,10 @@ def course_card_publication_issue(title, summary, description=""):
 
 def is_course_card_recommendable(title, summary, description=""):
     """Only recommend a published course when its visible title and copy are ready."""
-    return not course_card_publication_issue(title, summary, description)
+    return (
+        not course_card_publication_issue(title, summary, description)
+        and not _DISCOVERY_TEST_TITLE_RE.search(str(title or ""))
+    )
 
 _DISCOVERY_TEST_TITLE_RE = re.compile(
     r"\b(?:test|sample|demo)\s+(?:course|programme|program)\b",
