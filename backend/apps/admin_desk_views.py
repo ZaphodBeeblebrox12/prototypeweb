@@ -167,6 +167,8 @@ def admin_desk_courses(request):
         seo_filter = ""
 
     can_view_offers = _allowed(request.user, "academy.view_courseoffer")
+    if not can_view_offers:
+        offer_filter = ""
     courses = _admin_desk_course_queryset(include_offers=can_view_offers)
     if query:
         courses = courses.filter(
