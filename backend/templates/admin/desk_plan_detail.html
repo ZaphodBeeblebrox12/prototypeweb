@@ -70,6 +70,7 @@
           {% if plan.is_hidden %}
           <div class="fact"><span>Grant duration</span><strong>{% if plan.grant_duration_days %}{{ plan.grant_duration_days }} days{% else %}No expiry configured{% endif %}</strong></div>
           <div class="fact"><span>Access notice channel</span><strong>{{ plan.get_notice_channel_display }}</strong></div>
+          <div class="fact"><span>Ticket approver scope</span><strong>{{ ticket_approver_scope }}</strong></div>
           {% endif %}
         </div>
         {% if plan.description %}<p class="muted" style="margin:12px 0 0">{{ plan.description }}</p>{% endif %}
