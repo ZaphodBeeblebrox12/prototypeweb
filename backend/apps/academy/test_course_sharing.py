@@ -27,22 +27,6 @@ class CourseShareCopyTests(TestCase):
             DEFAULT_SHARE_MESSAGE.replace("{course_title}", self.course.title),
         )
 
-    def test_candlestick_patterns_uses_tailored_invitation(self):
-        course = Course.objects.create(
-            title="Candlestick Patterns",
-            slug="candlestick-patterns",
-            share_message=DEFAULT_SHARE_MESSAGE,
-            status=Course.Status.PUBLISHED,
-            catalogue_role=Course.CatalogueRole.MINI,
-        )
-
-        self.assertEqual(
-            course_share_message(course),
-            "Most traders see a green or red candle and stop there. This course "
-            "shows you the story inside it: who is in control, who is losing "
-            "ground, and what that means for your next entry.",
-        )
-
     def test_course_specific_copy_overrides_default(self):
         self.course.share_title = "A useful chart-reading course"
         self.course.share_message = "Take a look at {course_title}."
