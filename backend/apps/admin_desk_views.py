@@ -358,6 +358,7 @@ def admin_desk_course_offers(request):
         "active_filter": active_filter,
         "can_view_plans": can_view_plans,
         "can_view_commercial_readiness": can_view_commercial_readiness,
+        "can_open_course_detail": can_open_course_detail,
         "matched_count": len(rows),
         "desk_nav": _nav(request),
     })
