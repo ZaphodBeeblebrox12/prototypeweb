@@ -1658,6 +1658,15 @@ def admin_desk_platform(request):
                     access_item("Invoices", "payments.view_invoice"),
                     access_item("Subscriptions", "subscriptions.view_subscription"),
                     access_item("Change subscriptions", "subscriptions.change_subscription"),
+                    access_item("Plan catalogue", "subscriptions.view_plan"),
+                    access_item("Product catalogue", "subscriptions.view_product"),
+                    access_item("Global base prices", "subscriptions.view_planprice"),
+                    access_item("Geo price overrides", "subscriptions.view_geoplanprice"),
+                    access_item("Plan feature bullets", "subscriptions.view_planfeature"),
+                    access_item(
+                        "Community channel mappings",
+                        "bot_integration.view_planchannelmapping",
+                    ),
                     {
                         "label": "Business settings",
                         "granted": (
@@ -1880,6 +1889,8 @@ def admin_desk_revenue(request):
     since = now - timedelta(days=30)
     soon = now + timedelta(hours=72)
     context = {"period_days": 30}
+    if _allowed(request.user, "subscriptions.view_plan"):
+        context["plans_url"] = reverse("staff_admin_desk_plans")
 
     can_view_payments = _allowed(request.user, "payments.view_paymentintent")
     can_view_invoices = _allowed(request.user, "payments.view_invoice")
@@ -1983,10 +1994,201 @@ def admin_desk_revenue(request):
     context["has_revenue_sections"] = any(
         key in context for key in (
             "payment_summary", "invoice_summary", "subscription_summary",
-            "dispute_summary", "business_url",
+            "dispute_summary", "business_url", "plans_url",
         )
     )
     return render(request, "admin/desk_revenue.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_plans(request):
+    """Read-only Plans & Pricing workspace over canonical Product/Plan records."""
+    _guard(request, "subscriptions.view_plan")
+    from apps.subscriptions.models import GeoPlanPrice, Plan, PlanPrice, Product
+
+    can_view_products = _allowed(request.user, "subscriptions.view_product")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_features = _allowed(request.user, "subscriptions.view_planfeature")
+    can_view_channel_mappings = _allowed(
+        request.user, "bot_integration.view_planchannelmapping"
+    )
+
+    query = request.GET.get("q", "").strip()[:120]
+    tier_filter = request.GET.get("tier", "").strip().lower()
+    state_filter = request.GET.get("state", "").strip().lower()
+    queryset = Plan.objects.all()
+    if can_view_products:
+        queryset = queryset.select_related("product")
+    if query:
+        search_filter = Q(name__icontains=query) | Q(description__icontains=query)
+        if can_view_products:
+            search_filter |= Q(product__name__icontains=query) | Q(product__slug__icontains=query)
+        queryset = queryset.filter(search_filter)
+    if tier_filter in {value for value, _label in Plan.Tier.choices}:
+        queryset = queryset.filter(tier=tier_filter)
+    else:
+        tier_filter = ""
+    if state_filter == "active":
+        queryset = queryset.filter(is_active=True, is_hidden=False)
+    elif state_filter == "inactive":
+        queryset = queryset.filter(is_active=False)
+    elif state_filter == "hidden":
+        queryset = queryset.filter(is_hidden=True)
+    elif state_filter == "trial":
+        queryset = queryset.filter(is_trial=True)
+    else:
+        state_filter = ""
+
+    if can_view_base_prices:
+        queryset = queryset.annotate(
+            active_base_price_count=Count(
+                "prices", filter=Q(prices__is_active=True), distinct=True
+            )
+        )
+    if can_view_geo_prices:
+        queryset = queryset.annotate(
+            active_geo_price_count=Count(
+                "geo_prices", filter=Q(geo_prices__is_active=True), distinct=True
+            )
+        )
+
+    if can_view_products:
+        queryset = queryset.order_by(
+            "product__display_order", "product__name",
+            "display_order", "tier", "name",
+        )
+    else:
+        queryset = queryset.order_by("display_order", "tier", "name")
+
+    page = Paginator(queryset, 30).get_page(request.GET.get("page"))
+    all_plans = Plan.objects.all()
+    context = {
+        "plans_page": page,
+        "query": query,
+        "tier_filter": tier_filter,
+        "state_filter": state_filter,
+        "tier_choices": Plan.Tier.choices,
+        "plan_summary": {
+            "total": all_plans.count(),
+            "active": all_plans.filter(is_active=True, is_hidden=False).count(),
+            "hidden": all_plans.filter(is_hidden=True).count(),
+            "trial": all_plans.filter(is_trial=True).count(),
+            "products": Product.objects.count() if can_view_products else None,
+        },
+        "can_view_products": can_view_products,
+        "can_view_base_prices": can_view_base_prices,
+        "can_view_geo_prices": can_view_geo_prices,
+        "can_view_features": can_view_features,
+        "can_view_channel_mappings": can_view_channel_mappings,
+        "can_open_advanced_admin": any(
+            _allowed(request.user, permission)
+            for permission in (
+                "subscriptions.change_plan",
+                "subscriptions.change_planprice",
+                "subscriptions.change_geoplanprice",
+                "subscriptions.change_planfeature",
+            )
+        ),
+        "advanced_admin_url": reverse("admin:subscriptions_plan_changelist"),
+        "desk_nav": _nav(request),
+    }
+    return render(request, "admin/desk_plans.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_plan_detail(request, plan_id):
+    """Inspect one Plan and only the related configuration the operator may view."""
+    _guard(request, "subscriptions.view_plan")
+    from apps.subscriptions.models import GeoPlanPrice, Plan, PlanFeature, PlanPrice
+    from apps.bot_integration.models import PlanChannelMapping
+
+    can_view_product = _allowed(request.user, "subscriptions.view_product")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_features = _allowed(request.user, "subscriptions.view_planfeature")
+    can_view_channel_mappings = _allowed(
+        request.user, "bot_integration.view_planchannelmapping"
+    )
+    plan = get_object_or_404(Plan.objects.select_related("product"), pk=plan_id)
+
+    base_prices = []
+    if can_view_base_prices:
+        base_prices = [
+            {
+                "interval": price.get_interval_display(),
+                "amount": f"{price.currency} {price.price_cents / 100:,.2f}",
+                "active": price.is_active,
+            }
+            for price in PlanPrice.objects.filter(plan=plan).order_by("interval", "currency")
+        ]
+
+    geo_prices = []
+    if can_view_geo_prices:
+        for price in GeoPlanPrice.objects.filter(plan=plan).order_by(
+            "interval", "country", "region", "currency"
+        ):
+            target = []
+            if price.country:
+                target.append(f"Country {price.country}")
+            if price.region:
+                target.append(f"Region {price.region}")
+            geo_prices.append({
+                "interval": price.get_interval_display(),
+                "target": " · ".join(target) or "Scope not recorded",
+                "amount": f"{price.currency} {price.price_cents / 100:,.2f}",
+                "active": price.is_active,
+                "country_specific": bool(price.country),
+            })
+
+    features = (
+        list(PlanFeature.objects.filter(plan=plan).order_by("position", "id"))
+        if can_view_features else []
+    )
+    channel_mappings = []
+    if can_view_channel_mappings:
+        channel_mappings = [
+            {
+                "platform": mapping.get_platform_display(),
+                "name": mapping.name or "Configured channel target",
+            }
+            for mapping in PlanChannelMapping.objects.filter(plan=plan).order_by(
+                "platform", "name"
+            )
+        ]
+
+    context = {
+        "plan": plan,
+        "product": plan.product if can_view_product else None,
+        "base_prices": base_prices,
+        "geo_prices": geo_prices,
+        "features": features,
+        "channel_mappings": channel_mappings,
+        "can_view_product": can_view_product,
+        "can_view_base_prices": can_view_base_prices,
+        "can_view_geo_prices": can_view_geo_prices,
+        "can_view_features": can_view_features,
+        "can_view_channel_mappings": can_view_channel_mappings,
+        "can_view_subscriptions": _allowed(
+            request.user, "subscriptions.view_subscription"
+        ),
+        "can_open_advanced_admin": any(
+            _allowed(request.user, permission)
+            for permission in (
+                "subscriptions.change_plan",
+                "subscriptions.change_planprice",
+                "subscriptions.change_geoplanprice",
+                "subscriptions.change_planfeature",
+            )
+        ),
+        "advanced_admin_url": reverse("admin:subscriptions_plan_change", args=[plan.pk]),
+        "plans_url": reverse("staff_admin_desk_plans"),
+        "subscriptions_url": reverse("staff_admin_desk_subscriptions"),
+        "desk_nav": _nav(request),
+    }
+    return render(request, "admin/desk_plan_detail.html", context)
 
 
 @login_required
@@ -2147,6 +2349,7 @@ def _nav(request):
     return {
         "accounts": _allowed(request.user, "accounts.view_user"),
         "subscriptions": _allowed(request.user, "subscriptions.view_subscription"),
+        "plans": _allowed(request.user, "subscriptions.view_plan"),
         "finance": (
             _allowed(request.user, "payments.view_paymentintent")
             or _allowed(request.user, "payments.view_refund")
@@ -2923,6 +3126,36 @@ def admin_desk_search(request):
                         f"{invoice.currency} {invoice.total_cents / 100:,.2f}"
                     ),
                     reverse("staff_admin_desk_invoice_detail", args=[invoice.pk]),
+                )
+
+        if _allowed(request.user, "subscriptions.view_plan"):
+            from apps.subscriptions.models import Plan
+
+            can_search_product = _allowed(request.user, "subscriptions.view_product")
+            plan_filter = Q(name__icontains=query) | Q(description__icontains=query)
+            if can_search_product:
+                plan_filter |= Q(product__name__icontains=query)
+            plans = Plan.objects.filter(plan_filter).only(
+                "id", "name", "tier", "is_active", "is_hidden", "is_trial",
+            ).order_by("display_order", "tier", "name")[:5]
+            for plan in plans:
+                state = (
+                    "Hidden" if plan.is_hidden
+                    else "Active" if plan.is_active
+                    else "Inactive"
+                )
+                if plan.is_trial:
+                    state += " · Trial"
+                if can_search_product and plan.product_id:
+                    title = f"{plan.product.name} · {plan.name}"
+                else:
+                    title = plan.name
+                add_result(
+                    "Revenue",
+                    "Plan",
+                    title,
+                    f"{plan.get_tier_display()} · {state}",
+                    reverse("staff_admin_desk_plan_detail", args=[plan.pk]),
                 )
 
         if _allowed(request.user, "subscriptions.view_subscription"):
