@@ -209,6 +209,62 @@ class AdminDeskTests(TestCase):
         self.assertNotContains(response, reverse("staff_admin_desk_accounts"))
         self.assertNotContains(response, "Active learner accounts")
 
+    def test_restricted_support_ticket_blocks_detail_action_and_customer_profile(self):
+        from apps.subscriptions.models import Plan
+
+        operator = User.objects.create_user(
+            username="restricted-scope-operator",
+            email="restricted-scope-operator@example.test",
+            is_staff=True,
+        )
+        other_reviewer = User.objects.create_user(
+            username="restricted-scope-approver",
+            email="restricted-scope-approver@example.test",
+            is_staff=True,
+        )
+        member = User.objects.create_user(
+            username="restricted-scope-member",
+            email="restricted-scope-member@example.test",
+        )
+        restricted_plan = Plan.objects.create(
+            name="Restricted reviewer plan",
+            tier=Plan.Tier.PRO,
+        )
+        restricted_plan.ticket_approvers.add(other_reviewer)
+        ticket = SupportTicket.objects.create(
+            user=member,
+            plan=restricted_plan,
+            category=SupportTicket.Category.BILLING,
+            message="A private support request for another reviewer.",
+        )
+        self.client.force_login(operator)
+
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk])
+        )
+        self.assertEqual(detail_response.status_code, 404)
+
+        messages_before = ticket.messages.count()
+        action_response = self.client.post(
+            reverse("staff_admin_desk_support_ticket_action", args=[ticket.pk]),
+            {
+                "action": "public_reply",
+                "body": "This reply must not be saved by an unauthorised reviewer.",
+            },
+        )
+        self.assertEqual(action_response.status_code, 404)
+        self.assertEqual(ticket.messages.count(), messages_before)
+
+        customer_response = self.client.get(
+            reverse("staff_admin_desk_customer_360", args=[member.pk])
+        )
+        self.assertEqual(customer_response.status_code, 403)
+        self.assertNotContains(
+            customer_response,
+            "A private support request for another reviewer.",
+            status_code=403,
+        )
+
     def test_my_work_is_limited_to_current_staff_assignments_and_notifications(self):
         operator = User.objects.create_user(
             username="my-work-operator",
