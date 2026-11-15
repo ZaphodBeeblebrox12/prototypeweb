@@ -13,9 +13,10 @@
   display: grid;
   grid-template-columns: 252px minmax(0, 1fr);
   align-items: stretch;
-  width: min(1800px, 100%);
+  width: 100%;
+  max-width: none;
   min-height: calc(100vh - 76px);
-  margin: 0 auto;
+  margin: 0;
   background: var(--tt-desk-ivory);
 }
 .tt-admin-desk-layout .tt-admin-desk-main {
