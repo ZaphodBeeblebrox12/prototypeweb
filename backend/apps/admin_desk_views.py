@@ -2188,9 +2188,16 @@ def admin_desk_plan_detail(request, plan_id):
             )
         ]
 
+    ticket_approver_count = plan.ticket_approvers.count()
+    ticket_approver_scope = (
+        f"{ticket_approver_count} assigned staff approver(s)"
+        if ticket_approver_count
+        else "Any staff (default)"
+    )
     context = {
         "plan": plan,
         "product": plan.product if can_view_product else None,
+        "ticket_approver_scope": ticket_approver_scope,
         "base_prices": base_prices,
         "geo_prices": geo_prices,
         "features": features,
