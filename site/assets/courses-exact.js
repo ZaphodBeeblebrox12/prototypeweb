@@ -236,11 +236,17 @@
       ['Facebook','fb','https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url)],
       ['X','xx','https://twitter.com/intent/tweet?text=' + encodeURIComponent(message) + '&url=' + encodeURIComponent(url)]
     ];
-    const symbols = {wa:'W',tg:'➤',in:'in',fb:'f',xx:'𝕏'};
+    const icons = {
+      wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.88 11.88 0 0 0 12.05 0C5.46 0 .1 5.36.1 11.95c0 2.1.55 4.15 1.6 5.96L0 24l6.25-1.64a11.9 11.9 0 0 0 5.79 1.48h.01C18.64 23.84 24 18.48 24 11.9c0-3.18-1.24-6.17-3.48-8.42ZM12.05 21.8a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.71.97.99-3.62-.24-.37a9.82 9.82 0 0 1-1.51-5.24c0-5.45 4.44-9.89 9.9-9.89a9.83 9.83 0 0 1 7 2.9 9.84 9.84 0 0 1 2.9 7c0 5.46-4.44 9.9-9.9 9.9Zm5.43-7.41c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.95 1.17-.18.2-.35.22-.65.07-.3-.15-1.28-.47-2.44-1.5-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.53.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.68-1.63-.93-2.23-.24-.58-.49-.5-.68-.51h-.58c-.2 0-.53.08-.8.38-.28.3-1.05 1.02-1.05 2.48s1.08 2.88 1.23 3.08c.15.2 2.12 3.24 5.13 4.54.72.31 1.28.49 1.72.63.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.18-1.42-.08-.13-.28-.2-.58-.35Z"/></svg>',
+      tg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.95 4.57c.17-1.45-1.38-2.1-2.65-1.6L1.5 10.55c-1.78.69-1.75 1.66-.3 2.12l5.1 1.6 1.97 6.13c.25.78.13 1.1.94 1.1.63 0 .91-.29 1.26-.62l2.47-2.4 5.14 3.8c.95.53 1.64.26 1.88-.89l3.37-15.91ZM8.1 13.9l10.7-6.76c.53-.32 1.02-.15.62.2l-8.85 7.99-.35 3.75L8.1 13.9Z"/></svg>',
+      in: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.61 0 4.28 2.38 4.28 5.48v6.26ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>',
+      fb: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.39H7.08V12h3.04V9.36c0-3 1.79-4.66 4.53-4.66 1.31 0 2.68.23 2.68.23v2.95h-1.51c-1.49 0-1.95.93-1.95 1.88V12h3.32l-.53 3.46h-2.79v8.39A12 12 0 0 0 24 12Z"/></svg>',
+      xx: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.78 7.75L23.2 22h-6.25l-4.9-7.35L5.62 22H2.5l7.25-8.29L1.8 2h6.4l4.43 6.77L18.9 2Zm-1.1 18h1.73L7.27 3.9H5.42L17.8 20Z"/></svg>'
+    };
     const options = $('#shareOptions');
     options.innerHTML = targets.map(([label,kind,href]) =>
-      '<a href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="share-channel-icon ' + kind + '">' +
-      symbols[kind] + '</span><span>' + label + '</span><span style="margin-left:auto;color:#9a9a8d">↗</span></a>'
+      '<a href="' + href + '" target="_blank" rel="noopener noreferrer"><span class="share-channel-icon ' + kind + '" aria-hidden="true">' +
+      icons[kind] + '</span><span>' + label + '</span><span class="share-channel-arrow" aria-hidden="true">↗</span></a>'
     ).join('');
     if (typeof navigator.share === 'function') {
       const more = document.createElement('button');
