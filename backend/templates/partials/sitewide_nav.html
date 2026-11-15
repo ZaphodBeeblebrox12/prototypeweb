@@ -24,7 +24,26 @@
       </div>
     </div>
     {% endif %}
-    {% if user.is_authenticated %}
+    {% if request.path|slice:":17" == "/staff/admin-desk" %}
+      {% if user.is_authenticated and user.is_staff %}
+        <details class="tt-admin-workspace-switcher">
+          <summary aria-label="Switch workspace" aria-haspopup="true">
+            <span>Member Area</span><span class="tt-admin-workspace-caret" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="tt-admin-workspace-dropdown" aria-label="Available workspaces">
+            <p class="tt-admin-workspace-eyebrow">SWITCH WORKSPACE</p>
+            <a class="is-current" href="{% url 'staff_admin_desk' %}" aria-current="page">
+              <span class="tt-admin-workspace-option-title">Admin Desk</span>
+              <small>Current workspace</small>
+            </a>
+            <a href="{% url 'dashboard' %}">
+              <span class="tt-admin-workspace-option-title">Member Area</span>
+              <small>Open learner dashboard</small>
+            </a>
+          </div>
+        </details>
+      {% endif %}
+    {% elif user.is_authenticated %}
       <a class="button member-area-link" href="{% url 'dashboard' %}">Member Area ↗</a>
     {% elif request.path == '/accounts/login/' %}
       <a class="button member-area-link" href="{% url 'account_signup' %}">Create account ↗</a>
