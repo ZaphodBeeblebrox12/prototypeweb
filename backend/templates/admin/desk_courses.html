@@ -118,7 +118,7 @@
             <td>{{ row.course.updated_at|date:"j M Y" }}</td>
           </tr>
           {% empty %}
-          <tr><td class="empty" colspan="8">{% if query or role_filter or status_filter or access_filter or offer_filter or seo_filter %}No courses match the selected search and filters.{% else %}No Course records are available in the catalogue yet.{% endif %}</td></tr>
+          <tr><td class="empty" colspan="{% if can_view_offers %}8{% else %}7{% endif %}">{% if query or role_filter or status_filter or access_filter or offer_filter or seo_filter %}No courses match the selected search and filters.{% else %}No Course records are available in the catalogue yet.{% endif %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
