@@ -14,7 +14,7 @@
     <form class="tt-desk-global-search" method="get" action="{% url 'staff_admin_desk_search' %}" role="search">
       <label class="tt-desk-global-search-label" for="ttDeskGlobalSearch">Search workspace</label>
       <div class="tt-desk-global-search-control">
-        <input id="ttDeskGlobalSearch" type="search" name="q" value="{{ request.GET.q|default:'' }}" maxlength="120" minlength="2" placeholder="People, tickets, disputes…" autocomplete="off">
+        <input id="ttDeskGlobalSearch" type="search" name="q" value="{{ request.GET.q|default:'' }}" maxlength="120" minlength="2" placeholder="People, tickets, refunds, disputes…" autocomplete="off">
         <button type="submit" aria-label="Search workspace"><i class="bi bi-search" aria-hidden="true"></i></button>
       </div>
     </form>
