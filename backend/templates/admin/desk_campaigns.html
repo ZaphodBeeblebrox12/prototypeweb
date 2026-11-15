@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Campaigns &amp; Audiences | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Campaigns &amp; Audiences{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-campaigns{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-campaigns *{box-sizing:border-box}
+  .tt-campaigns a{color:#315b43;text-underline-offset:3px}
+  .tt-campaigns .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 18px}
+  .tt-campaigns .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-campaigns h1{margin:0;font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-campaigns .intro{max-width:790px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+  .tt-campaigns .actions,.tt-campaigns .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tt-campaigns .button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-campaigns .button.primary{border-color:var(--green);background:var(--green);color:#fff}
+  .tt-campaigns .panel{margin:12px 0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-campaigns .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tt-campaigns .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-campaigns .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-campaigns .panel-body{padding:13px 14px}
+  .tt-campaigns .filters{padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:#f8f8f3}
+  .tt-campaigns input,.tt-campaigns select{min-height:34px;padding:6px 9px;border:1px solid #d4d8cf;border-radius:3px;background:#fff;color:var(--ink);font:inherit;font-size:11px}
+  .tt-campaigns input[type=search]{min-width:220px;flex:1}
+  .tt-campaigns .table-wrap{overflow:auto}
+  .tt-campaigns table{width:100%;border-collapse:collapse;min-width:620px}
+  .tt-campaigns th,.tt-campaigns td{padding:10px 9px;border-bottom:1px solid var(--soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-campaigns th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+  .tt-campaigns tr:last-child td{border-bottom:0}
+  .tt-campaigns .muted{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.4}
+  .tt-campaigns .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750;white-space:nowrap}
+  .tt-campaigns .empty{padding:20px 8px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-campaigns .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+  .tt-campaigns .pagination{display:flex;justify-content:flex-end;align-items:center;gap:9px;padding:10px 0 0;color:var(--muted);font-size:10px}
+  @media(max-width:600px){.tt-campaigns h1{font-size:27px}.tt-campaigns .head{align-items:flex-start}.tt-campaigns .actions,.tt-campaigns .actions .button{width:100%}.tt-campaigns input[type=search]{min-width:100%}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-campaigns">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Growth / Campaign operations</p>
+      <h1>Campaigns &amp; Audiences</h1>
+      <p class="intro">Inspect campaign records, reusable audiences and frozen audience snapshots. This workspace is read-only; campaign configuration and launch actions remain in their existing controlled workflow.</p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{% url 'staff_admin_desk_growth' %}">← Growth overview</a>
+      {% if campaign_admin_url %}<a class="button" href="{{ campaign_admin_url }}">Advanced campaign configuration ↗</a>{% endif %}
+      {% if audience_admin_url %}<a class="button" href="{{ audience_admin_url }}">Advanced audience configuration ↗</a>{% endif %}
+    </div>
+  </header>
+
+  <form class="filters" method="get" action="{% url 'staff_admin_desk_campaigns' %}">
+    <input type="search" name="q" value="{{ query }}" maxlength="120" placeholder="Search campaigns and audiences" aria-label="Search campaigns and audiences">
+    {% if can_view_campaigns %}
+    <select name="state" aria-label="Campaign state">
+      <option value="">All campaign states</option>
+      <option value="draft"{% if state_filter == "draft" %} selected{% endif %}>Draft</option>
+      <option value="scheduled"{% if state_filter == "scheduled" %} selected{% endif %}>Scheduled</option>
+      <option value="sending"{% if state_filter == "sending" %} selected{% endif %}>Sending</option>
+      <option value="paused"{% if state_filter == "paused" %} selected{% endif %}>Paused</option>
+      <option value="done"{% if state_filter == "done" %} selected{% endif %}>Done</option>
+    </select>
+    {% endif %}
+    <button class="button primary" type="submit">Apply filters</button>
+    <a class="button" href="{% url 'staff_admin_desk_campaigns' %}">Clear</a>
+  </form>
+
+  {% if can_view_campaigns %}
+  <section class="panel" aria-labelledby="campaign-register-heading">
+    <div class="panel-head">
+      <div><h2 id="campaign-register-heading">Campaign register</h2><p>Canonical Campaign records · newest first</p></div>
+      <span class="pill">Read only</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Campaign</th><th>State</th>{% if can_view_audiences %}<th>Audience</th>{% endif %}{% if can_view_recipients %}<th>Frozen recipients</th>{% endif %}{% if can_view_template_versions %}<th>Template version</th>{% endif %}<th>Schedule / snapshot</th><th></th></tr></thead>
+        <tbody>
+          {% for row in campaign_rows %}
+          <tr>
+            <td><strong>{{ row.name }}</strong><span class="muted">Created {{ row.created_at|date:"j M Y, H:i" }}</span></td>
+            <td><span class="pill">{{ row.state }}</span></td>
+            {% if can_view_audiences %}<td>{{ row.audience_name }}{% if row.live_audience_estimate != None %}<span class="muted">Current live estimate: {{ row.live_audience_estimate }}</span>{% endif %}</td>{% endif %}
+            {% if can_view_recipients %}<td>{{ row.frozen_recipient_count|default:"—" }}</td>{% endif %}
+            {% if can_view_template_versions %}<td>{{ row.template_version|default:"—" }}{% if row.template_subject %}<span class="muted">{{ row.template_subject }}</span>{% endif %}</td>{% endif %}
+            <td>{% if row.scheduled_at %}Scheduled {{ row.scheduled_at|date:"j M Y, H:i" }}{% else %}Not scheduled{% endif %}{% if row.snapshot_at %}<span class="muted">Frozen {{ row.snapshot_at|date:"j M Y, H:i" }}</span>{% endif %}</td>
+            <td><a href="{{ row.detail_url }}">Inspect →</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="empty">No campaigns match the current filters.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if campaign_page and campaign_page.paginator.num_pages > 1 %}
+    <div class="pagination">
+      <span>Page {{ campaign_page.number }} of {{ campaign_page.paginator.num_pages }}</span>
+      {% if campaign_page.has_previous %}<a href="?page={{ campaign_page.previous_page_number }}&amp;q={{ query|urlencode }}&amp;state={{ state_filter|urlencode }}">Previous</a>{% endif %}
+      {% if campaign_page.has_next %}<a href="?page={{ campaign_page.next_page_number }}&amp;q={{ query|urlencode }}&amp;state={{ state_filter|urlencode }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if can_view_audiences %}
+  <section class="panel" aria-labelledby="audience-register-heading">
+    <div class="panel-head">
+      <div><h2 id="audience-register-heading">Audience register</h2><p>Frozen audience snapshots are distinct from current live membership estimates</p></div>
+      <span class="pill">Read only</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Audience</th><th>Description</th><th>Current live estimate</th>{% if can_view_campaigns %}<th>Campaigns</th>{% endif %}<th>Created</th></tr></thead>
+        <tbody>
+          {% for row in audience_rows %}
+          <tr>
+            <td><strong>{{ row.name }}</strong></td>
+            <td>{{ row.description|default:"—" }}</td>
+            <td>{% if row.live_count != None %}{{ row.live_count }}{% else %}Unable to estimate{% endif %}</td>
+            {% if can_view_campaigns %}<td>{{ row.campaign_count|default:"0" }}</td>{% endif %}
+            <td>{{ row.created_at|date:"j M Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="empty">No audiences are available to this account.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Current live membership is not the same as a campaign's frozen recipient list. Scheduling freezes the audience membership; this screen does not recalculate or alter that snapshot.</p>
+    {% if audiences_page and audiences_page.paginator.num_pages > 1 %}
+    <div class="pagination">
+      <span>Page {{ audiences_page.number }} of {{ audiences_page.paginator.num_pages }}</span>
+      {% if audiences_page.has_previous %}<a href="?audience_page={{ audiences_page.previous_page_number }}&amp;q={{ query|urlencode }}">Previous</a>{% endif %}
+      {% if audiences_page.has_next %}<a href="?audience_page={{ audiences_page.next_page_number }}&amp;q={{ query|urlencode }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <p class="note">Reporting and recipient states are evidence of local stored records. A local “Sent” state from the stub provider is not provider-confirmed delivery.</p>
+</div>
+{% endblock %}

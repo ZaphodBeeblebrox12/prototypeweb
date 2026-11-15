@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }} | Campaigns &amp; Audiences | TradeThesis{% endblock %}
+{% block page_title %}Campaign detail{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-campaign-detail{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1320px;margin:4px auto 36px;color:var(--ink)}
+  .tt-campaign-detail *{box-sizing:border-box}
+  .tt-campaign-detail a{color:#315b43;text-underline-offset:3px}
+  .tt-campaign-detail .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 18px}
+  .tt-campaign-detail .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-campaign-detail h1{margin:0;font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-campaign-detail .intro{margin:8px 0 0;color:var(--muted);font-size:12px}
+  .tt-campaign-detail .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-campaign-detail .button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-campaign-detail .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tt-campaign-detail .panel{min-width:0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-campaign-detail .panel-head{padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tt-campaign-detail .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-campaign-detail .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-campaign-detail .panel-body{padding:13px 14px}
+  .tt-campaign-detail .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .tt-campaign-detail .fact{min-width:0;padding:9px;border-bottom:1px solid var(--soft)}
+  .tt-campaign-detail .fact span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+  .tt-campaign-detail .fact strong{display:block;margin-top:5px;font-size:12px;overflow-wrap:anywhere}
+  .tt-campaign-detail .table-wrap{overflow:auto}
+  .tt-campaign-detail table{width:100%;border-collapse:collapse;min-width:420px}
+  .tt-campaign-detail th,.tt-campaign-detail td{padding:9px 8px;border-bottom:1px solid var(--soft);text-align:left;font-size:10px}
+  .tt-campaign-detail th{color:#738078;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+  .tt-campaign-detail tr:last-child td{border-bottom:0}
+  .tt-campaign-detail .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750}
+  .tt-campaign-detail .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+  .tt-campaign-detail .empty{color:var(--muted);padding:15px;text-align:center;font-size:10px}
+  @media(max-width:760px){.tt-campaign-detail .grid{grid-template-columns:1fr}.tt-campaign-detail h1{font-size:27px}.tt-campaign-detail .head{align-items:flex-start}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-campaign-detail">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Growth / Campaign record</p>
+      <h1>{{ campaign.name }}</h1>
+      <p class="intro">Created {{ campaign.created_at|date:"j M Y, H:i" }} · <span class="pill">{{ campaign.get_state_display }}</span></p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{{ campaigns_url }}">← Campaigns &amp; Audiences</a>
+      {% if can_open_advanced_admin %}<a class="button" href="{{ advanced_admin_url }}">Advanced configuration ↗</a>{% endif %}
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="campaign-record-heading">
+      <div class="panel-head"><h2 id="campaign-record-heading">Campaign lifecycle</h2><p>Stored scheduling and snapshot fields</p></div>
+      <div class="panel-body">
+        <div class="facts">
+          <div class="fact"><span>State</span><strong>{{ campaign.get_state_display }}</strong></div>
+          <div class="fact"><span>Scheduled at</span><strong>{% if campaign.scheduled_at %}{{ campaign.scheduled_at|date:"j M Y, H:i" }}{% else %}Not scheduled{% endif %}</strong></div>
+          <div class="fact"><span>Audience snapshot frozen</span><strong>{% if campaign.snapshot_at %}{{ campaign.snapshot_at|date:"j M Y, H:i" }}{% else %}Not yet frozen{% endif %}</strong></div>
+          <div class="fact"><span>Subject override</span><strong>{{ campaign.subject_override|default:"None" }}</strong></div>
+        </div>
+      </div>
+    </section>
+
+    {% if audience_context %}
+    <section class="panel" aria-labelledby="campaign-audience-heading">
+      <div class="panel-head"><h2 id="campaign-audience-heading">Audience context</h2><p>Live estimate and stored snapshot time are separate</p></div>
+      <div class="panel-body">
+        <div class="facts">
+          <div class="fact"><span>Audience</span><strong>{{ audience_context.name }}</strong></div>
+          <div class="fact"><span>Current live membership estimate</span><strong>{% if audience_context.live_count != None %}{{ audience_context.live_count }}{% else %}Unavailable{% endif %}</strong></div>
+          <div class="fact"><span>Snapshot frozen at</span><strong>{% if audience_context.snapshot_at %}{{ audience_context.snapshot_at|date:"j M Y, H:i" }}{% else %}Not frozen{% endif %}</strong></div>
+        </div>
+        <p class="note">{{ audience_context.estimate_note }}. This is not a count of the frozen recipient rows.</p>
+        {% if audience_context.description %}<p class="note">{{ audience_context.description }}</p>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if template_version %}
+    <section class="panel" aria-labelledby="campaign-template-heading">
+      <div class="panel-head"><h2 id="campaign-template-heading">Template snapshot</h2><p>Immutable version attached to this campaign</p></div>
+      <div class="panel-body">
+        <div class="facts">
+          <div class="fact"><span>Template</span><strong>{{ template_version.name }} · v{{ template_version.version_number }}</strong></div>
+          <div class="fact"><span>Kind / editor</span><strong>{{ template_version.kind }} · {{ template_version.editor_mode }}</strong></div>
+          <div class="fact"><span>Subject</span><strong>{{ template_version.subject|default:"—" }}</strong></div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if recipient_summary %}
+    <section class="panel" aria-labelledby="campaign-recipients-heading">
+      <div class="panel-head"><h2 id="campaign-recipients-heading">Frozen recipient states</h2><p>Stored CampaignRecipient rows</p></div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table><thead><tr><th>Status</th><th>Recipients</th></tr></thead><tbody>
+            {% for state,count in recipient_summary.items %}
+            <tr><td>{{ state|title }}</td><td>{{ count }}</td></tr>
+            {% empty %}<tr><td colspan="2" class="empty">No recipient rows are stored.</td></tr>{% endfor %}
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if metrics %}
+    <section class="panel" aria-labelledby="campaign-metrics-heading">
+      <div class="panel-head"><h2 id="campaign-metrics-heading">Stored campaign metrics</h2><p>Cached counters · not provider delivery proof</p></div>
+      <div class="panel-body">
+        <div class="facts">
+          <div class="fact"><span>Frozen total</span><strong>{{ metrics.total }}</strong></div>
+          <div class="fact"><span>Marked sent</span><strong>{{ metrics.sent }}</strong></div>
+          <div class="fact"><span>Failed</span><strong>{{ metrics.failed }}</strong></div>
+          <div class="fact"><span>Bounced</span><strong>{{ metrics.bounced }}</strong></div>
+          <div class="fact"><span>Complained</span><strong>{{ metrics.complained }}</strong></div>
+          <div class="fact"><span>Suppressed</span><strong>{{ metrics.suppressed }}</strong></div>
+        </div>
+        {% if metrics.updated_at %}<p class="note">Counters last updated {{ metrics.updated_at|date:"j M Y, H:i" }}.</p>{% endif %}
+        <p class="note"><strong>Important:</strong> the current campaign sweep uses a stub provider. “Marked sent” records a local state transition; it is not provider-confirmed delivery.</p>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_delivery %}
+    <section class="panel" aria-labelledby="campaign-delivery-heading">
+      <div class="panel-head"><h2 id="campaign-delivery-heading">Delivery evidence</h2><p>Stored provider/state counts, not raw payloads</p></div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table><thead><tr><th>Provider</th><th>State</th><th>Records</th></tr></thead><tbody>
+            {% for row in delivery_rows %}
+            <tr><td>{{ row.provider }}</td><td>{{ row.state }}</td><td>{{ row.count }}</td></tr>
+            {% empty %}<tr><td colspan="3" class="empty">No linked Delivery records are available.</td></tr>{% endfor %}
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+  <p class="note">This page is read-only. Campaign changes, scheduling and send actions remain in the existing Campaign workflow; no new provider action is performed here.</p>
+</div>
+{% endblock %}

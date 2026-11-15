@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}My Work | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}My Work{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-my-work{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--line-soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-my-work *{box-sizing:border-box}
+  .tt-my-work a{color:#315b43;text-underline-offset:3px}
+  .tt-my-work .head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:4px 0 19px}
+  .tt-my-work .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-my-work h1{margin:0;color:var(--ink);font:500 30px/1.08 Georgia,"Times New Roman",serif}
+  .tt-my-work .intro{max-width:790px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+  .tt-my-work .head-link{display:inline-flex;align-items:center;gap:7px;min-height:35px;padding:8px 11px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-my-work .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:13px}
+  .tt-my-work .stat{padding:12px 14px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-my-work .stat strong{display:block;color:var(--ink);font:600 24px/1 Georgia,"Times New Roman",serif;font-variant-numeric:tabular-nums}
+  .tt-my-work .stat span{display:block;margin-top:6px;color:var(--muted);font-size:10px}
+  .tt-my-work .panel{margin:0 0 13px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-my-work .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .tt-my-work .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-my-work .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+  .tt-my-work .panel-body{padding:13px 15px}
+  .tt-my-work .work-list{display:grid;margin:0;padding:0;list-style:none}
+  .tt-my-work .work-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+  .tt-my-work .work-item:last-child{border-bottom:0}
+  .tt-my-work .work-title{display:block;color:var(--ink);font-size:11px;font-weight:800;text-decoration:none}
+  .tt-my-work .work-title:hover{text-decoration:underline}
+  .tt-my-work .meta{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.45;overflow-wrap:anywhere}
+  .tt-my-work .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750;white-space:nowrap}
+  .tt-my-work .pill.overdue{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-my-work .empty{padding:22px 10px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-my-work .notification{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .tt-my-work .notification:last-child{border-bottom:0}
+  .tt-my-work .notification-dot{width:7px;height:7px;margin-top:5px;border-radius:50%;background:#d5d8d0}
+  .tt-my-work .notification.unread .notification-dot{background:var(--terracotta)}
+  .tt-my-work .notification strong{display:block;font-size:10.5px}
+  .tt-my-work .notification p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+  .tt-my-work .notification time{color:var(--muted);font-size:9px;white-space:nowrap}
+  .tt-my-work .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
+  @media(max-width:600px){.tt-my-work h1{font-size:27px}.tt-my-work .head{align-items:flex-start}.tt-my-work .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-my-work .panel-head{align-items:flex-start;flex-direction:column}.tt-my-work .work-item{grid-template-columns:1fr;gap:7px}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-my-work">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Command Centre / Personal queue</p>
+      <h1>My Work</h1>
+      <p class="intro">Assignments currently owned by you, plus a preview of your own notifications. Unassigned work and records outside your reviewer scope are not included.</p>
+    </div>
+    <a class="head-link" href="{{ notifications_url }}">Open all notifications →</a>
+  </header>
+
+  <section class="stats" aria-label="My work summary">
+    <div class="stat"><strong>{{ total_assigned_work }}</strong><span>Active assignments</span></div>
+    <div class="stat"><strong>{{ support_count }}</strong><span>Support tickets assigned to you</span></div>
+    <div class="stat"><strong>{{ unread_notification_count }}</strong><span>Unread personal notifications</span></div>
+  </section>
+
+  <section class="panel" aria-labelledby="my-support-heading">
+    <div class="panel-head">
+      <div><h2 id="my-support-heading">Assigned support tickets</h2><p>Active tickets you are authorised to review</p></div>
+      <a href="{% url 'staff_admin_desk_support_tickets' %}?assignment=mine">View assigned queue →</a>
+    </div>
+    <div class="panel-body">
+      {% if assigned_tickets %}
+      <ul class="work-list">
+        {% for ticket in assigned_tickets %}
+        <li class="work-item">
+          <div>
+            <a class="work-title" href="{% url 'staff_admin_desk_support_ticket' ticket.pk %}">#{{ ticket.short_id }} · {{ ticket.get_category_display }}</a>
+            <span class="meta">{{ ticket.user.get_full_name|default:ticket.user.get_username }} · {{ ticket.message|truncatechars:130 }}</span>
+            <span class="meta">Updated {{ ticket.updated_at|date:"j M Y · H:i" }} · {{ ticket.get_priority_display }} priority</span>
+          </div>
+          <div>
+            <span class="pill">{{ ticket.get_status_display }}</span>
+            {% if ticket.is_sla_overdue %}<span class="pill overdue">First response overdue</span>{% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="empty">No active support tickets are currently assigned to you.</div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if assigned_disputes is not None %}
+  <section class="panel" aria-labelledby="my-disputes-heading">
+    <div class="panel-head">
+      <div><h2 id="my-disputes-heading">Assigned disputes</h2><p>Active chargeback cases assigned to you</p></div>
+      <a href="/admin-disputes/">Open disputes workspace →</a>
+    </div>
+    <div class="panel-body">
+      {% if assigned_disputes %}
+      <ul class="work-list">
+        {% for dispute in assigned_disputes %}
+        <li class="work-item">
+          <div>
+            <a class="work-title" href="{% url 'disputes:detail' dispute.pk %}">{{ dispute.provider|upper }} · {{ dispute.provider_dispute_id }}</a>
+            <span class="meta">{{ dispute.get_reason_category_display }} · {{ dispute.currency }} {{ dispute.amount_cents }} minor units</span>
+            <span class="meta">Opened {{ dispute.opened_at|date:"j M Y" }}</span>
+          </div>
+          <div>
+            <span class="pill">{{ dispute.get_status_display }}</span>
+            {% if dispute.evidence_due_at and dispute.evidence_due_at < now %}<span class="pill overdue">Deadline passed</span>{% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="empty">No active disputes are currently assigned to you.</div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="panel" aria-labelledby="my-notifications-heading">
+    <div class="panel-head">
+      <div><h2 id="my-notifications-heading">Notifications &amp; alerts</h2><p>Only notifications addressed to your signed-in account</p></div>
+      <a href="{{ notifications_url }}">All notifications →</a>
+    </div>
+    <div class="panel-body">
+      {% if notifications %}
+      <ul class="work-list">
+        {% for notification in notifications %}
+        <li class="notification {% if not notification.is_read %}unread{% endif %}">
+          <span class="notification-dot" aria-hidden="true"></span>
+          <div>
+            <strong>{{ notification.title }}</strong>
+            <p>{{ notification.message|truncatechars:220 }}</p>
+          </div>
+          <time datetime="{{ notification.created_at|date:'c' }}">{{ notification.created_at|date:"j M · H:i" }}</time>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="empty">No notifications have been recorded for your account.</div>
+      {% endif %}
+      <p class="note">{{ notification_count }} total notifications · {{ unread_notification_count }} unread. Opening the full notification page provides the existing read/mark-read controls.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

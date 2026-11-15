@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Search | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Search{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-desk-search{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--soft:#ecece5;--paper:#fffefa;max-width:1180px;margin:4px auto 36px;color:var(--ink)}
+  .tt-desk-search *{box-sizing:border-box}
+  .tt-desk-search .head{margin:4px 0 18px}
+  .tt-desk-search .eyebrow{margin:0 0 6px;color:#b7654d;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-desk-search h1{margin:0;color:var(--ink);font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-desk-search .intro{max-width:760px;margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+  .tt-desk-search .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .tt-desk-search .search-form{display:flex;gap:8px;max-width:760px;margin:0 0 19px}
+  .tt-desk-search .search-form input{flex:1;min-width:0;min-height:42px;padding:9px 12px;border:1px solid #cfcfc4;border-radius:4px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px}
+  .tt-desk-search .search-form input:focus{outline:2px solid #879985;outline-offset:1px;border-color:#879985}
+  .tt-desk-search .search-form button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 16px;border:1px solid #36523f;border-radius:4px;background:#36523f;color:white;font-size:11px;font-weight:750;cursor:pointer}
+  .tt-desk-search .search-form button:hover{background:#293f31}
+  .tt-desk-search .summary{margin:0 0 12px;color:var(--muted);font-size:11px}
+  .tt-desk-search .groups{display:grid;gap:11px}
+  .tt-desk-search .group{border:1px solid var(--line);border-radius:5px;background:var(--paper)}
+  .tt-desk-search .group-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .tt-desk-search .group-head h2{margin:0;font-size:12px;font-weight:800}
+  .tt-desk-search .group-head span{color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
+  .tt-desk-search .results{margin:0;padding:0;list-style:none}
+  .tt-desk-search .result{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--soft)}
+  .tt-desk-search .result:last-child{border-bottom:0}
+  .tt-desk-search .result-copy{flex:1;min-width:0}
+  .tt-desk-search .kind{display:block;margin-bottom:3px;color:#a65e49;font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .tt-desk-search .result-title{display:block;overflow-wrap:anywhere;color:var(--ink);font-size:12px;font-weight:750;line-height:1.35}
+  .tt-desk-search .result-detail{display:block;margin-top:3px;color:var(--muted);font-size:10px;line-height:1.45;overflow-wrap:anywhere}
+  .tt-desk-search .open-link{flex:0 0 auto;color:#365b43;font-size:10px;font-weight:750;text-decoration:none;white-space:nowrap}
+  .tt-desk-search .open-link:hover{text-decoration:underline;text-underline-offset:3px}
+  .tt-desk-search .empty{padding:24px 16px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--muted);font-size:11px;line-height:1.6}
+  .tt-desk-search .empty strong{display:block;margin-bottom:5px;color:var(--ink);font-size:13px}
+  .tt-desk-search .scope-note{margin:13px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
+  @media(max-width:560px){
+    .tt-desk-search h1{font-size:27px}
+    .tt-desk-search .search-form{align-items:stretch}
+    .tt-desk-search .search-form button{padding-inline:11px}
+    .tt-desk-search .result{align-items:flex-start}
+    .tt-desk-search .open-link{padding-top:17px}
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-desk-search">
+  <header class="head">
+    <p class="eyebrow">Admin Desk / Global search</p>
+    <h1>Find a record</h1>
+    <p class="intro">Search the records available to your staff permissions. Results open the existing workspace that owns the record; this search does not change business data.</p>
+  </header>
+
+  <form class="search-form" method="get" action="{% url 'staff_admin_desk_search' %}" role="search">
+    <label class="sr-only" for="ttDeskSearchQuery">Search records</label>
+    <input id="ttDeskSearchQuery" type="search" name="q" value="{{ query }}" minlength="2" maxlength="120" placeholder="Search a learner, ticket, course, plan, payment, refund, dispute or job…" autocomplete="off" autofocus>
+    <button type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+  </form>
+
+  {% if not query %}
+  <div class="empty">
+    <strong>Search across your permitted workspaces</strong>
+    Enter at least two characters. The results will include only records visible to your current permissions and Support reviewer scope.
+  </div>
+  {% elif not searched %}
+  <div class="empty">
+    <strong>Enter a little more to search</strong>
+    Use at least two characters so the search can return useful, bounded results.
+  </div>
+  {% elif search_groups %}
+  <p class="summary">{{ total_results }} result{{ total_results|pluralize }} found for “{{ query }}” · up to five matches per record type</p>
+  <div class="groups">
+    {% for group in search_groups %}
+    <section class="group" aria-label="{{ group.name }} search results">
+      <header class="group-head">
+        <h2>{{ group.name }}</h2>
+        <span>{{ group.results|length }} match{{ group.results|length|pluralize }}</span>
+      </header>
+      <ul class="results">
+        {% for result in group.results %}
+        <li class="result">
+          <div class="result-copy">
+            <span class="kind">{{ result.kind }}</span>
+            <span class="result-title">{{ result.title }}</span>
+            <span class="result-detail">{{ result.detail }}</span>
+          </div>
+          <a class="open-link" href="{{ result.url }}">Open →</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <strong>No matching records were found</strong>
+    Try a username, email address, ticket wording, course title, invoice number or job type. Results are limited to records your current permissions allow you to see.
+  </div>
+  {% endif %}
+  <p class="scope-note">Search results are capped per record type. Private Support notes, payment and webhook payloads, provider webhook IDs, refund IDs in results, claim tokens and raw provisioning identifiers are not displayed.</p>
+</div>
+{% endblock %}

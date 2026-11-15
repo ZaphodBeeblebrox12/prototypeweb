@@ -10,7 +10,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q, Count, Max, Sum
+from django.db.models import Q, Count, Max, Sum, Case, When, Value, IntegerField, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -37,6 +37,571 @@ def _audit(action, actor, object_type, object_id, metadata=None):
         action=action, user=actor, object_type=object_type,
         object_id=object_id, metadata=metadata or {},
     )
+
+
+def _admin_desk_course_offer_readiness(offer, course):
+    """Describe offer state and source-backed saleability checks independently."""
+    reasons = []
+    if not offer.is_active:
+        reasons.append("The CourseOffer is marked inactive.")
+    if course.status != course.Status.PUBLISHED:
+        reasons.append("The course is not published.")
+    if course.access_type not in (course.AccessType.PAID, course.AccessType.MIXED):
+        reasons.append("The course access type is not Paid or Mixed.")
+    if not offer.plan_id:
+        reasons.append("No Revenue Plan is linked.")
+        price_ready = False
+    else:
+        plan = offer.plan
+        if not plan.is_hidden:
+            reasons.append("The linked Plan is not hidden from the subscription catalogue.")
+        base_prices = getattr(plan, "desk_active_one_time_prices", ())
+        geo_prices = getattr(plan, "desk_active_one_time_geo_prices", ())
+        price_ready = bool(base_prices or geo_prices)
+        if not price_ready:
+            reasons.append("No active one-time base or geo price is recorded.")
+
+    saleable = not reasons
+    if not offer.is_active:
+        label = "Inactive"
+    elif saleable:
+        label = "Saleable"
+    else:
+        label = "Active · needs attention"
+
+    return {
+        "saleable": saleable,
+        "label": label,
+        "reasons": reasons,
+        "price_ready": price_ready,
+    }
+
+
+def _admin_desk_course_offer_queryset(
+    *, include_plan=True, include_base_prices=True, include_geo_prices=True
+):
+    """Load Revenue-owned plan/price fields only for separately authorised readers."""
+    from apps.academy.models import CourseOffer
+
+    queryset = CourseOffer.objects.all()
+    if include_plan:
+        queryset = queryset.select_related("plan")
+
+    price_prefetches = []
+    if include_plan and include_base_prices:
+        from apps.subscriptions.models import PlanPrice
+
+        price_prefetches.append(
+            Prefetch(
+                "plan__prices",
+                queryset=PlanPrice.objects.filter(
+                    interval=PlanPrice.Interval.ONE_TIME,
+                    is_active=True,
+                ),
+                to_attr="desk_active_one_time_prices",
+            )
+        )
+    if include_plan and include_geo_prices:
+        from apps.subscriptions.models import GeoPlanPrice
+
+        price_prefetches.append(
+            Prefetch(
+                "plan__geo_prices",
+                queryset=GeoPlanPrice.objects.filter(
+                    interval=GeoPlanPrice.Interval.ONE_TIME,
+                    is_active=True,
+                ),
+                to_attr="desk_active_one_time_geo_prices",
+            )
+        )
+    if price_prefetches:
+        queryset = queryset.prefetch_related(*price_prefetches)
+    return queryset
+
+
+def _admin_desk_course_queryset(
+    *, include_offers, include_plan=True,
+    include_base_prices=True, include_geo_prices=True
+):
+    from apps.academy.models import Course
+
+    queryset = Course.objects.annotate(
+        total_modules=Count("modules", distinct=True),
+        published_modules=Count(
+            "modules",
+            filter=Q(modules__is_published=True),
+            distinct=True,
+        ),
+        total_lessons=Count("modules__lessons", distinct=True),
+        published_lesson_count=Count(
+            "modules__lessons",
+            filter=Q(
+                modules__is_published=True,
+                modules__lessons__is_published=True,
+            ),
+            distinct=True,
+        ),
+    )
+    if include_offers:
+        queryset = queryset.prefetch_related(
+            Prefetch(
+                "offers",
+                queryset=_admin_desk_course_offer_queryset(
+                    include_plan=include_plan,
+                    include_base_prices=include_base_prices,
+                    include_geo_prices=include_geo_prices,
+                ),
+                to_attr="admin_desk_offers",
+            )
+        )
+    return queryset
+
+
+@login_required
+@require_GET
+def admin_desk_courses(request):
+    """Read-only, filterable Course register owned by the Academy workspace."""
+    _guard(request)
+    from django.conf import settings
+    from django.core.paginator import Paginator
+
+    from apps.academy.models import Course
+    from apps.academy.permissions import is_course_content_admin
+    from apps.academy.seo_admin import _course_indexability_reasons
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+
+    query = request.GET.get("q", "").strip()[:120]
+    role_filter = request.GET.get("role", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+    access_filter = request.GET.get("access", "").strip()
+    offer_filter = request.GET.get("offer", "").strip()
+    seo_filter = request.GET.get("seo", "").strip()
+    valid_roles = {value for value, _label in Course.CatalogueRole.choices}
+    valid_statuses = {value for value, _label in Course.Status.choices}
+    valid_access_types = {value for value, _label in Course.AccessType.choices}
+    if role_filter not in valid_roles:
+        role_filter = ""
+    if status_filter not in valid_statuses:
+        status_filter = ""
+    if access_filter not in valid_access_types:
+        access_filter = ""
+    if offer_filter not in {"none", "active", "inactive", "saleable", "attention"}:
+        offer_filter = ""
+    if seo_filter not in {"indexable", "blocked"}:
+        seo_filter = ""
+
+    can_view_offers = _allowed(request.user, "academy.view_courseoffer")
+    can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_commercial_readiness = (
+        can_view_plans and can_view_base_prices and can_view_geo_prices
+    )
+    if not can_view_offers:
+        offer_filter = ""
+    elif not can_view_commercial_readiness and offer_filter in {"saleable", "attention"}:
+        offer_filter = ""
+    courses = _admin_desk_course_queryset(
+        include_offers=can_view_offers,
+        include_plan=can_view_plans,
+        include_base_prices=can_view_base_prices,
+        include_geo_prices=can_view_geo_prices,
+    )
+    if query:
+        courses = courses.filter(
+            Q(title__icontains=query)
+            | Q(slug__icontains=query)
+            | Q(summary__icontains=query)
+        )
+    if role_filter:
+        courses = courses.filter(catalogue_role=role_filter)
+    if status_filter:
+        courses = courses.filter(status=status_filter)
+    if access_filter:
+        courses = courses.filter(access_type=access_filter)
+    if offer_filter == "none":
+        courses = courses.filter(offers__isnull=True)
+    elif offer_filter == "active":
+        courses = courses.filter(offers__is_active=True)
+    elif offer_filter == "inactive":
+        courses = courses.filter(offers__is_active=False)
+    courses = courses.order_by("position", "title", "slug").distinct()
+
+    global_enabled = bool(getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False))
+    rows = []
+    for course in courses:
+        offer_records = (
+            getattr(course, "admin_desk_offers", ()) if can_view_offers else ()
+        )
+        offer_audits = []
+        if can_view_offers and can_view_commercial_readiness:
+            offer_audits = [
+                _admin_desk_course_offer_readiness(offer, course)
+                for offer in offer_records
+            ]
+        saleable_count = sum(1 for row in offer_audits if row["saleable"])
+        active_offer_count = (
+            sum(1 for offer in offer_records if offer.is_active)
+            if can_view_offers else None
+        )
+        offer_state = None
+        if can_view_offers:
+            if not offer_records:
+                offer_state = "No offer"
+            elif not active_offer_count:
+                offer_state = "Inactive"
+            elif not can_view_commercial_readiness:
+                offer_state = "Active · commercial check restricted"
+            elif saleable_count:
+                offer_state = "Saleable"
+            else:
+                offer_state = "Active · needs attention"
+
+        seo_reasons = _course_indexability_reasons(course, global_enabled)
+        indexable = not seo_reasons
+        if offer_filter == "saleable" and not saleable_count:
+            continue
+        if offer_filter == "attention" and not (
+            active_offer_count and active_offer_count > saleable_count
+        ):
+            continue
+        if seo_filter == "indexable" and not indexable:
+            continue
+        if seo_filter == "blocked" and not (
+            course.status == Course.Status.PUBLISHED and not indexable
+        ):
+            continue
+
+        rows.append({
+            "course": course,
+            "role_label": course.get_catalogue_role_display(),
+            "status_label": course.get_status_display(),
+            "access_label": course.get_access_type_display(),
+            "published_modules": course.published_modules,
+            "total_modules": course.total_modules,
+            "published_lessons": course.published_lesson_count,
+            "total_lessons": course.total_lessons,
+            "offer_state": offer_state,
+            "seo_indexable": indexable,
+            "seo_reasons": seo_reasons,
+            "detail_url": reverse("staff_admin_desk_course_detail", args=[course.pk]),
+        })
+
+    page = Paginator(rows, 25).get_page(request.GET.get("page"))
+    return render(request, "admin/desk_courses.html", {
+        "courses_page": page,
+        "query": query,
+        "role_filter": role_filter,
+        "status_filter": status_filter,
+        "access_filter": access_filter,
+        "offer_filter": offer_filter,
+        "seo_filter": seo_filter,
+        "can_view_offers": can_view_offers,
+        "can_view_commercial_readiness": can_view_commercial_readiness,
+        "role_choices": Course.CatalogueRole.choices,
+        "status_choices": Course.Status.choices,
+        "access_choices": Course.AccessType.choices,
+        "matched_count": len(rows),
+        "global_indexing_enabled": global_enabled,
+        "desk_nav": _nav(request),
+    })
+
+
+@login_required
+@require_GET
+def admin_desk_course_offers(request):
+    """Read-only CourseOffer register; Revenue details require their own grants."""
+    _guard(request, "academy.view_courseoffer")
+    if not _allowed(request.user, "academy.view_course"):
+        raise PermissionDenied
+
+    from django.core.paginator import Paginator
+
+    from apps.academy.models import CourseOffer
+    from apps.academy.permissions import is_course_content_admin
+
+    can_open_course_detail = is_course_content_admin(request.user)
+    can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_commercial_readiness = (
+        can_view_plans and can_view_base_prices and can_view_geo_prices
+    )
+
+    query = request.GET.get("q", "").strip()[:120]
+    active_filter = request.GET.get("active", "").strip().lower()
+    if active_filter not in {"active", "inactive"}:
+        active_filter = ""
+
+    offers = _admin_desk_course_offer_queryset(
+        include_plan=can_view_plans,
+        include_base_prices=can_view_base_prices,
+        include_geo_prices=can_view_geo_prices,
+    ).select_related("course")
+    if query:
+        offers = offers.filter(
+            Q(name__icontains=query)
+            | Q(slug__icontains=query)
+            | Q(course__title__icontains=query)
+            | Q(course__slug__icontains=query)
+        )
+    if active_filter == "active":
+        offers = offers.filter(is_active=True)
+    elif active_filter == "inactive":
+        offers = offers.filter(is_active=False)
+
+    offers = offers.order_by(
+        "course__position", "course__title", "position", "name"
+    )
+
+    rows = []
+    for offer in offers:
+        readiness = (
+            _admin_desk_course_offer_readiness(offer, offer.course)
+            if can_view_commercial_readiness else None
+        )
+        if can_view_plans and offer.plan_id:
+            plan_name = offer.plan.name
+            plan_hidden = offer.plan.is_hidden
+            plan_url = reverse(
+                "staff_admin_desk_plan_detail", args=[offer.plan_id]
+            )
+        elif offer.plan_id:
+            plan_name = "Linked Revenue Plan"
+            plan_hidden = None
+            plan_url = ""
+        else:
+            plan_name = "No plan linked"
+            plan_hidden = None
+            plan_url = ""
+
+        if can_view_commercial_readiness:
+            price_state = (
+                "Active one-time price recorded"
+                if readiness["price_ready"] else "No active one-time price"
+            )
+        elif can_view_plans and offer.plan_id:
+            price_state = "Price visibility requires Revenue price permissions"
+        else:
+            price_state = "Commercial detail restricted"
+
+        rows.append({
+            "offer": offer,
+            "course": offer.course,
+            "plan_name": plan_name,
+            "plan_hidden": plan_hidden,
+            "plan_url": plan_url,
+            "price_state": price_state,
+            "readiness": readiness,
+            "detail_url": (
+                reverse("staff_admin_desk_course_detail", args=[offer.course_id])
+                if can_open_course_detail else ""
+            ),
+        })
+
+    page = Paginator(rows, 25).get_page(request.GET.get("page"))
+    return render(request, "admin/desk_course_offers.html", {
+        "offers_page": page,
+        "query": query,
+        "active_filter": active_filter,
+        "can_view_plans": can_view_plans,
+        "can_view_commercial_readiness": can_view_commercial_readiness,
+        "can_open_course_detail": can_open_course_detail,
+        "matched_count": len(rows),
+        "desk_nav": _nav(request),
+    })
+
+
+@login_required
+@require_GET
+def admin_desk_course_detail(request, course_id):
+    """Read-only Course control page with canonical links to owning workflows."""
+    _guard(request)
+    from urllib.parse import urlencode
+
+    from django.conf import settings
+
+    from apps.academy.models import (
+        Course,
+        CourseEntitlement,
+        CourseEntitlementEvent,
+        CourseModule,
+        Lesson,
+        LessonProgress,
+        PlanCourseAccess,
+    )
+    from apps.academy.permissions import is_course_content_admin
+    from apps.academy.seo_admin import _course_indexability_reasons
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+
+    can_view_offers = _allowed(request.user, "academy.view_courseoffer")
+    can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_commercial_readiness = (
+        can_view_plans and can_view_base_prices and can_view_geo_prices
+    )
+    can_view_entitlements = _allowed(request.user, "academy.view_courseentitlement")
+    can_view_progress = _allowed(request.user, "academy.view_lessonprogress")
+    can_view_entitlement_events = (
+        can_view_entitlements
+        and _allowed(request.user, "academy.view_courseentitlementevent")
+    )
+
+    course = get_object_or_404(
+        _admin_desk_course_queryset(
+            include_offers=can_view_offers,
+            include_plan=can_view_plans,
+            include_base_prices=can_view_base_prices,
+            include_geo_prices=can_view_geo_prices,
+        ),
+        pk=course_id,
+    )
+    modules = (
+        CourseModule.objects.filter(course=course)
+        .annotate(
+            total_lessons=Count("lessons", distinct=True),
+            published_lessons=Count(
+                "lessons",
+                filter=Q(lessons__is_published=True),
+                distinct=True,
+            ),
+        )
+        .prefetch_related(
+            Prefetch(
+                "lessons",
+                queryset=Lesson.objects.only(
+                    "id",
+                    "module_id",
+                    "title",
+                    "summary",
+                    "format",
+                    "duration_minutes",
+                    "is_preview",
+                    "is_published",
+                    "release_day",
+                    "position",
+                ).order_by("position", "title"),
+                to_attr="admin_desk_lessons",
+            )
+        )
+        .order_by("position", "title")
+    )
+    module_rows = []
+    for module in modules:
+        module_rows.append({
+            "module": module,
+            "lessons": module.admin_desk_lessons,
+        })
+
+    global_enabled = bool(getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False))
+    seo_reasons = _course_indexability_reasons(course, global_enabled)
+    offer_rows = []
+    if can_view_offers:
+        for offer in getattr(course, "admin_desk_offers", ()):
+            readiness = (
+                _admin_desk_course_offer_readiness(offer, course)
+                if can_view_commercial_readiness else None
+            )
+            offer_rows.append({
+                "offer": offer,
+                "readiness": readiness,
+                "price_state": (
+                    "Active one-time price recorded"
+                    if readiness and readiness["price_ready"]
+                    else "No active one-time price"
+                    if readiness else "Commercial checks require Revenue permissions"
+                ),
+                "plan_visible": bool(can_view_plans and offer.plan_id),
+                "plan_url": (
+                    reverse("staff_admin_desk_plan_detail", args=[offer.plan_id])
+                    if can_view_plans and offer.plan_id else ""
+                ),
+            })
+
+    entitlement_summary = None
+    if can_view_entitlements:
+        entitlement_base = CourseEntitlement.objects.filter(course=course)
+        entitlement_summary = {
+            "active": entitlement_base.filter(
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__lte=timezone.now(),
+            ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())).count(),
+            "scheduled": entitlement_base.filter(
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__gt=timezone.now(),
+            ).count(),
+            "expired": entitlement_base.filter(
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__lte=timezone.now(),
+                expires_at__lte=timezone.now(),
+            ).count(),
+            "revoked": entitlement_base.filter(
+                status=CourseEntitlement.Status.REVOKED
+            ).count(),
+            "url": reverse("admin:academy_courseentitlement_changelist"),
+        }
+
+    progress_summary = None
+    if can_view_progress:
+        progress_summary = {
+            row["status"]: row["count"]
+            for row in LessonProgress.objects.filter(
+                lesson__module__course=course
+            ).values("status").annotate(count=Count("pk"))
+        }
+
+    membership_rows = []
+    can_view_membership_mappings = (
+        can_view_plans and _allowed(request.user, "academy.view_plancourseaccess")
+    )
+    if can_view_membership_mappings:
+        membership_rows = list(
+            PlanCourseAccess.objects.filter(course=course)
+            .select_related("plan")
+            .order_by("plan__name")
+        )
+
+    entitlement_events = []
+    if can_view_entitlement_events:
+        entitlement_events = list(
+            CourseEntitlementEvent.objects.filter(
+                entitlement__course=course
+            ).select_related(
+                "entitlement", "entitlement__user", "actor"
+            ).order_by("-created_at")[:10]
+        )
+
+    builder_url = "{}?{}".format(
+        reverse("staff_course_builder_preview"),
+        urlencode({"open_course": course.slug}),
+    )
+    return render(request, "admin/desk_course_detail.html", {
+        "course": course,
+        "module_rows": module_rows,
+        "can_view_offers": can_view_offers,
+        "can_view_plans": can_view_plans,
+        "can_view_commercial_readiness": can_view_commercial_readiness,
+        "offer_rows": offer_rows,
+        "seo_reasons": seo_reasons,
+        "seo_indexable": not seo_reasons,
+        "global_indexing_enabled": global_enabled,
+        "entitlement_summary": entitlement_summary,
+        "progress_summary": progress_summary,
+        "membership_rows": membership_rows,
+        "entitlement_events": entitlement_events,
+        "can_view_entitlements": can_view_entitlements,
+        "can_view_progress": can_view_progress,
+        "can_view_membership_mappings": can_view_membership_mappings,
+        "builder_url": builder_url,
+        "seo_url": reverse("staff_admin_desk_seo"),
+        "catalogue_url": reverse("staff_admin_desk_courses"),
+        "desk_nav": _nav(request),
+    })
 
 
 @login_required
@@ -1317,6 +1882,1470 @@ def admin_desk_support_ticket_action(request, ticket_id):
     return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
 
 
+
+@login_required
+@require_GET
+def admin_desk_customers(request):
+    """Permission-aware Customers landing page using canonical account and ticket records."""
+    _guard(request)
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    now = timezone.now()
+    since = now - timedelta(days=7)
+    visible_tickets = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.select_related(
+            "user", "plan", "affiliate_link", "assigned_to"
+        ),
+    )
+    actionable_statuses = (
+        SupportTicket.Status.PENDING,
+        SupportTicket.Status.IN_PROGRESS,
+    )
+    actionable = visible_tickets.filter(status__in=actionable_statuses)
+    needs_response = actionable.filter(first_response_at__isnull=True)
+    active = visible_tickets.filter(status__in=SupportTicket.ACTIVE_STATUSES)
+    overdue_filter = {
+        "status__in": SupportTicket.ACTIVE_STATUSES,
+        "first_response_at__isnull": True,
+        "first_response_due_at__lt": now,
+    }
+
+    # Triage is based only on fields already maintained by the support workflow:
+    # first-response deadline, priority, assignment and current status.
+    # Do not infer a "new member reply" without an explicit source signal.
+    attention = actionable.annotate(
+        _sla_order=Case(
+            When(
+                first_response_at__isnull=True,
+                first_response_due_at__lt=now,
+                then=Value(0),
+            ),
+            default=Value(1),
+            output_field=IntegerField(),
+        ),
+        _priority_order=Case(
+            When(priority=SupportTicket.Priority.URGENT, then=Value(0)),
+            When(priority=SupportTicket.Priority.HIGH, then=Value(1)),
+            When(priority=SupportTicket.Priority.NORMAL, then=Value(2)),
+            When(priority=SupportTicket.Priority.LOW, then=Value(3)),
+            default=Value(4),
+            output_field=IntegerField(),
+        ),
+        _assignment_order=Case(
+            When(assigned_to__isnull=True, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        ),
+    ).order_by("_sla_order", "_priority_order", "_assignment_order", "-created_at")[:8]
+
+    can_view_accounts = _allowed(request.user, "accounts.view_user")
+    learner_count = None
+    if can_view_accounts:
+        User = get_user_model()
+        learner_count = User.objects.filter(
+            is_staff=False,
+            is_superuser=False,
+            is_active=True,
+            is_banned=False,
+        ).count()
+
+    return render(
+        request,
+        "admin/desk_customers.html",
+        {
+            "can_view_accounts": can_view_accounts,
+            "current_time": now,
+            "active_learners": learner_count,
+            "support_summary": {
+                "open": active.count(),
+                "needs_response": needs_response.count(),
+                "overdue": visible_tickets.filter(**overdue_filter).count(),
+                "unassigned": needs_response.filter(assigned_to__isnull=True).count(),
+                "recently_resolved": visible_tickets.filter(
+                    status__in=[
+                        SupportTicket.Status.APPROVED,
+                        SupportTicket.Status.REJECTED,
+                    ],
+                    updated_at__gte=since,
+                ).count(),
+            },
+            "attention_tickets": attention,
+            "support_queue_url": reverse("staff_admin_desk_support_tickets"),
+            "accounts_url": (
+                reverse("staff_admin_desk_accounts") if can_view_accounts else ""
+            ),
+            "desk_nav": _nav(request),
+        },
+    )
+
+@login_required
+@require_GET
+def admin_desk_platform(request):
+    """Permission-scoped, read-only Platform overview for jobs, provisioning and audit."""
+    _guard(request)
+    now = timezone.now()
+    since = now - timedelta(days=7)
+    context = {
+        "now": now,
+        "since": since,
+        "operations_url": reverse("staff_admin_desk_operations_timeline"),
+        "advanced_admin_url": reverse("admin:index"),
+    }
+
+    if _allowed(request.user, "jobs.view_job"):
+        from apps.jobs.models import Job
+
+        context["job_summary"] = {
+            "pending": Job.objects.filter(status=Job.STATUS_PENDING).count(),
+            "running": Job.objects.filter(status=Job.STATUS_RUNNING).count(),
+            "failed_7d": Job.objects.filter(
+                status=Job.STATUS_FAILED, updated_at__gte=since
+            ).count(),
+            "stalled": Job.objects.filter(
+                attempts__gte=3, status__in=Job.OPEN_STATUSES
+            ).count(),
+            "url": reverse("admin:jobs_job_changelist"),
+        }
+        incident_jobs = Job.objects.filter(
+            Q(status=Job.STATUS_FAILED, updated_at__gte=since)
+            | Q(status__in=Job.OPEN_STATUSES, attempts__gte=3)
+            | Q(
+                status=Job.STATUS_RUNNING,
+                locked_at__lt=now - timedelta(minutes=15),
+            )
+        ).only(
+            "kind", "status", "attempts", "max_attempts", "created_at", "updated_at"
+        ).order_by("-updated_at")[:8]
+        context["job_incidents"] = [
+            {
+                "job": job,
+                "url": reverse("staff_admin_desk_operations_job", args=[job.pk]),
+            }
+            for job in incident_jobs
+        ]
+
+    if _allowed(request.user, "jobs.view_provisioningoperation"):
+        from apps.jobs.models import ProvisioningOperation
+
+        active_states = [
+            ProvisioningOperation.ST_PENDING,
+            ProvisioningOperation.ST_CREATING,
+            ProvisioningOperation.ST_CREATED,
+            ProvisioningOperation.ST_SENDING,
+            ProvisioningOperation.ST_SENT,
+        ]
+        context["provisioning_summary"] = {
+            "active": ProvisioningOperation.objects.filter(
+                state__in=active_states
+            ).count(),
+            "failed": ProvisioningOperation.objects.filter(
+                state=ProvisioningOperation.ST_FAILED,
+                updated_at__gte=since,
+            ).count(),
+            "unknown": ProvisioningOperation.objects.filter(
+                state=ProvisioningOperation.ST_UNKNOWN,
+                updated_at__gte=since,
+            ).count(),
+        }
+        provisioning_incidents = ProvisioningOperation.objects.filter(
+            state__in=[
+                ProvisioningOperation.ST_FAILED,
+                ProvisioningOperation.ST_UNKNOWN,
+            ],
+            updated_at__gte=since,
+        ).only(
+            "operation_id", "operation", "state", "attempts", "updated_at"
+        ).order_by("-updated_at")[:8]
+        context["provisioning_incidents"] = [
+            {
+                "operation": operation,
+                "url": reverse(
+                    "staff_admin_desk_operations_provisioning",
+                    args=[operation.pk],
+                ),
+            }
+            for operation in provisioning_incidents
+        ]
+
+    if _allowed(request.user, "payments.view_webhookevent"):
+        from apps.payments.models import WebhookEvent
+
+        recent_webhooks = WebhookEvent.objects.filter(
+            received_at__gte=since
+        )
+        webhook_counts = {
+            state: recent_webhooks.filter(status=state).count()
+            for state, _label in WebhookEvent.Status.choices
+        }
+        context["webhook_summary"] = {
+            "total_7d": recent_webhooks.count(),
+            "received": webhook_counts[WebhookEvent.Status.RECEIVED],
+            "processed": webhook_counts[WebhookEvent.Status.PROCESSED],
+            "failed": webhook_counts[WebhookEvent.Status.FAILED],
+            "ignored": webhook_counts[WebhookEvent.Status.IGNORED],
+            "url": reverse("admin:payments_webhookevent_changelist"),
+        }
+        context["webhook_items"] = list(
+            recent_webhooks.only(
+                "provider", "event_type", "status",
+                "received_at", "processed_at",
+            ).order_by("-received_at")[:8]
+        )
+
+    if _allowed(request.user, "jobs.view_periodicjob"):
+        from apps.jobs.models import PeriodicJob
+
+        context["scheduler_summary"] = {
+            "enabled": PeriodicJob.objects.filter(enabled=True).count(),
+            "errors": PeriodicJob.objects.filter(
+                last_status=PeriodicJob.Status.ERROR
+            ).count(),
+            "never_run": PeriodicJob.objects.filter(
+                enabled=True, last_run_at__isnull=True
+            ).count(),
+            "url": reverse("admin:jobs_periodicjob_changelist"),
+        }
+        context["scheduler_items"] = list(
+            PeriodicJob.objects.only(
+                "name", "enabled", "last_run_at", "last_status"
+            ).order_by("name")[:10]
+        )
+
+    if _allowed(request.user, "audit.view_auditlog"):
+        from apps.audit.models import AuditLog
+
+        context["audit_summary"] = {
+            "recent": AuditLog.objects.filter(created_at__gte=since).count(),
+            "url": reverse("admin:audit_auditlog_changelist"),
+        }
+        context["audit_items"] = list(
+            AuditLog.objects.select_related("user").only(
+                "action", "object_type", "created_at", "user__username"
+            ).order_by("-created_at")[:10]
+        )
+
+    if _allowed(request.user, "accounts.view_securityevent"):
+        from apps.accounts.models import SecurityEvent
+
+        context["security_summary"] = {
+            "recent": SecurityEvent.objects.filter(occurred_at__gte=since).count(),
+        }
+        # Security detail is intentionally minimised: do not render IP addresses,
+        # user agents, raw event detail or tokens in this overview.
+        context["security_items"] = list(
+            SecurityEvent.objects.only(
+                "event_type", "occurred_at"
+            ).order_by("-occurred_at")[:10]
+        )
+
+    if _allowed(request.user, "policies.view_policyversion"):
+        from django.contrib import admin
+        from apps.policies.models import PolicyVersion
+
+        policy_admin = admin.site._registry.get(PolicyVersion)
+        if policy_admin and policy_admin.has_view_permission(request):
+            from apps.policies.services import sales_policy_readiness
+
+            readiness = sales_policy_readiness()
+            readiness["url"] = reverse("admin:policies_policyversion_changelist")
+            context["policy_readiness"] = readiness
+
+    from apps.academy.permissions import is_course_content_admin
+    from apps.growth.permissions import has_growth_permission
+
+    def access_granted(permission):
+        return _allowed(request.user, permission)
+
+    def access_item(label, permission, detail=""):
+        return {
+            "label": label,
+            "granted": access_granted(permission),
+            "detail": detail,
+        }
+
+    role_display = getattr(request.user, "get_role_display", None)
+    role_value = (
+        role_display()
+        if callable(role_display)
+        else str(getattr(request.user, "role", "") or "Not set")
+    )
+    staff_approved = getattr(request.user, "is_staff_approved", None)
+    if staff_approved is None:
+        staff_approval_label = "Not recorded"
+    else:
+        staff_approval_label = "Approved" if staff_approved else "Not approved"
+
+    context["my_access"] = {
+        "identity": {
+            "application_role": role_value,
+            "is_active": request.user.is_active,
+            "is_staff": request.user.is_staff,
+            "is_superuser": request.user.is_superuser,
+            "staff_approval": staff_approval_label,
+        },
+        "groups": list(
+            request.user.groups.order_by("name").values_list("name", flat=True)
+        ),
+        "sections": [
+            {
+                "name": "Customers",
+                "items": [
+                    access_item("Learner accounts", "accounts.view_user"),
+                    access_item("Change account state", "accounts.change_user"),
+                    {
+                        "label": "Support tickets",
+                        "granted": True,
+                        "detail": "Staff route · each ticket is filtered by its reviewer/plan scope",
+                    },
+                ],
+            },
+            {
+                "name": "Academy",
+                "items": [
+                    {
+                        "label": "Course content administration",
+                        "granted": is_course_content_admin(request.user),
+                        "detail": "Existing content-admin role/superuser rule",
+                    },
+                    access_item("Course catalogue", "academy.view_course"),
+                    access_item("Course offers", "academy.view_courseoffer"),
+                    access_item("Learner entitlements", "academy.view_courseentitlement"),
+                    access_item("Lesson progress", "academy.view_lessonprogress"),
+                ],
+            },
+            {
+                "name": "Revenue",
+                "items": [
+                    access_item("Payments", "payments.view_paymentintent"),
+                    access_item("Refund ledger", "payments.view_refund"),
+                    access_item("Invoices", "payments.view_invoice"),
+                    access_item("Subscriptions", "subscriptions.view_subscription"),
+                    access_item("Change subscriptions", "subscriptions.change_subscription"),
+                    access_item("Plan catalogue", "subscriptions.view_plan"),
+                    access_item("Product catalogue", "subscriptions.view_product"),
+                    access_item("Change plan configuration", "subscriptions.change_plan"),
+                    access_item("Global base prices", "subscriptions.view_planprice"),
+                    access_item("Geo price overrides", "subscriptions.view_geoplanprice"),
+                    access_item("Plan feature bullets", "subscriptions.view_planfeature"),
+                    access_item(
+                        "Community channel mappings",
+                        "bot_integration.view_planchannelmapping",
+                    ),
+                    {
+                        "label": "Business settings",
+                        "granted": (
+                            access_granted("payments.change_billingsettings")
+                            or access_granted("payments.add_billingsettings")
+                        ),
+                        "detail": "Add or change BillingSettings",
+                    },
+                    {
+                        "label": "Disputes",
+                        "granted": (
+                            request.user.is_superuser
+                            or getattr(request.user, "role", None) == "admin"
+                            or access_granted("disputes.view_dispute")
+                        ),
+                        "detail": "Custom dispute workspace · Admin role/superuser bypass or explicit view permission",
+                    },
+                    {
+                        "label": "Change disputes",
+                        "granted": (
+                            request.user.is_superuser
+                            or getattr(request.user, "role", None) == "admin"
+                            or (
+                                access_granted("disputes.view_dispute")
+                                and access_granted("disputes.change_dispute")
+                            )
+                        ),
+                        "detail": "Admin role/superuser bypass or both view and change permissions",
+                    },
+                ],
+            },
+            {
+                "name": "Growth",
+                "items": [
+                    {
+                        "label": "Growth overview & reporting",
+                        "granted": any(
+                            has_growth_permission(request.user, permission)
+                            for permission in (
+                                "events.view_event",
+                                "emailing.view_delivery",
+                                "campaigns.view_campaign",
+                                "promotions.view_couponredemption",
+                                "growth.view_referralreward",
+                                "growth.view_giftinvite",
+                            )
+                        ),
+                        "detail": "Admin role/superuser or at least one source permission; each report panel is separately gated",
+                    },
+                    access_item(
+                        "Analytics event register",
+                        "events.view_event",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    {
+                        "label": "Campaigns workspace",
+                        "granted": (
+                            has_growth_permission(request.user, "campaigns.view_campaign")
+                            or has_growth_permission(request.user, "campaigns.view_audience")
+                        ),
+                        "detail": "Campaign and Audience permissions are independent; each panel is separately gated",
+                    },
+                    access_item("Saved Audiences", "campaigns.view_audience"),
+                    access_item("Frozen campaign recipients", "campaigns.view_campaignrecipient"),
+                    access_item("Campaign metrics cache", "campaigns.view_campaignmetrics"),
+                    access_item(
+                        "Campaign register",
+                        "campaigns.view_campaign",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    access_item(
+                        "Email delivery register",
+                        "emailing.view_delivery",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    access_item(
+                        "Coupon redemption register",
+                        "promotions.view_couponredemption",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    {
+                        "label": "Referral rewards",
+                        "granted": has_growth_permission(
+                            request.user,
+                            ("growth.view_referralreward", "growth.view_referralsettings"),
+                        ),
+                        "detail": "Admin role/superuser bypass or both reward and settings read permissions",
+                    },
+                    access_item(
+                        "Gift invite register",
+                        "growth.view_giftinvite",
+                        "Explicit model permission for the legacy register; overview counts are separately gated",
+                    ),
+                    {
+                        "label": "Create and send gifts",
+                        "granted": has_growth_permission(
+                            request.user,
+                            (
+                                "growth.add_giftinvite",
+                                "subscriptions.add_giftsubscription",
+                                "subscriptions.view_plan",
+                            ),
+                        ),
+                        "detail": "Admin role/superuser bypass or all underlying create and plan-read permissions",
+                    },
+                ],
+            },
+            {
+                "name": "Platform",
+                "items": [
+                    access_item("Background jobs", "jobs.view_job"),
+                    access_item("Provider webhook events", "payments.view_webhookevent"),
+                    access_item("Provisioning operations", "jobs.view_provisioningoperation"),
+                    access_item("Periodic scheduler", "jobs.view_periodicjob"),
+                    access_item("Audit log", "audit.view_auditlog"),
+                    access_item("Security events", "accounts.view_securityevent"),
+                    access_item("Policy versions", "policies.view_policyversion"),
+                ],
+            },
+        ],
+    }
+
+    context["has_platform_records"] = any(
+        key in context for key in (
+            "job_summary", "provisioning_summary", "scheduler_summary",
+            "webhook_summary", "audit_summary", "security_summary",
+            "policy_readiness",
+        )
+    )
+    return render(request, "admin/desk_platform.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_growth(request):
+    """Read-only Growth overview with each report gated by its source permission."""
+    _guard(request)
+    from apps.analytics.services import report
+    from apps.growth.permissions import has_growth_permission
+
+    context = {
+        "has_growth_data": False,
+        "can_view_referrals": has_growth_permission(
+            request.user,
+            ("growth.view_referralreward", "growth.view_referralsettings"),
+        ),
+        "can_send_gifts": has_growth_permission(
+            request.user,
+            (
+                "growth.add_giftinvite",
+                "subscriptions.add_giftsubscription",
+                "subscriptions.view_plan",
+            ),
+        ),
+        "can_view_audiences": has_growth_permission(
+            request.user, "campaigns.view_audience"
+        ),
+        "referrals_url": "/growth/admin/referral-rewards/",
+    }
+
+    if has_growth_permission(request.user, "events.view_event"):
+        context["purchase_report"] = report.signup_analytics(days=30)
+        context["events_url"] = (
+            reverse("admin:events_event_changelist")
+            if _allowed(request.user, "events.view_event") else ""
+        )
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "emailing.view_delivery"):
+        context["email_report"] = report.email_performance(days=30)
+        context["email_url"] = (
+            reverse("admin:emailing_delivery_changelist")
+            if _allowed(request.user, "emailing.view_delivery") else ""
+        )
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "campaigns.view_campaign"):
+        context["campaign_report"] = report.campaign_performance()[:8]
+        context["campaign_url"] = (
+            reverse("admin:campaigns_campaign_changelist")
+            if _allowed(request.user, "campaigns.view_campaign") else ""
+        )
+        context["campaign_workspace_url"] = reverse("staff_admin_desk_campaigns")
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "promotions.view_couponredemption"):
+        context["promotion_report"] = report.promotion_performance()[:8]
+        context["promotion_url"] = (
+            reverse("admin:promotions_couponredemption_changelist")
+            if _allowed(request.user, "promotions.view_couponredemption") else ""
+        )
+        context["has_growth_data"] = True
+
+    if has_growth_permission(
+        request.user,
+        ("growth.view_referralreward", "growth.view_referralsettings"),
+    ):
+        context["referral_report"] = report.referral_performance()
+        context["has_growth_data"] = True
+
+    if has_growth_permission(request.user, "growth.view_giftinvite"):
+        from apps.growth.models import GiftInvite
+
+        context["gift_summary"] = {
+            "pending": GiftInvite.objects.filter(
+                status=GiftInvite.Status.PENDING
+            ).count(),
+            "claimed": GiftInvite.objects.filter(
+                status=GiftInvite.Status.CLAIMED
+            ).count(),
+            "expired": GiftInvite.objects.filter(
+                status=GiftInvite.Status.EXPIRED
+            ).count(),
+            "url": (
+                reverse("admin:growth_giftinvite_changelist")
+                if _allowed(request.user, "growth.view_giftinvite") else ""
+            ),
+        }
+        context["has_growth_data"] = True
+
+    context["campaign_workspace_url"] = (
+        reverse("staff_admin_desk_campaigns")
+        if (
+            has_growth_permission(request.user, "campaigns.view_campaign")
+            or has_growth_permission(request.user, "campaigns.view_audience")
+        )
+        else ""
+    )
+    context["can_view_campaigns"] = "campaign_report" in context
+    context["can_view_email"] = "email_report" in context
+    context["can_view_promotions"] = "promotion_report" in context
+    context["can_view_purchases"] = "purchase_report" in context
+    context["can_view_referral_metrics"] = "referral_report" in context
+    return render(request, "admin/desk_growth.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_campaigns(request):
+    """Read-only Campaigns and Audiences workspace over canonical Growth records."""
+    _guard(request)
+    from apps.growth.permissions import has_growth_permission
+
+    can_view_campaigns = has_growth_permission(
+        request.user, "campaigns.view_campaign"
+    )
+    can_view_audiences = has_growth_permission(
+        request.user, "campaigns.view_audience"
+    )
+    if not (can_view_campaigns or can_view_audiences):
+        raise PermissionDenied
+
+    from apps.campaigns.models import Audience, Campaign, CampaignRecipient
+
+    can_view_recipients = has_growth_permission(
+        request.user, "campaigns.view_campaignrecipient"
+    )
+    can_view_template_versions = has_growth_permission(
+        request.user, "emailing.view_templateversion"
+    )
+    can_change_campaigns = has_growth_permission(
+        request.user, "campaigns.change_campaign"
+    )
+    can_change_audiences = has_growth_permission(
+        request.user, "campaigns.change_audience"
+    )
+
+    query = request.GET.get("q", "").strip()[:120]
+    state_filter = request.GET.get("state", "").strip().lower()
+    audience_id = request.GET.get("audience", "").strip()
+
+    context = {
+        "query": query,
+        "state_filter": state_filter,
+        "can_view_campaigns": can_view_campaigns,
+        "can_view_audiences": can_view_audiences,
+        "can_view_recipients": can_view_recipients,
+        "can_view_template_versions": can_view_template_versions,
+        "campaign_admin_url": (
+            reverse("admin:campaigns_campaign_changelist")
+            if _allowed(request.user, "campaigns.change_campaign") else ""
+        ),
+        "audience_admin_url": (
+            reverse("admin:campaigns_audience_changelist")
+            if _allowed(request.user, "campaigns.change_audience") else ""
+        ),
+        "desk_nav": _nav(request),
+    }
+
+    if can_view_campaigns:
+        campaigns = Campaign.objects.all()
+        if can_view_audiences:
+            campaigns = campaigns.select_related("audience")
+        if can_view_template_versions:
+            campaigns = campaigns.select_related(
+                "template_version", "template_version__template"
+            )
+        if query:
+            campaigns = campaigns.filter(name__icontains=query)
+        if state_filter in {value for value, _label in Campaign.State.choices}:
+            campaigns = campaigns.filter(state=state_filter)
+        else:
+            state_filter = ""
+        if audience_id and can_view_audiences:
+            campaigns = campaigns.filter(audience_id=audience_id)
+        elif audience_id:
+            audience_id = ""
+        if can_view_recipients:
+            campaigns = campaigns.annotate(
+                frozen_recipient_count=Count("recipients", distinct=True)
+            )
+        campaigns = campaigns.order_by("-created_at")
+        campaign_page = Paginator(
+            campaigns, 20
+        ).get_page(request.GET.get("page"))
+
+        campaign_rows = []
+        for campaign in campaign_page:
+            row = {
+                "id": campaign.pk,
+                "name": campaign.name,
+                "state": campaign.get_state_display(),
+                "state_value": campaign.state,
+                "created_at": campaign.created_at,
+                "scheduled_at": campaign.scheduled_at,
+                "snapshot_at": campaign.snapshot_at,
+                "detail_url": reverse(
+                    "staff_admin_desk_campaign_detail", args=[campaign.pk]
+                ),
+            }
+            if can_view_audiences:
+                row["audience_name"] = campaign.audience.name
+                try:
+                    row["live_audience_estimate"] = (
+                        campaign.audience.members().count()
+                    )
+                except Exception:  # malformed/stale audience filters are not evaluated in the UI
+                    row["live_audience_estimate"] = "Unable to estimate"
+            if can_view_recipients:
+                row["frozen_recipient_count"] = campaign.frozen_recipient_count
+            if can_view_template_versions:
+                row["template_version"] = (
+                    f"{campaign.template_version.template.name} "
+                    f"v{campaign.template_version.version_number}"
+                )
+                row["template_subject"] = campaign.subject_override or (
+                    campaign.template_version.subject
+                )
+            campaign_rows.append(row)
+        context["campaign_page"] = campaign_page
+        context["campaign_rows"] = campaign_rows
+
+    if can_view_audiences:
+        audiences = Audience.objects.all()
+        if query:
+            audiences = audiences.filter(name__icontains=query)
+        audiences_page = Paginator(
+            audiences.order_by("name"), 20
+        ).get_page(request.GET.get("audience_page"))
+        audience_rows = []
+        for audience in audiences_page:
+            try:
+                live_count = audience.members().count()
+            except Exception:  # malformed/stale audience filters should not break the register
+                live_count = None
+            audience_rows.append({
+                "id": audience.pk,
+                "name": audience.name,
+                "description": audience.description,
+                "created_at": audience.created_at,
+                "live_count": live_count,
+                "campaign_count": (
+                    audience.campaigns.count() if can_view_campaigns else None
+                ),
+            })
+        context["audiences_page"] = audiences_page
+        context["audience_rows"] = audience_rows
+        context["selected_audience"] = audience_id
+
+    return render(request, "admin/desk_campaigns.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_campaign_detail(request, campaign_id):
+    """Inspect a Campaign's live Audience, frozen snapshot and delivery evidence."""
+    _guard(request)
+    from apps.growth.permissions import has_growth_permission
+
+    if not has_growth_permission(request.user, "campaigns.view_campaign"):
+        raise PermissionDenied
+
+    from apps.campaigns.models import Campaign, CampaignMetrics, CampaignRecipient
+    from apps.emailing.models import Delivery
+
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    can_view_audience = has_growth_permission(
+        request.user, "campaigns.view_audience"
+    )
+    can_view_recipients = has_growth_permission(
+        request.user, "campaigns.view_campaignrecipient"
+    )
+    can_view_metrics = has_growth_permission(
+        request.user, "campaigns.view_campaignmetrics"
+    )
+    can_view_template = has_growth_permission(
+        request.user, "emailing.view_templateversion"
+    )
+    can_view_delivery = has_growth_permission(
+        request.user, "emailing.view_delivery"
+    )
+
+    audience_context = None
+    if can_view_audience:
+        try:
+            live_count = campaign.audience.members().count()
+            estimate_note = "Current live membership estimate"
+        except Exception:
+            live_count = None
+            estimate_note = "Current audience rules could not be evaluated"
+        audience_context = {
+            "name": campaign.audience.name,
+            "description": campaign.audience.description,
+            "live_count": live_count,
+            "estimate_note": estimate_note,
+            "snapshot_at": campaign.snapshot_at,
+        }
+
+    recipient_summary = None
+    if can_view_recipients:
+        recipient_summary = {
+            row["status"]: row["count"]
+            for row in CampaignRecipient.objects.filter(
+                campaign=campaign
+            ).values("status").annotate(count=Count("pk"))
+        }
+
+    metrics = None
+    if can_view_metrics:
+        metric = CampaignMetrics.objects.filter(campaign=campaign).first()
+        if metric:
+            metrics = {
+                "total": metric.total,
+                "sent": metric.sent,
+                "failed": metric.failed,
+                "bounced": metric.bounced,
+                "complained": metric.complained,
+                "suppressed": metric.suppressed,
+                "updated_at": metric.updated_at,
+            }
+
+    template_version = None
+    if can_view_template:
+        from apps.emailing.models import TemplateVersion
+
+        version = TemplateVersion.objects.select_related("template").filter(
+            pk=campaign.template_version_id
+        ).first()
+        if version:
+            template_version = {
+                "name": version.template.name,
+                "version_number": version.version_number,
+                "subject": campaign.subject_override or version.subject,
+                "editor_mode": version.get_editor_mode_display(),
+                "kind": version.template.get_kind_display(),
+            }
+
+    delivery_rows = []
+    if can_view_delivery:
+        delivery_rows = list(
+            Delivery.objects.filter(
+                campaign_recipients__campaign=campaign
+            ).values("provider", "state").annotate(
+                count=Count("pk", distinct=True)
+            ).order_by("provider", "state")
+        )
+
+    context = {
+        "campaign": campaign,
+        "audience_context": audience_context,
+        "recipient_summary": recipient_summary,
+        "metrics": metrics,
+        "template_version": template_version,
+        "delivery_rows": delivery_rows,
+        "can_view_audience": can_view_audience,
+        "can_view_recipients": can_view_recipients,
+        "can_view_metrics": can_view_metrics,
+        "can_view_template": can_view_template,
+        "can_view_delivery": can_view_delivery,
+        "can_open_advanced_admin": _allowed(
+            request.user, "campaigns.change_campaign"
+        ),
+        "advanced_admin_url": reverse(
+            "admin:campaigns_campaign_change", args=[campaign.pk]
+        ),
+        "campaigns_url": reverse("staff_admin_desk_campaigns"),
+        "desk_nav": _nav(request),
+    }
+    return render(request, "admin/desk_campaign_detail.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_revenue(request):
+    """Permission-scoped Revenue landing page; amounts remain in source currencies."""
+    _guard(request)
+    now = timezone.now()
+    since = now - timedelta(days=30)
+    soon = now + timedelta(hours=72)
+    context = {"period_days": 30}
+    if _allowed(request.user, "subscriptions.view_plan"):
+        context["plans_url"] = reverse("staff_admin_desk_plans")
+
+    can_view_payments = _allowed(request.user, "payments.view_paymentintent")
+    can_view_invoices = _allowed(request.user, "payments.view_invoice")
+    if can_view_payments:
+        from apps.payments.models import PaymentIntent
+        payment_base = PaymentIntent.objects.filter(
+            is_simulated=False,
+            created_at__gte=since,
+        )
+        context["payment_summary"] = {
+            "pending": payment_base.filter(
+                status=PaymentIntent.Status.PENDING
+            ).count(),
+            "successful": payment_base.filter(
+                status=PaymentIntent.Status.SUCCESS
+            ).count(),
+            "failed": payment_base.filter(
+                status=PaymentIntent.Status.FAILED
+            ).count(),
+            "successful_by_currency": list(
+                payment_base.filter(status=PaymentIntent.Status.SUCCESS)
+                .values("currency")
+                .annotate(
+                    payments=Count("pk"),
+                    amount_cents=Sum("amount"),
+                )
+                .order_by("currency")
+            ),
+            "url": reverse("staff_admin_desk_finance"),
+        }
+    if can_view_invoices:
+        from apps.payments.models import Invoice
+
+        context["invoice_summary"] = {
+            "issued": Invoice.objects.filter(issued_at__gte=since).count(),
+            "url": reverse("staff_admin_desk_finance") + "?tab=invoices",
+        }
+
+    if _allowed(request.user, "payments.view_refund"):
+        from apps.payments.models import Refund
+
+        refund_base = Refund.objects.filter(refunded_at__gte=since)
+        context["refund_summary"] = {
+            "count": refund_base.count(),
+            "by_currency": list(
+                refund_base.values("currency").annotate(
+                    refunds=Count("pk"),
+                    amount_cents=Sum("amount_cents"),
+                ).order_by("currency")
+            ),
+            "url": reverse("staff_admin_desk_finance") + "?tab=refunds",
+        }
+
+    if _allowed(request.user, "subscriptions.view_subscription"):
+        from apps.subscriptions.models import Subscription
+
+        context["subscription_summary"] = {
+            "active": Subscription.objects.filter(
+                status=Subscription.Status.ACTIVE,
+                is_active=True,
+            ).count(),
+            "pending": Subscription.objects.filter(
+                status=Subscription.Status.PENDING
+            ).count(),
+            "expiring_soon": Subscription.objects.filter(
+                status=Subscription.Status.ACTIVE,
+                is_active=True,
+                expires_at__isnull=False,
+                expires_at__gt=now,
+                expires_at__lte=soon,
+            ).count(),
+            "url": reverse("staff_admin_desk_subscriptions"),
+        }
+
+    can_view_disputes = bool(
+        request.user.is_superuser
+        or getattr(request.user, "role", None) == "admin"
+        or _allowed(request.user, "disputes.view_dispute")
+    )
+    if can_view_disputes:
+        from apps.disputes.models import Dispute
+
+        live_statuses = [
+            Dispute.Status.OPENED,
+            Dispute.Status.EVIDENCE_PREP,
+            Dispute.Status.READY_FOR_REVIEW,
+        ]
+        context["dispute_summary"] = {
+            "open": Dispute.objects.filter(
+                status__in=[Dispute.Status.OPENED, Dispute.Status.EVIDENCE_PREP]
+            ).count(),
+            "needs_response": Dispute.objects.filter(
+                status__in=live_statuses
+            ).count(),
+            "deadline_72h": Dispute.objects.filter(
+                status__in=live_statuses,
+                evidence_due_at__lte=soon,
+            ).count(),
+            "overdue": Dispute.objects.filter(
+                status__in=live_statuses,
+                evidence_due_at__lt=now,
+            ).count(),
+            "url": "/admin-disputes/",
+        }
+
+    from apps.payments.models import BillingSettings
+    settings_exist = BillingSettings.objects.filter(pk=1).exists()
+    can_manage_business = (
+        _allowed(request.user, "payments.change_billingsettings")
+        if settings_exist
+        else _allowed(request.user, "payments.add_billingsettings")
+    )
+    if can_manage_business:
+        context["business_url"] = reverse("staff_admin_desk_business")
+
+    context["has_revenue_sections"] = any(
+        key in context for key in (
+            "payment_summary", "invoice_summary", "subscription_summary",
+            "dispute_summary", "business_url", "plans_url", "refund_summary",
+        )
+    )
+    return render(request, "admin/desk_revenue.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_plans(request):
+    """Read-only Plans & Pricing workspace over canonical Product/Plan records."""
+    _guard(request, "subscriptions.view_plan")
+    from apps.subscriptions.models import Plan, Product
+
+    can_view_products = _allowed(request.user, "subscriptions.view_product")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_features = _allowed(request.user, "subscriptions.view_planfeature")
+    can_view_channel_mappings = _allowed(
+        request.user, "bot_integration.view_planchannelmapping"
+    )
+
+    query = request.GET.get("q", "").strip()[:120]
+    tier_filter = request.GET.get("tier", "").strip().lower()
+    state_filter = request.GET.get("state", "").strip().lower()
+    queryset = Plan.objects.all()
+    if can_view_products:
+        queryset = queryset.select_related("product")
+    if query:
+        search_filter = Q(name__icontains=query) | Q(description__icontains=query)
+        if can_view_products:
+            search_filter |= Q(product__name__icontains=query) | Q(product__slug__icontains=query)
+        queryset = queryset.filter(search_filter)
+    if tier_filter in {value for value, _label in Plan.Tier.choices}:
+        queryset = queryset.filter(tier=tier_filter)
+    else:
+        tier_filter = ""
+    if state_filter == "active":
+        queryset = queryset.filter(is_active=True, is_hidden=False)
+    elif state_filter == "inactive":
+        queryset = queryset.filter(is_active=False)
+    elif state_filter == "hidden":
+        queryset = queryset.filter(is_hidden=True)
+    elif state_filter == "trial":
+        queryset = queryset.filter(is_trial=True)
+    else:
+        state_filter = ""
+
+    if can_view_base_prices:
+        queryset = queryset.annotate(
+            active_base_price_count=Count(
+                "prices", filter=Q(prices__is_active=True), distinct=True
+            )
+        )
+    if can_view_geo_prices:
+        queryset = queryset.annotate(
+            active_geo_price_count=Count(
+                "geo_prices", filter=Q(geo_prices__is_active=True), distinct=True
+            )
+        )
+
+    if can_view_products:
+        queryset = queryset.order_by(
+            "product__display_order", "product__name",
+            "display_order", "tier", "name",
+        )
+    else:
+        queryset = queryset.order_by("display_order", "tier", "name")
+
+    page = Paginator(queryset, 30).get_page(request.GET.get("page"))
+    products_page = None
+    if can_view_products:
+        products_queryset = Product.objects.all()
+        if query:
+            products_queryset = products_queryset.filter(
+                Q(name__icontains=query) | Q(slug__icontains=query)
+            )
+        products_queryset = products_queryset.annotate(
+            plan_count=Count("plans", distinct=True),
+            active_public_plan_count=Count(
+                "plans",
+                filter=Q(plans__is_active=True, plans__is_hidden=False),
+                distinct=True,
+            ),
+        ).order_by("display_order", "name")
+        products_page = Paginator(
+            products_queryset, 20
+        ).get_page(request.GET.get("product_page"))
+    all_plans = Plan.objects.all()
+    context = {
+        "plans_page": page,
+        "products_page": products_page,
+        "query": query,
+        "tier_filter": tier_filter,
+        "state_filter": state_filter,
+        "tier_choices": Plan.Tier.choices,
+        "plan_table_columns": (
+            5 + int(can_view_products) + int(can_view_base_prices)
+            + int(can_view_geo_prices)
+        ),
+        "plan_summary": {
+            "total": all_plans.count(),
+            "active": all_plans.filter(is_active=True, is_hidden=False).count(),
+            "hidden": all_plans.filter(is_hidden=True).count(),
+            "trial": all_plans.filter(is_trial=True).count(),
+            "products": Product.objects.count() if can_view_products else None,
+        },
+        "can_view_products": can_view_products,
+        "can_view_base_prices": can_view_base_prices,
+        "can_view_geo_prices": can_view_geo_prices,
+        "can_view_features": can_view_features,
+        "can_view_channel_mappings": can_view_channel_mappings,
+        "can_open_advanced_admin": any(
+            _allowed(request.user, permission)
+            for permission in (
+                "subscriptions.change_plan",
+                "subscriptions.change_planprice",
+                "subscriptions.change_geoplanprice",
+                "subscriptions.change_planfeature",
+                "subscriptions.change_product",
+                "bot_integration.change_planchannelmapping",
+            )
+        ),
+        "advanced_admin_url": reverse("admin:subscriptions_plan_changelist"),
+        "desk_nav": _nav(request),
+    }
+    return render(request, "admin/desk_plans.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_plan_detail(request, plan_id):
+    """Inspect one Plan and only the related configuration the operator may view."""
+    _guard(request, "subscriptions.view_plan")
+    from urllib.parse import urlencode
+    from apps.subscriptions.models import (
+        GeoPlanPrice, Plan, PlanFeature, PlanPrice, Subscription,
+    )
+    from apps.bot_integration.models import PlanChannelMapping
+
+    can_view_product = _allowed(request.user, "subscriptions.view_product")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_features = _allowed(request.user, "subscriptions.view_planfeature")
+    can_view_channel_mappings = _allowed(
+        request.user, "bot_integration.view_planchannelmapping"
+    )
+    plan_queryset = Plan.objects.all()
+    if can_view_product:
+        plan_queryset = plan_queryset.select_related("product")
+    plan = get_object_or_404(plan_queryset, pk=plan_id)
+
+    base_prices = []
+    if can_view_base_prices:
+        base_prices = [
+            {
+                "interval": price.get_interval_display(),
+                "amount": f"{price.currency} {price.price_cents / 100:,.2f}",
+                "active": price.is_active,
+            }
+            for price in PlanPrice.objects.filter(plan=plan).order_by("interval", "currency")
+        ]
+
+    geo_prices = []
+    if can_view_geo_prices:
+        for price in GeoPlanPrice.objects.filter(plan=plan).order_by(
+            "interval", "country", "region", "currency"
+        ):
+            target = []
+            if price.country:
+                target.append(f"Country {price.country}")
+            if price.region:
+                target.append(f"Region {price.region}")
+            geo_prices.append({
+                "interval": price.get_interval_display(),
+                "target": " · ".join(target) or "Scope not recorded",
+                "amount": f"{price.currency} {price.price_cents / 100:,.2f}",
+                "active": price.is_active,
+                "country_specific": bool(price.country),
+            })
+
+    features = (
+        list(PlanFeature.objects.filter(plan=plan).order_by("position", "id"))
+        if can_view_features else []
+    )
+    channel_mappings = []
+    if can_view_channel_mappings:
+        channel_mappings = [
+            {
+                "platform": mapping.get_platform_display(),
+                "name": mapping.name or "Configured channel target",
+            }
+            for mapping in PlanChannelMapping.objects.filter(plan=plan).order_by(
+                "platform", "name"
+            )
+        ]
+
+    ticket_approver_count = plan.ticket_approvers.count()
+    ticket_approver_scope = (
+        f"{ticket_approver_count} assigned staff approver(s)"
+        if ticket_approver_count
+        else "Any staff (default)"
+    )
+
+    can_view_subscriptions = _allowed(
+        request.user, "subscriptions.view_subscription"
+    )
+    subscription_rows = []
+    subscription_summary = None
+    if can_view_subscriptions:
+        subscription_queryset = (
+            Subscription.objects.filter(plan=plan)
+            .select_related("user")
+            .only(
+                "user__username", "status", "is_active", "started_at",
+                "expires_at", "is_gift", "is_admin_grant", "is_trial",
+                "price_cents", "price_currency", "created_at",
+            )
+            .order_by("-created_at")
+        )
+        subscription_summary = {
+            "total": subscription_queryset.count(),
+            "active": subscription_queryset.filter(
+                status=Subscription.Status.ACTIVE, is_active=True
+            ).count(),
+            "pending": subscription_queryset.filter(
+                status=Subscription.Status.PENDING
+            ).count(),
+            "url": (
+                reverse("staff_admin_desk_subscriptions")
+                + "?"
+                + urlencode({"q": plan.name})
+            ),
+        }
+        for subscription in subscription_queryset[:8]:
+            if subscription.is_gift:
+                source = "Gift"
+            elif subscription.is_trial:
+                source = "Trial"
+            elif subscription.is_admin_grant:
+                source = "Admin grant"
+            else:
+                source = "Standard"
+            price = (
+                f"{subscription.price_currency} "
+                f"{subscription.price_cents / 100:,.2f}"
+                if subscription.price_cents is not None
+                and subscription.price_currency
+                else "No price snapshot"
+            )
+            subscription_rows.append({
+                "learner": subscription.user.username,
+                "status": subscription.get_status_display(),
+                "is_active": subscription.is_active,
+                "source": source,
+                "price": price,
+                "started_at": subscription.started_at,
+                "expires_at": subscription.expires_at,
+            })
+
+    can_view_course_offer = _allowed(
+        request.user, "academy.view_courseoffer"
+    )
+    course_offer = None
+    if can_view_course_offer:
+        from apps.academy.models import CourseOffer
+
+        offer = (
+            CourseOffer.objects.filter(plan=plan)
+            .select_related("course")
+            .only(
+                "name", "slug", "access_duration_days", "is_active",
+                "course__title", "course__slug", "course__status",
+                "course__access_type",
+            )
+            .first()
+        )
+        if offer:
+            course_offer = {
+                "name": offer.name,
+                "slug": offer.slug,
+                "course_title": offer.course.title,
+                "course_slug": offer.course.slug,
+                "course_status": offer.course.get_status_display(),
+                "access_type": offer.course.get_access_type_display(),
+                "active": offer.is_active,
+                "catalogue_eligible": offer.is_saleable,
+                "access_duration": (
+                    f"{offer.access_duration_days} days"
+                    if offer.access_duration_days else "Permanent"
+                ),
+                "url": reverse("admin:academy_courseoffer_changelist"),
+            }
+
+    context = {
+        "plan": plan,
+        "product": plan.product if can_view_product else None,
+        "ticket_approver_scope": ticket_approver_scope,
+        "base_prices": base_prices,
+        "geo_prices": geo_prices,
+        "features": features,
+        "channel_mappings": channel_mappings,
+        "can_view_product": can_view_product,
+        "can_view_base_prices": can_view_base_prices,
+        "can_view_geo_prices": can_view_geo_prices,
+        "can_view_features": can_view_features,
+        "can_view_channel_mappings": can_view_channel_mappings,
+        "can_view_subscriptions": can_view_subscriptions,
+        "subscription_summary": subscription_summary,
+        "subscription_rows": subscription_rows,
+        "can_view_course_offer": can_view_course_offer,
+        "course_offer": course_offer,
+        "can_open_advanced_admin": any(
+            _allowed(request.user, permission)
+            for permission in (
+                "subscriptions.change_plan",
+                "subscriptions.change_planprice",
+                "subscriptions.change_geoplanprice",
+                "subscriptions.change_planfeature",
+                "subscriptions.change_product",
+                "bot_integration.change_planchannelmapping",
+                "academy.change_courseoffer",
+            )
+        ),
+        "advanced_admin_url": reverse("admin:subscriptions_plan_changelist"),
+        "plans_url": reverse("staff_admin_desk_plans"),
+        "subscriptions_url": reverse("staff_admin_desk_subscriptions"),
+        "desk_nav": _nav(request),
+    }
+    return render(request, "admin/desk_plan_detail.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_academy(request):
+    """Permission-scoped Academy overview over canonical course/access records."""
+    _guard(request)
+    from apps.academy.models import Course, CourseEntitlement, CourseOffer
+    from apps.academy.permissions import is_course_content_admin
+
+    now = timezone.now()
+    context = {
+        "can_review_courses": is_course_content_admin(request.user),
+        "can_build_courses": is_course_content_admin(request.user),
+        "can_view_courses": _allowed(request.user, "academy.view_course"),
+        "can_view_offers": _allowed(request.user, "academy.view_courseoffer"),
+        "can_view_entitlements": _allowed(
+            request.user, "academy.view_courseentitlement"
+        ),
+        "seo_url": reverse("staff_admin_desk_seo"),
+    }
+
+    if context["can_view_courses"]:
+        context["course_summary"] = {
+            "total": Course.objects.count(),
+            "draft": Course.objects.filter(status=Course.Status.DRAFT).count(),
+            "published": Course.objects.filter(
+                status=Course.Status.PUBLISHED
+            ).count(),
+            "archived": Course.objects.filter(
+                status=Course.Status.ARCHIVED
+            ).count(),
+            "url": (
+                reverse("staff_admin_desk_courses")
+                if is_course_content_admin(request.user) else ""
+            ),
+        }
+
+    if context["can_review_courses"]:
+        from apps.academy.models import CourseImport
+
+        context["review_summary"] = {
+            "pending": CourseImport.objects.filter(
+                status=CourseImport.Status.REVIEW
+            ).count(),
+            "url": reverse("staff_admin_desk_course_reviews"),
+            "cleanup_url": reverse("staff_admin_desk_course_import_cleanup"),
+        }
+
+    if context["can_view_offers"]:
+        context["offer_summary"] = {
+            "active": CourseOffer.objects.filter(is_active=True).count(),
+            "inactive": CourseOffer.objects.filter(is_active=False).count(),
+            "url": (
+                reverse("staff_admin_desk_course_offers")
+                if context["can_view_courses"] else ""
+            ),
+        }
+
+    if context["can_view_entitlements"]:
+        active_entitlements = CourseEntitlement.objects.filter(
+            status=CourseEntitlement.Status.ACTIVE,
+            starts_at__lte=now,
+        ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
+        context["entitlement_summary"] = {
+            "active": active_entitlements.count(),
+            "revoked": CourseEntitlement.objects.filter(
+                status=CourseEntitlement.Status.REVOKED
+            ).count(),
+            "url": reverse("admin:academy_courseentitlement_changelist"),
+        }
+
+    context["has_academy_sections"] = any(
+        key in context for key in (
+            "course_summary", "review_summary", "offer_summary",
+            "entitlement_summary",
+        )
+    )
+    return render(request, "admin/desk_academy.html", context)
+
+
+@login_required
+@require_GET
+def admin_desk_my_work(request):
+    """Show staff assignments and the signed-in user's own notifications."""
+    _guard(request)
+    from apps.notifications.models import Notification
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    now = timezone.now()
+    active_support = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.select_related(
+            "user", "plan", "affiliate_link", "assigned_to"
+        ),
+    ).filter(
+        assigned_to=request.user,
+        status__in=SupportTicket.ACTIVE_STATUSES,
+    )
+    context = {
+        "support_count": active_support.count(),
+        "assigned_disputes": None,
+        "dispute_count": 0,
+        "assigned_tickets": active_support.order_by(
+            "first_response_due_at", "-updated_at"
+        )[:10],
+        "notification_count": Notification.objects.filter(
+            user=request.user
+        ).count(),
+        "unread_notification_count": Notification.objects.filter(
+            user=request.user,
+            is_read=False,
+        ).count(),
+        "notifications": Notification.objects.filter(
+            user=request.user
+        ).only(
+            "id", "notification_type", "title", "message", "is_read", "created_at"
+        ).order_by("-created_at")[:8],
+        "notifications_url": "/notifications/",
+    }
+
+    can_view_disputes = bool(
+        request.user.is_superuser
+        or getattr(request.user, "role", None) == "admin"
+        or (
+            request.user.is_staff
+            and request.user.has_perm("disputes.view_dispute")
+        )
+    )
+    if can_view_disputes:
+        from apps.disputes.models import Dispute
+
+        active_disputes = Dispute.objects.filter(
+            assigned_to=request.user,
+            status__in=[
+                Dispute.Status.OPENED,
+                Dispute.Status.EVIDENCE_PREP,
+                Dispute.Status.READY_FOR_REVIEW,
+            ],
+        )
+        context["dispute_count"] = active_disputes.count()
+        context["assigned_disputes"] = active_disputes.order_by(
+            "evidence_due_at", "-opened_at"
+        )[:10]
+
+    context["total_assigned_work"] = (
+        context["support_count"] + context.get("dispute_count", 0)
+    )
+    context["now"] = now
+    context["desk_nav"] = _nav(request)
+    return render(request, "admin/desk_my_work.html", context)
+
+
 def _nav(request):
     from apps.payments.models import BillingSettings
 
@@ -1329,8 +3358,10 @@ def _nav(request):
     return {
         "accounts": _allowed(request.user, "accounts.view_user"),
         "subscriptions": _allowed(request.user, "subscriptions.view_subscription"),
+        "plans": _allowed(request.user, "subscriptions.view_plan"),
         "finance": (
             _allowed(request.user, "payments.view_paymentintent")
+            or _allowed(request.user, "payments.view_refund")
             or _allowed(request.user, "payments.view_invoice")
         ),
         "business": business_allowed,
@@ -1796,16 +3827,32 @@ def admin_desk_finance(request):
     _guard(request)
     can_pay = _allowed(request.user, "payments.view_paymentintent")
     can_invoice = _allowed(request.user, "payments.view_invoice")
-    if not (can_pay or can_invoice):
+    can_view_refunds = _allowed(request.user, "payments.view_refund")
+    if not (can_pay or can_invoice or can_view_refunds):
         raise PermissionDenied
-    from apps.payments.models import Invoice, PaymentIntent
+    from apps.payments.models import Invoice, PaymentIntent, Refund
 
     query = request.GET.get("q", "").strip()[:120]
     status_filter = request.GET.get("payment_status", "").strip().lower()
-    tab = request.GET.get("tab", "payments").strip().lower()
-    if tab not in {"payments", "invoices"}:
-        tab = "payments"
-    payment_page = invoice_page = None
+    refund_source = request.GET.get("refund_source", "").strip().lower()
+
+    available_tabs = {
+        name for name, allowed in (
+            ("payments", can_pay),
+            ("invoices", can_invoice),
+            ("refunds", can_view_refunds),
+        ) if allowed
+    }
+    requested_tab = request.GET.get("tab", "").strip().lower()
+    if requested_tab in available_tabs:
+        tab = requested_tab
+    else:
+        tab = next(
+            (name for name in ("payments", "invoices", "refunds") if name in available_tabs),
+            "",
+        )
+
+    payment_page = invoice_page = refund_page = None
     counts = {}
     if can_pay:
         qs = PaymentIntent.objects.select_related("user", "plan")
@@ -1829,11 +3876,33 @@ def admin_desk_finance(request):
                 | Q(payment_intent__provider_reference__icontains=query)
             )
         invoice_page = Paginator(qs.order_by("-issue_date", "-issued_at"), 30).get_page(request.GET.get("invoice_page"))
+    if can_view_refunds:
+        qs = Refund.objects.select_related(
+            "payment_intent", "payment_intent__user", "payment_intent__plan"
+        )
+        if query:
+            qs = qs.filter(
+                Q(provider_refund_id__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+                | Q(payment_intent__user__email__icontains=query)
+                | Q(payment_intent__plan__name__icontains=query)
+                | Q(payment_intent__provider_reference__icontains=query)
+            )
+        if refund_source in {value for value, _ in Refund.Source.choices}:
+            qs = qs.filter(source=refund_source)
+        else:
+            refund_source = ""
+        refund_page = Paginator(
+            qs.order_by("-refunded_at"), 30
+        ).get_page(request.GET.get("refund_page"))
     return render(request, "admin/desk_finance.html", {
-        "query": query, "payment_status": status_filter, "tab": tab,
-        "payment_page": payment_page, "invoice_page": invoice_page,
-        "payment_counts": counts, "can_view_payments": can_pay, "can_view_invoices": can_invoice,
+        "query": query, "payment_status": status_filter, "refund_source": refund_source,
+        "tab": tab, "payment_page": payment_page, "invoice_page": invoice_page,
+        "refund_page": refund_page, "payment_counts": counts,
+        "can_view_payments": can_pay, "can_view_invoices": can_invoice,
+        "can_view_refunds": can_view_refunds,
         "payment_status_choices": PaymentIntent.Status.choices,
+        "refund_source_choices": Refund.Source.choices,
         "csv_url": reverse("ops-payments-csv") if can_pay else "",
         "desk_nav": _nav(request),
     })
@@ -1849,3 +3918,505 @@ def admin_desk_invoice_detail(request, invoice_id):
         "back_url": f"{reverse('staff_admin_desk_finance')}?tab=invoices",
         "desk_nav": _nav(request),
     })
+
+
+
+@login_required
+@require_GET
+def admin_desk_search(request):
+    """Permission-filtered global search across canonical Admin Desk records.
+
+    Search results are deliberately read-only shortcuts. Each item routes to
+    the existing owner workflow, and every source queryset is independently
+    permission- or reviewer-scope-filtered before searching.
+    """
+    _guard(request)
+    from urllib.parse import urlencode
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    query = (request.GET.get("q") or "").strip()[:120]
+    groups = {
+        "Customers": [],
+        "Academy": [],
+        "Revenue": [],
+        "Growth": [],
+        "Platform": [],
+    }
+
+    def add_result(domain, kind, title, detail, url):
+        if url and domain in groups:
+            groups[domain].append({
+                "kind": kind,
+                "title": title,
+                "detail": detail,
+                "url": url,
+            })
+
+    if len(query) >= 2:
+        User = get_user_model()
+
+        # Account results exclude internal staff and superuser accounts.
+        if _allowed(request.user, "accounts.view_user"):
+            learners = User.objects.filter(
+                is_staff=False,
+                is_superuser=False,
+            ).filter(
+                Q(username__icontains=query)
+                | Q(email__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(nickname__icontains=query)
+            ).only(
+                "id", "username", "first_name", "last_name",
+                "is_active", "is_banned",
+            ).order_by("-date_joined")[:5]
+            for learner in learners:
+                full_name = " ".join(
+                    part for part in (learner.first_name, learner.last_name) if part
+                ).strip()
+                title = full_name or learner.username
+                if full_name and full_name != learner.username:
+                    title = f"{title} · {learner.username}"
+                state = (
+                    "Banned" if learner.is_banned
+                    else "Active" if learner.is_active
+                    else "Inactive"
+                )
+                add_result(
+                    "Customers",
+                    "Learner account",
+                    title,
+                    state,
+                    reverse("staff_admin_desk_account_detail", args=[learner.pk]),
+                )
+
+        # Support results use the same per-plan reviewer scope as the queue
+        # and detail page. Search excludes admin_notes and private messages.
+        support_queryset = reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.select_related("user", "plan", "affiliate_link"),
+        )
+        support_filter = (
+            Q(user__username__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(user__first_name__icontains=query)
+            | Q(user__last_name__icontains=query)
+            | Q(message__icontains=query)
+        )
+        try:
+            from uuid import UUID
+            exact_ticket_id = UUID(query)
+        except (TypeError, ValueError, AttributeError):
+            exact_ticket_id = None
+        if exact_ticket_id is not None:
+            support_filter |= Q(pk=exact_ticket_id)
+        tickets = support_queryset.filter(support_filter).order_by("-created_at")[:5]
+        for ticket in tickets:
+            add_result(
+                "Customers",
+                "Support ticket",
+                f"Ticket #{ticket.short_id} · {ticket.user.username}",
+                (
+                    f"{ticket.get_category_display()} · "
+                    f"{ticket.get_status_display()} · "
+                    f"{ticket.get_priority_display()} priority"
+                ),
+                reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
+            )
+
+        # Academy course search is available only to staff who can view the
+        # canonical Course records. The link remains the existing admin list
+        # until a dedicated course-detail workflow is migrated.
+        if _allowed(request.user, "academy.view_course"):
+            from apps.academy.models import Course
+
+            courses = Course.objects.filter(
+                Q(title__icontains=query)
+                | Q(slug__icontains=query)
+                | Q(summary__icontains=query)
+            ).only(
+                "title", "slug", "status", "updated_at"
+            ).order_by("title")[:5]
+            course_list_url = (
+                reverse("admin:academy_course_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for course in courses:
+                add_result(
+                    "Academy",
+                    "Course",
+                    course.title,
+                    (
+                        f"{course.get_status_display()} · Updated "
+                        f"{timezone.localtime(course.updated_at):%d %b %Y, %H:%M}"
+                    ),
+                    course_list_url,
+                )
+
+        # Course-import review entries are restricted to the existing content
+        # administrator role and only include submissions currently awaiting review.
+        from apps.academy.permissions import is_course_content_admin
+        if is_course_content_admin(request.user):
+            from apps.academy.models import CourseImport
+
+            imports = CourseImport.objects.filter(
+                status=CourseImport.Status.REVIEW,
+                title__icontains=query,
+            ).only("id", "title", "imported_at").order_by("-imported_at")[:5]
+            for item in imports:
+                add_result(
+                    "Academy",
+                    "Course submission",
+                    item.title,
+                    "Awaiting authorised review",
+                    reverse("staff_admin_desk_course_review", args=[item.pk]),
+                )
+
+        if _allowed(request.user, "payments.view_paymentintent"):
+            from apps.payments.models import PaymentIntent
+
+            payment_filter = (
+                Q(user__username__icontains=query)
+                | Q(user__email__icontains=query)
+                | Q(plan__name__icontains=query)
+                | Q(provider_reference__icontains=query)
+                | Q(provider_payment_id__icontains=query)
+            )
+            payments = PaymentIntent.objects.filter(
+                payment_filter
+            ).select_related("user", "plan").only(
+                "user__username", "plan__name", "status", "amount",
+                "currency", "is_simulated", "created_at",
+            ).order_by("-created_at")[:5]
+            finance_url = (
+                reverse("staff_admin_desk_finance")
+                + "?"
+                + urlencode({"q": query, "tab": "payments"})
+            )
+            for payment in payments:
+                amount = f"{payment.currency} {payment.amount / 100:,.2f}"
+                state = payment.get_status_display()
+                if payment.is_simulated:
+                    state = f"{state} · Simulation — no money collected"
+                add_result(
+                    "Revenue",
+                    "Payment record",
+                    f"{payment.user.username} · {payment.plan.name}",
+                    f"{state} · {amount}",
+                    finance_url,
+                )
+
+        if _allowed(request.user, "payments.view_invoice"):
+            from apps.payments.models import Invoice
+
+            invoices = Invoice.objects.filter(
+                Q(invoice_number__icontains=query)
+                | Q(customer_name__icontains=query)
+                | Q(customer_email__icontains=query)
+                | Q(description__icontains=query)
+                | Q(transaction_reference__icontains=query)
+                | Q(payment_intent__provider_reference__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+                | Q(payment_intent__user__email__icontains=query)
+            ).only(
+                "id", "invoice_number", "customer_name", "customer_email",
+                "description", "total_cents", "currency", "issue_date",
+            ).order_by("-issue_date", "-issued_at")[:5]
+            for invoice in invoices:
+                customer = invoice.customer_name or invoice.customer_email or "Customer"
+                add_result(
+                    "Revenue",
+                    "Invoice",
+                    invoice.invoice_number,
+                    (
+                        f"{customer} · {invoice.description} · "
+                        f"{invoice.currency} {invoice.total_cents / 100:,.2f}"
+                    ),
+                    reverse("staff_admin_desk_invoice_detail", args=[invoice.pk]),
+                )
+
+        if _allowed(request.user, "subscriptions.view_plan"):
+            from apps.subscriptions.models import Plan
+
+            can_search_product = _allowed(request.user, "subscriptions.view_product")
+            plan_filter = Q(name__icontains=query) | Q(description__icontains=query)
+            if can_search_product:
+                plan_filter |= Q(product__name__icontains=query)
+            plans = Plan.objects.filter(plan_filter).only(
+                "id", "name", "tier", "is_active", "is_hidden", "is_trial",
+            ).order_by("display_order", "tier", "name")[:5]
+            for plan in plans:
+                state = (
+                    "Hidden" if plan.is_hidden
+                    else "Active" if plan.is_active
+                    else "Inactive"
+                )
+                if plan.is_trial:
+                    state += " · Trial"
+                if can_search_product and plan.product_id:
+                    title = f"{plan.product.name} · {plan.name}"
+                else:
+                    title = plan.name
+                add_result(
+                    "Revenue",
+                    "Plan",
+                    title,
+                    f"{plan.get_tier_display()} · {state}",
+                    reverse("staff_admin_desk_plan_detail", args=[plan.pk]),
+                )
+
+        if _allowed(request.user, "subscriptions.view_subscription"):
+            from apps.subscriptions.models import Subscription
+
+            subscriptions = Subscription.objects.filter(
+                Q(user__username__icontains=query)
+                | Q(user__email__icontains=query)
+                | Q(plan__name__icontains=query)
+            ).select_related("user", "plan").only(
+                "id", "user__username", "plan__name", "status",
+                "is_active", "expires_at",
+            ).order_by("-created_at")[:5]
+            subscriptions_url = (
+                reverse("staff_admin_desk_subscriptions")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for subscription in subscriptions:
+                state = (
+                    "Active access" if subscription.is_active
+                    else subscription.get_status_display()
+                )
+                add_result(
+                    "Revenue",
+                    "Subscription",
+                    f"{subscription.user.username} · {subscription.plan.name}",
+                    state,
+                    subscriptions_url,
+                )
+
+        can_view_disputes = bool(
+            request.user.is_superuser
+            or getattr(request.user, "role", None) == "admin"
+            or _allowed(request.user, "disputes.view_dispute")
+        )
+        if can_view_disputes:
+            from apps.disputes.models import Dispute
+
+            disputes = Dispute.objects.filter(
+                Q(provider_dispute_id__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+            ).select_related(
+                "payment_intent", "payment_intent__user"
+            ).only(
+                "provider", "reason_category", "amount_cents", "currency",
+                "status", "opened_at", "payment_intent__user__username",
+            ).order_by("-opened_at")[:5]
+            dispute_url = (
+                reverse("disputes:dashboard")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for dispute in disputes:
+                add_result(
+                    "Revenue",
+                    "Dispute",
+                    (
+                        f"{dispute.payment_intent.user.username} · "
+                        f"{dispute.get_provider_display()}"
+                    ),
+                    (
+                        f"{dispute.get_reason_category_display()} · "
+                        f"{dispute.get_status_display()} · "
+                        f"{dispute.currency} {dispute.amount_cents / 100:,.2f}"
+                    ),
+                    dispute_url,
+                )
+
+        if _allowed(request.user, "payments.view_refund"):
+            from apps.payments.models import Refund
+
+            refunds = Refund.objects.filter(
+                Q(provider_refund_id__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+                | Q(payment_intent__user__email__icontains=query)
+                | Q(payment_intent__plan__name__icontains=query)
+                | Q(payment_intent__provider_reference__icontains=query)
+            ).select_related(
+                "payment_intent", "payment_intent__user", "payment_intent__plan"
+            ).only(
+                "provider", "amount_cents", "currency", "source",
+                "commercial_context", "refunded_at",
+                "payment_intent__user__username", "payment_intent__plan__name",
+            ).order_by("-refunded_at")[:5]
+            refund_url = (
+                reverse("staff_admin_desk_finance")
+                + "?"
+                + urlencode({"q": query, "tab": "refunds"})
+            )
+            for refund in refunds:
+                add_result(
+                    "Revenue",
+                    "Refund record",
+                    (
+                        f"{refund.payment_intent.user.username} · "
+                        f"{refund.payment_intent.plan.name}"
+                    ),
+                    (
+                        f"{refund.get_provider_display()} · "
+                        f"{refund.get_source_display()} · "
+                        f"{refund.get_commercial_context_display()} · "
+                        f"{refund.currency} {refund.amount_cents / 100:,.2f}"
+                    ),
+                    refund_url,
+                )
+
+        from apps.growth.permissions import has_growth_permission
+        if has_growth_permission(request.user, "campaigns.view_campaign"):
+            from apps.campaigns.models import Campaign
+
+            campaigns = Campaign.objects.filter(
+                name__icontains=query
+            ).only("id", "name", "state", "created_at").order_by("-created_at")[:5]
+            for campaign in campaigns:
+                add_result(
+                    "Growth",
+                    "Campaign",
+                    campaign.name,
+                    f"{campaign.get_state_display()} · Campaign workspace",
+                    reverse(
+                        "staff_admin_desk_campaign_detail", args=[campaign.pk]
+                    ),
+                )
+
+        if has_growth_permission(request.user, "campaigns.view_audience"):
+            from apps.campaigns.models import Audience
+
+            audiences = Audience.objects.filter(
+                name__icontains=query
+            ).only("id", "name", "description").order_by("name")[:5]
+            for audience in audiences:
+                add_result(
+                    "Growth",
+                    "Campaign audience",
+                    audience.name,
+                    audience.description or "Saved audience rules",
+                    (
+                        reverse("staff_admin_desk_campaigns")
+                        + "?"
+                        + urlencode({"audience": str(audience.pk)})
+                    ),
+                )
+
+        if _allowed(request.user, "growth.view_giftinvite"):
+            from apps.growth.models import GiftInvite
+
+            invites = GiftInvite.objects.filter(
+                recipient_email__icontains=query
+            ).only("id", "status", "expires_at").order_by("-created_at")[:5]
+            invite_url = (
+                reverse("admin:growth_giftinvite_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for invite in invites:
+                add_result(
+                    "Growth",
+                    "Gift invitation",
+                    "Gift invitation",
+                    (
+                        f"{invite.get_status_display()} · Expires "
+                        f"{timezone.localtime(invite.expires_at):%d %b %Y}"
+                    ),
+                    invite_url,
+                )
+
+        if _allowed(request.user, "jobs.view_job"):
+            from apps.jobs.models import Job
+
+            job_filter = Q(kind__icontains=query)
+            if query.isdecimal():
+                job_filter |= Q(pk=int(query))
+            jobs = Job.objects.filter(job_filter).only(
+                "id", "kind", "status", "updated_at"
+            ).order_by("-updated_at")[:5]
+            for job in jobs:
+                add_result(
+                    "Platform",
+                    "Background job",
+                    f"Job #{job.pk} · {job.kind}",
+                    (
+                        f"{job.status.title()} · Updated "
+                        f"{timezone.localtime(job.updated_at):%d %b %Y, %H:%M}"
+                    ),
+                    reverse("staff_admin_desk_operations_job", args=[job.pk]),
+                )
+
+        if _allowed(request.user, "jobs.view_provisioningoperation"):
+            from apps.jobs.models import ProvisioningOperation
+
+            operations = ProvisioningOperation.objects.filter(
+                operation__icontains=query
+            ).only("id", "operation", "state", "attempts", "updated_at").order_by(
+                "-updated_at"
+            )[:5]
+            for operation in operations:
+                state = (
+                    "Needs verification"
+                    if operation.state == ProvisioningOperation.ST_UNKNOWN
+                    else operation.state.replace("_", " ").title()
+                )
+                add_result(
+                    "Platform",
+                    "Provisioning operation",
+                    f"{operation.operation.title()} operation",
+                    f"{state} · {operation.attempts} attempts",
+                    reverse(
+                        "staff_admin_desk_operations_provisioning",
+                        args=[operation.pk],
+                    ),
+                )
+
+        if _allowed(request.user, "payments.view_webhookevent"):
+            from apps.payments.models import WebhookEvent
+
+            webhooks = WebhookEvent.objects.filter(
+                event_type__icontains=query
+            ).only(
+                "provider", "event_type", "status", "received_at", "processed_at"
+            ).order_by("-received_at")[:5]
+            webhook_register_url = (
+                reverse("admin:payments_webhookevent_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for webhook in webhooks:
+                add_result(
+                    "Platform",
+                    "Provider webhook",
+                    f"{webhook.get_provider_display()} · {webhook.event_type}",
+                    (
+                        f"{webhook.get_status_display()} · Received "
+                        f"{timezone.localtime(webhook.received_at):%d %b %Y, %H:%M}"
+                    ),
+                    webhook_register_url,
+                )
+
+    search_groups = [
+        {"name": name, "results": items}
+        for name, items in groups.items()
+        if items
+    ]
+    total_results = sum(len(group["results"]) for group in search_groups)
+    return render(
+        request,
+        "admin/desk_search.html",
+        {
+            "query": query,
+            "searched": len(query) >= 2,
+            "search_groups": search_groups,
+            "total_results": total_results,
+            "desk_nav": _nav(request),
+        },
+    )

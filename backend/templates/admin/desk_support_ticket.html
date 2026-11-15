@@ -49,7 +49,7 @@
 </style>
 {% endblock %}
 {% block content %}
-<main class="tt-ticket-detail">
+<div class="tt-ticket-detail">
   <header class="head">
     <div>
       <p class="eyebrow"><a href="{% url 'staff_admin_desk' %}">Admin Desk</a> / <a href="{{ queue_url }}">Support workspace</a></p>
@@ -213,5 +213,5 @@
       {% endif %}
     </aside>
   </div>
-</main>
+</div>
 {% endblock %}

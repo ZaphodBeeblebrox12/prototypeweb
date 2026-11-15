@@ -1,4 +1,5 @@
 """Tests for the permission-aware, read-only TradeThesis Admin Desk."""
+from datetime import timedelta
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
@@ -7,8 +8,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.academy.models import Course, CourseModule, Lesson
+from apps.notifications.models import Notification
 from apps.support.models import SupportTicket
 
 User = get_user_model()
@@ -134,6 +137,1897 @@ class AdminDeskTests(TestCase):
         self.assertEqual(detail_response.status_code, 200)
         self.assertContains(detail_response, "Conversation")
         self.assertContains(detail_response, "Assignment &amp; priority")
+
+    def test_customers_overview_uses_live_reviewer_scoped_ticket_counts(self):
+        owner = User.objects.create_superuser(
+            username="customers-overview-owner",
+            email="customers-overview-owner@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=owner, email=owner.email, verified=True, primary=True
+        )
+        learner = User.objects.create_user(
+            username="customers-overview-learner",
+            email="customers-overview-learner@example.test",
+            first_name="Taylor",
+            last_name="Trader",
+        )
+        ticket = SupportTicket.objects.create(
+            user=learner,
+            category=SupportTicket.Category.BILLING,
+            message="Please check my payment and course access.",
+        )
+        SupportTicket.objects.filter(pk=ticket.pk).update(
+            first_response_due_at=timezone.now() - timedelta(hours=1)
+        )
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("staff_admin_desk_customers"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(response.context["can_view_accounts"])
+        self.assertEqual(response.context["active_learners"], 1)
+        self.assertEqual(response.context["support_summary"]["open"], 1)
+        self.assertEqual(response.context["support_summary"]["overdue"], 1)
+        self.assertEqual(response.context["support_summary"]["unassigned"], 1)
+        self.assertContains(response, ticket.short_id)
+        self.assertContains(
+            response,
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
+        )
+        self.assertContains(response, "Customer 360")
+        self.assertNotContains(response, "Ananya Rao")
+
+    def test_generic_staff_customers_overview_does_not_expose_learner_register(self):
+        operator = User.objects.create_user(
+            username="customers-overview-support",
+            email="customers-overview-support@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        learner = User.objects.create_user(
+            username="customers-overview-member",
+            email="customers-overview-member@example.test",
+        )
+        ticket = SupportTicket.objects.create(
+            user=learner,
+            category=SupportTicket.Category.TECHNICAL,
+            message="I cannot connect to the community.",
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_customers"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertFalse(response.context["can_view_accounts"])
+        self.assertIsNone(response.context["active_learners"])
+        self.assertEqual(response.context["support_summary"]["open"], 1)
+        self.assertContains(response, ticket.short_id)
+        self.assertNotContains(response, reverse("staff_admin_desk_accounts"))
+        self.assertNotContains(response, "Active learner accounts")
+
+    def test_restricted_support_ticket_blocks_detail_action_and_customer_profile(self):
+        from apps.subscriptions.models import Plan
+
+        operator = User.objects.create_user(
+            username="restricted-scope-operator",
+            email="restricted-scope-operator@example.test",
+            is_staff=True,
+        )
+        other_reviewer = User.objects.create_user(
+            username="restricted-scope-approver",
+            email="restricted-scope-approver@example.test",
+            is_staff=True,
+        )
+        member = User.objects.create_user(
+            username="restricted-scope-member",
+            email="restricted-scope-member@example.test",
+        )
+        restricted_plan = Plan.objects.create(
+            name="Restricted reviewer plan",
+            tier=Plan.Tier.PRO,
+        )
+        restricted_plan.ticket_approvers.add(other_reviewer)
+        ticket = SupportTicket.objects.create(
+            user=member,
+            plan=restricted_plan,
+            category=SupportTicket.Category.BILLING,
+            message="A private support request for another reviewer.",
+        )
+        self.client.force_login(operator)
+
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk])
+        )
+        self.assertEqual(detail_response.status_code, 404)
+
+        messages_before = ticket.messages.count()
+        action_response = self.client.post(
+            reverse("staff_admin_desk_support_ticket_action", args=[ticket.pk]),
+            {
+                "action": "public_reply",
+                "body": "This reply must not be saved by an unauthorised reviewer.",
+            },
+        )
+        self.assertEqual(action_response.status_code, 404)
+        self.assertEqual(ticket.messages.count(), messages_before)
+
+        customer_response = self.client.get(
+            reverse("staff_admin_desk_customer_360", args=[member.pk])
+        )
+        self.assertEqual(customer_response.status_code, 403)
+        self.assertNotContains(
+            customer_response,
+            "A private support request for another reviewer.",
+            status_code=403,
+        )
+
+    def test_my_work_is_limited_to_current_staff_assignments_and_notifications(self):
+        operator = User.objects.create_user(
+            username="my-work-operator",
+            email="my-work-operator@example.test",
+            is_staff=True,
+        )
+        other_operator = User.objects.create_user(
+            username="my-work-other-operator",
+            email="my-work-other-operator@example.test",
+            is_staff=True,
+        )
+        assigned_member = User.objects.create_user(
+            username="my-work-assigned-member",
+            email="my-work-assigned-member@example.test",
+        )
+        other_member = User.objects.create_user(
+            username="my-work-other-member",
+            email="my-work-other-member@example.test",
+        )
+        own_ticket = SupportTicket.objects.create(
+            user=assigned_member,
+            category=SupportTicket.Category.BILLING,
+            message="Assigned billing request.",
+            assigned_to=operator,
+        )
+        other_ticket = SupportTicket.objects.create(
+            user=other_member,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Another reviewer's technical request.",
+            assigned_to=other_operator,
+        )
+        Notification.objects.create(
+            user=operator,
+            title="Your assignment changed",
+            message="A support request is assigned to you.",
+        )
+        Notification.objects.create(
+            user=other_operator,
+            title="Private notification",
+            message="This belongs to another staff member.",
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_my_work"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["support_count"], 1)
+        self.assertEqual(response.context["notification_count"], 1)
+        self.assertEqual(response.context["unread_notification_count"], 1)
+        self.assertContains(response, own_ticket.short_id)
+        self.assertNotContains(response, other_ticket.short_id)
+        self.assertContains(response, "Your assignment changed")
+        self.assertNotContains(response, "Private notification")
+
+    def test_growth_referral_summary_requires_reward_and_settings_permissions(self):
+        from django.contrib.auth.models import Permission
+
+        operator = User.objects.create_user(
+            username="growth-referral-report-staff",
+            email="growth-referral-report-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        reward_permission = Permission.objects.get(
+            content_type__app_label="growth",
+            codename="view_referralreward",
+        )
+        settings_permission = Permission.objects.get(
+            content_type__app_label="growth",
+            codename="view_referralsettings",
+        )
+        operator.user_permissions.add(reward_permission)
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertNotIn("referral_report", response.context)
+        self.assertFalse(response.context["can_view_referrals"])
+
+        operator.user_permissions.add(settings_permission)
+        response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn("referral_report", response.context)
+        self.assertTrue(response.context["can_view_referrals"])
+
+    def test_campaign_workspace_separates_campaign_and_audience_permissions(self):
+        from django.contrib.auth.models import Permission
+        from apps.campaigns.models import Audience, Campaign
+        from apps.emailing.models import Template, TemplateVersion
+
+        template = Template.objects.create(name="Permission boundary test")
+        version = TemplateVersion.objects.create(
+            template=template,
+            version_number=1,
+            editor_mode=TemplateVersion.EditorMode.HTML,
+            subject="Permission boundary",
+            html="<p>Permission boundary</p>",
+        )
+        audience = Audience.objects.create(
+            name="Restricted Audience Name",
+            description="Audience-only description",
+            rules={"is_active": True},
+        )
+        campaign = Campaign.objects.create(
+            name="Restricted Campaign Name",
+            template_version=version,
+            audience=audience,
+        )
+
+        campaign_permission = Permission.objects.get(
+            content_type__app_label="campaigns",
+            codename="view_campaign",
+        )
+        audience_permission = Permission.objects.get(
+            content_type__app_label="campaigns",
+            codename="view_audience",
+        )
+
+        generic_staff = User.objects.create_user(
+            username="campaign-workspace-no-growth-grants",
+            email="campaign-workspace-no-growth-grants@example.test",
+            is_staff=True,
+        )
+        campaign_staff = User.objects.create_user(
+            username="campaign-workspace-campaign-only",
+            email="campaign-workspace-campaign-only@example.test",
+            is_staff=True,
+        )
+        campaign_staff.user_permissions.add(campaign_permission)
+        audience_staff = User.objects.create_user(
+            username="campaign-workspace-audience-only",
+            email="campaign-workspace-audience-only@example.test",
+            is_staff=True,
+        )
+        audience_staff.user_permissions.add(audience_permission)
+
+        self.client.force_login(generic_staff)
+        denied = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(denied.status_code, 403)
+        denied_detail = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(denied_detail.status_code, 403)
+
+        self.client.force_login(campaign_staff)
+        campaign_response = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(campaign_response.status_code, 200, campaign_response.content)
+        self.assertContains(campaign_response, "Restricted Campaign Name")
+        self.assertNotContains(campaign_response, "Restricted Audience Name")
+        self.assertNotContains(campaign_response, "Audience-only description")
+
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200, detail_response.content)
+        self.assertContains(detail_response, "Restricted Campaign Name")
+        self.assertNotContains(detail_response, "Restricted Audience Name")
+        self.assertNotContains(detail_response, "Audience context")
+
+        self.client.force_login(audience_staff)
+        audience_response = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(audience_response.status_code, 200, audience_response.content)
+        self.assertContains(audience_response, "Restricted Audience Name")
+        self.assertContains(audience_response, "Audience-only description")
+        self.assertNotContains(audience_response, "Restricted Campaign Name")
+        self.assertContains(audience_response, "Campaigns &amp; Audiences")
+        audience_detail_response = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(audience_detail_response.status_code, 403)
+
+        audience_growth_response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(
+            audience_growth_response.status_code, 200, audience_growth_response.content
+        )
+        self.assertTrue(audience_growth_response.context["can_view_audiences"])
+        self.assertContains(audience_growth_response, "Campaigns &amp; Audiences workspace")
+
+    def test_academy_course_offers_register_respects_domain_permissions(self):
+        from django.contrib.auth.models import Permission
+
+        from apps.academy.models import CourseOffer
+        from apps.subscriptions.models import Plan, PlanPrice
+
+        course = Course.objects.create(
+            title="Offers Register Course",
+            slug="offers-register-course",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.PAID,
+        )
+        private_plan = Plan.objects.create(
+            name="Private Revenue Plan Must Stay Hidden",
+            tier=Plan.Tier.BASIC,
+            is_hidden=False,
+        )
+        PlanPrice.objects.create(
+            plan=private_plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=1200,
+            currency="INR",
+            is_active=True,
+        )
+        offer = CourseOffer.objects.create(
+            course=course,
+            name="Offers Register Offer",
+            slug="offers-register-offer",
+            plan=private_plan,
+            is_active=False,
+        )
+
+        owner = User.objects.create_superuser(
+            username="academy-offers-content-admin",
+            email="academy-offers-content-admin@example.test",
+            password="test-password-123!",
+        )
+        self.client.force_login(owner)
+        response = self.client.get(reverse("staff_admin_desk_course_offers"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Offers Register Course")
+        self.assertContains(response, "Offers Register Offer")
+        self.assertContains(response, "Inactive")
+        self.assertContains(response, "Active one-time price recorded")
+        offer_row = response.context["offers_page"][0]
+        self.assertFalse(offer_row["readiness"]["saleable"])
+        self.assertTrue(offer_row["readiness"]["price_ready"])
+        self.assertTrue(response.context["can_open_course_detail"])
+
+        limited = User.objects.create_user(
+            username="academy-offers-limited-staff",
+            email="academy-offers-limited-staff@example.test",
+            is_staff=True,
+        )
+        limited.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_course"
+            ),
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_courseoffer"
+            ),
+        )
+        self.client.force_login(limited)
+        limited_response = self.client.get(reverse("staff_admin_desk_course_offers"))
+        self.assertEqual(limited_response.status_code, 200, limited_response.content)
+        self.assertContains(limited_response, "Offers Register Offer")
+        self.assertContains(limited_response, "Commercial checks restricted")
+        self.assertNotContains(limited_response, "Private Revenue Plan Must Stay Hidden")
+        self.assertNotContains(limited_response, "Not hidden")
+        self.assertFalse(limited_response.context["can_open_course_detail"])
+        self.assertNotContains(limited_response, reverse(
+            "staff_admin_desk_course_detail", args=[course.pk]
+        ))
+
+        content_operator = User.objects.create_user(
+            username="academy-content-admin-without-revenue",
+            email="academy-content-admin-without-revenue@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        content_operator.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_course"
+            ),
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_courseoffer"
+            ),
+        )
+        active_private_plan = Plan.objects.create(
+            name="Active Private Revenue Plan Must Stay Hidden",
+            tier=Plan.Tier.PRO,
+            is_hidden=False,
+        )
+        CourseOffer.objects.create(
+            course=course,
+            name="Active Offers Register Offer",
+            slug="active-offers-register-offer",
+            plan=active_private_plan,
+            is_active=True,
+        )
+
+        self.client.force_login(content_operator)
+        catalogue_response = self.client.get(reverse("staff_admin_desk_courses"))
+        self.assertEqual(catalogue_response.status_code, 200, catalogue_response.content)
+        self.assertContains(
+            catalogue_response, "Active · commercial check restricted"
+        )
+        self.assertNotContains(
+            catalogue_response, "Active Private Revenue Plan Must Stay Hidden"
+        )
+
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_course_detail", args=[course.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200, detail_response.content)
+        self.assertContains(detail_response, "Commercial checks restricted")
+        self.assertContains(detail_response, "Commercial checks require Revenue permissions")
+        self.assertNotContains(detail_response, "Private Revenue Plan Must Stay Hidden")
+        self.assertNotContains(detail_response, "One-time price configured")
+        self.assertNotContains(detail_response, "No active one-time price")
+
+        denied = User.objects.create_user(
+            username="academy-offers-no-grant",
+            email="academy-offers-no-grant@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(denied)
+        denied_response = self.client.get(reverse("staff_admin_desk_course_offers"))
+        self.assertEqual(denied_response.status_code, 403)
+
+    def test_academy_catalogue_and_course_detail_use_content_admin_boundary(self):
+        from django.contrib.auth.models import Permission
+
+        from apps.academy.models import CourseModule, Lesson
+
+        course = Course.objects.create(
+            title="Admin Desk Catalogue Course",
+            slug="admin-desk-catalogue-course",
+            summary="A searchable course summary",
+            description="Course detail description",
+            status=Course.Status.PUBLISHED,
+            catalogue_role=Course.CatalogueRole.MINI,
+            access_type=Course.AccessType.PAID,
+        )
+        module = CourseModule.objects.create(
+            course=course,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=module,
+            title="Visible Lesson Outline",
+            slug="visible-lesson-outline",
+            summary="A lesson summary",
+            position=1,
+            duration_minutes=12,
+            is_published=True,
+            content_markdown="PRIVATE LESSON BODY MUST NOT APPEAR",
+        )
+
+        content_admin = User.objects.create_user(
+            username="academy-content-admin",
+            email="academy-content-admin@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(content_admin)
+
+        catalogue = self.client.get(
+            reverse("staff_admin_desk_courses") + "?q=admin-desk-catalogue-course"
+        )
+        self.assertEqual(catalogue.status_code, 200, catalogue.content)
+        self.assertContains(catalogue, "Admin Desk Catalogue Course")
+        self.assertContains(catalogue, "Course Catalogue")
+
+        detail = self.client.get(
+            reverse("staff_admin_desk_course_detail", args=[course.pk])
+        )
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertContains(detail, "Course overview")
+        self.assertContains(detail, "Visible Lesson Outline")
+        self.assertContains(detail, "SEO &amp; discoverability")
+        self.assertNotContains(detail, "PRIVATE LESSON BODY MUST NOT APPEAR")
+
+        limited_staff = User.objects.create_user(
+            username="academy-model-permission-only",
+            email="academy-model-permission-only@example.test",
+            is_staff=True,
+        )
+        course_permission = Permission.objects.get(
+            content_type__app_label="academy",
+            codename="view_course",
+        )
+        limited_staff.user_permissions.add(course_permission)
+        self.client.force_login(limited_staff)
+
+        denied_catalogue = self.client.get(reverse("staff_admin_desk_courses"))
+        self.assertEqual(denied_catalogue.status_code, 403)
+        denied_detail = self.client.get(
+            reverse("staff_admin_desk_course_detail", args=[course.pk])
+        )
+        self.assertEqual(denied_detail.status_code, 403)
+
+        academy_overview = self.client.get(reverse("staff_admin_desk_academy"))
+        self.assertEqual(academy_overview.status_code, 200, academy_overview.content)
+        self.assertIn("course_summary", academy_overview.context)
+        self.assertFalse(academy_overview.context["course_summary"]["url"])
+        self.assertContains(
+            academy_overview,
+            "Catalogue access requires the Academy content-admin role",
+        )
+
+    def test_growth_email_report_uses_marked_sent_not_delivered_language(self):
+        owner = User.objects.create_superuser(
+            username="growth-email-report-owner",
+            email="growth-email-report-owner@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=owner, email=owner.email, verified=True, primary=True
+        )
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("staff_admin_desk_growth"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Marked sent")
+        self.assertContains(
+            response,
+            "A Sent state is not presented as provider-confirmed Delivered",
+        )
+
+    def test_global_search_respects_domain_permissions_and_ticket_reviewer_scope(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import PaymentIntent
+        from apps.subscriptions.models import Plan
+
+        operator = User.objects.create_user(
+            username="global-search-operator",
+            email="global-search-operator@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        for app_label, codename in (
+            ("accounts", "view_user"),
+            ("academy", "view_course"),
+            ("payments", "view_paymentintent"),
+        ):
+            permission = Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            operator.user_permissions.add(permission)
+
+        member = User.objects.create_user(
+            username="needle-member",
+            email="needle-member@example.test",
+            first_name="Needle",
+            last_name="Member",
+        )
+        hidden_member = User.objects.create_user(
+            username="hidden-scope-member",
+            email="hidden-scope-member@example.test",
+        )
+        other_reviewer = User.objects.create_user(
+            username="global-search-other-reviewer",
+            email="global-search-other-reviewer@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=other_reviewer,
+            email=other_reviewer.email,
+            verified=True,
+            primary=True,
+        )
+
+        visible_plan = Plan.objects.create(
+            name="Visible support plan",
+            tier=Plan.Tier.BASIC,
+        )
+        visible_plan.ticket_approvers.add(operator)
+        hidden_plan = Plan.objects.create(
+            name="Restricted support plan",
+            tier=Plan.Tier.PRO,
+        )
+        hidden_plan.ticket_approvers.add(other_reviewer)
+
+        visible_ticket = SupportTicket.objects.create(
+            user=member,
+            plan=visible_plan,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Needle visible support request",
+        )
+        hidden_ticket = SupportTicket.objects.create(
+            user=hidden_member,
+            plan=hidden_plan,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Needle restricted support request",
+        )
+        course = Course.objects.create(
+            title="Needle Course",
+            slug="needle-course",
+            status=Course.Status.DRAFT,
+        )
+        payment_plan = Plan.objects.create(
+            name="Needle Payment Plan",
+            tier=Plan.Tier.ENTERPRISE,
+        )
+        PaymentIntent.objects.create(
+            user=member,
+            plan=payment_plan,
+            provider=PaymentIntent.Provider.RAZORPAY,
+            amount=129900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "needle"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        groups = {
+            group["name"]: group["results"]
+            for group in response.context["search_groups"]
+        }
+        self.assertEqual(set(groups), {"Customers", "Academy", "Revenue"})
+        self.assertContains(response, member.username)
+        self.assertContains(response, visible_ticket.short_id)
+        self.assertNotContains(response, hidden_ticket.short_id)
+        self.assertNotContains(response, hidden_member.username)
+        self.assertContains(response, course.title)
+        self.assertContains(response, payment_plan.name)
+        self.assertContains(response, "INR 1,299.00")
+        self.assertNotContains(response, "Needle restricted support request")
+
+    def test_plans_workspace_requires_plan_view_and_hides_unpermitted_related_data(self):
+        from django.contrib.auth.models import Permission
+        from apps.academy.models import Course, CourseOffer
+        from apps.subscriptions.models import (
+            GeoPlanPrice, Plan, PlanFeature, PlanPrice, Product, Subscription,
+        )
+        from apps.bot_integration.models import PlanChannelMapping
+
+        product = Product.objects.create(
+            name="Private catalogue product",
+            slug="private-catalogue-product",
+            description="A private product description.",
+            is_active=True,
+        )
+        plan = Plan.objects.create(
+            product=product,
+            name="Private Premium Market Plan",
+            tier=Plan.Tier.PRO,
+            description="A read-only plan description.",
+            is_active=True,
+        )
+        PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.MONTHLY,
+            price_cents=399900,
+            currency="INR",
+            is_active=True,
+        )
+        GeoPlanPrice.objects.create(
+            plan=plan,
+            interval=GeoPlanPrice.Interval.MONTHLY,
+            price_cents=49900,
+            currency="INR",
+            country="IN",
+            is_active=True,
+        )
+        PlanFeature.objects.create(
+            plan=plan,
+            text="Private advanced feature bullet",
+            position=1,
+        )
+        external_channel_id = "-1009876543210"
+        PlanChannelMapping.objects.create(
+            plan=plan,
+            platform="telegram",
+            external_id=external_channel_id,
+            name="Private Trading Channel",
+        )
+
+        unprivileged = User.objects.create_user(
+            username="plans-view-denied",
+            email="plans-view-denied@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(unprivileged)
+        denied = self.client.get(reverse("staff_admin_desk_plans"))
+        self.assertEqual(denied.status_code, 403)
+
+        operator = User.objects.create_user(
+            username="plans-view-only",
+            email="plans-view-only@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="subscriptions",
+            codename="view_plan",
+        )
+        operator.user_permissions.add(permission)
+        self.client.force_login(operator)
+
+        listing = self.client.get(
+            reverse("staff_admin_desk_plans"),
+            {"q": "Private Premium"},
+        )
+        self.assertEqual(listing.status_code, 200, listing.content)
+        self.assertEqual(listing.context["plans_page"].paginator.count, 1)
+        self.assertIsNone(listing.context["products_page"])
+        self.assertFalse(listing.context["can_view_products"])
+        self.assertFalse(listing.context["can_view_base_prices"])
+        self.assertFalse(listing.context["can_view_geo_prices"])
+        self.assertContains(listing, plan.name)
+        self.assertNotContains(listing, product.name)
+        self.assertNotContains(listing, "3,999.00")
+
+        detail = self.client.get(
+            reverse("staff_admin_desk_plan_detail", args=[plan.pk])
+        )
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertFalse(detail.context["can_view_product"])
+        self.assertFalse(detail.context["can_view_base_prices"])
+        self.assertFalse(detail.context["can_view_geo_prices"])
+        self.assertFalse(detail.context["can_view_features"])
+        self.assertFalse(detail.context["can_view_channel_mappings"])
+        self.assertContains(detail, plan.name)
+        self.assertNotContains(detail, product.name)
+        self.assertNotContains(detail, "3,999.00")
+        self.assertNotContains(detail, "499.00")
+        self.assertNotContains(detail, "Private advanced feature bullet")
+        self.assertNotContains(detail, "Private Trading Channel")
+        self.assertNotContains(detail, external_channel_id)
+        self.assertEqual(
+            self.client.post(
+                reverse("staff_admin_desk_plan_detail", args=[plan.pk]),
+                {"name": "Changed from the read-only workspace"},
+            ).status_code,
+            405,
+        )
+
+    def test_plans_workspace_shows_only_individually_permitted_pricing_and_mappings(self):
+        from django.contrib.auth.models import Permission
+        from apps.academy.models import Course, CourseOffer
+        from apps.subscriptions.models import (
+            GeoPlanPrice, Plan, PlanFeature, PlanPrice, Product, Subscription,
+        )
+        from apps.bot_integration.models import PlanChannelMapping
+
+        product = Product.objects.create(
+            name="Visible catalogue product",
+            slug="visible-catalogue-product",
+            description="Product description shown to authorised staff.",
+        )
+        standalone_product = Product.objects.create(
+            name="Catalogue product awaiting a Plan",
+            slug="catalogue-product-awaiting-plan",
+            description="A configured product with no linked Plan yet.",
+        )
+        plan = Plan.objects.create(
+            product=product,
+            name="Visible Pro Market Plan",
+            tier=Plan.Tier.PRO,
+            description="Inspectable plan summary.",
+            is_hidden=True,
+            grant_duration_days=30,
+            notice_channel="email",
+            is_trial=True,
+            trial_duration_days=14,
+        )
+        PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.MONTHLY,
+            price_cents=399900,
+            currency="INR",
+            is_active=True,
+        )
+        GeoPlanPrice.objects.create(
+            plan=plan,
+            interval=GeoPlanPrice.Interval.MONTHLY,
+            price_cents=49900,
+            currency="INR",
+            country="IN",
+            region="APAC",
+            is_active=True,
+        )
+        PlanFeature.objects.create(
+            plan=plan,
+            text="Authorised feature bullet",
+            position=1,
+        )
+
+        learner = User.objects.create_user(
+            username="plan-usage-learner",
+            email="plan-usage-learner@example.test",
+        )
+        Subscription.objects.create(
+            user=learner,
+            plan=plan,
+            status=Subscription.Status.ACTIVE,
+            is_active=True,
+            started_at=timezone.now() - timedelta(days=1),
+            expires_at=timezone.now() + timedelta(days=13),
+            price_cents=0,
+            price_currency="INR",
+            is_trial=True,
+        )
+
+        course_offer_plan = Plan.objects.create(
+            product=product,
+            name="One-time Academy Course Plan",
+            tier=Plan.Tier.ENTERPRISE,
+            is_hidden=True,
+            is_active=True,
+        )
+        PlanPrice.objects.create(
+            plan=course_offer_plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=199900,
+            currency="INR",
+            is_active=True,
+        )
+        course = Course.objects.create(
+            title="One-time Academy Course",
+            slug="one-time-academy-course",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.PAID,
+        )
+        course_offer = CourseOffer(
+            course=course,
+            name="One-time Academy Offer",
+            slug="one-time-academy-offer",
+            plan=course_offer_plan,
+            access_duration_days=90,
+            is_active=True,
+        )
+        course_offer.full_clean()
+        course_offer.save()
+
+        external_channel_id = "-1009876543210"
+        PlanChannelMapping.objects.create(
+            plan=plan,
+            platform="telegram",
+            external_id=external_channel_id,
+            name="Authorised Trading Channel",
+        )
+
+        operator = User.objects.create_user(
+            username="plans-config-reviewer",
+            email="plans-config-reviewer@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permissions = [
+            ("subscriptions", "view_plan"),
+            ("subscriptions", "view_product"),
+            ("subscriptions", "view_planprice"),
+            ("subscriptions", "view_geoplanprice"),
+            ("subscriptions", "view_planfeature"),
+            ("bot_integration", "view_planchannelmapping"),
+            ("subscriptions", "view_subscription"),
+            ("academy", "view_courseoffer"),
+        ]
+        operator.user_permissions.add(*[
+            Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            for app_label, codename in permissions
+        ])
+        self.client.force_login(operator)
+
+        listing = self.client.get(reverse("staff_admin_desk_plans"))
+        self.assertEqual(listing.status_code, 200, listing.content)
+        self.assertTrue(listing.context["can_view_products"])
+        self.assertTrue(listing.context["can_view_base_prices"])
+        self.assertTrue(listing.context["can_view_geo_prices"])
+        self.assertEqual(listing.context["plan_summary"]["products"], 2)
+        self.assertEqual(listing.context["products_page"].paginator.count, 2)
+        self.assertContains(listing, product.name)
+        self.assertContains(listing, standalone_product.name)
+        self.assertContains(listing, plan.name)
+        self.assertContains(listing, "Active base prices")
+        self.assertContains(listing, "Active geo overrides")
+
+        detail = self.client.get(
+            reverse("staff_admin_desk_plan_detail", args=[plan.pk])
+        )
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertContains(detail, product.name)
+        self.assertContains(detail, "INR 3,999.00")
+        self.assertContains(detail, "INR 499.00")
+        self.assertContains(detail, "Country IN")
+        self.assertContains(detail, "Region APAC")
+        self.assertContains(detail, "Authorised feature bullet")
+        self.assertContains(detail, "Authorised Trading Channel")
+        self.assertTrue(detail.context["can_view_subscriptions"])
+        self.assertEqual(detail.context["subscription_summary"]["total"], 1)
+        self.assertEqual(detail.context["subscription_summary"]["active"], 1)
+        self.assertEqual(
+            detail.context["subscription_rows"][0]["learner"],
+            learner.username,
+        )
+        self.assertEqual(
+            detail.context["subscription_rows"][0]["source"], "Trial"
+        )
+        self.assertContains(detail, learner.username)
+        self.assertContains(detail, "INR 0.00")
+        self.assertTrue(detail.context["can_view_course_offer"])
+        self.assertIsNone(detail.context["course_offer"])
+        self.assertContains(detail, "30 days")
+        self.assertContains(detail, "Email")
+        self.assertContains(detail, "Any staff (default)")
+        self.assertNotContains(detail, external_channel_id)
+        self.assertContains(
+            detail,
+            "country-specific GeoPlanPrice first",
+        )
+        self.assertEqual(
+            detail.context["advanced_admin_url"],
+            reverse("admin:subscriptions_plan_changelist"),
+        )
+
+        search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "Visible Pro Market"},
+        )
+        self.assertEqual(search.status_code, 200, search.content)
+        groups = {
+            group["name"]: group["results"]
+            for group in search.context["search_groups"]
+        }
+        self.assertEqual(set(groups), {"Revenue"})
+        self.assertEqual(groups["Revenue"][0]["kind"], "Plan")
+        self.assertEqual(
+            groups["Revenue"][0]["url"],
+            reverse("staff_admin_desk_plan_detail", args=[plan.pk]),
+        )
+
+        platform = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(platform.status_code, 200, platform.content)
+        revenue_access = next(
+            section for section in platform.context["my_access"]["sections"]
+            if section["name"] == "Revenue"
+        )
+        access = {item["label"]: item["granted"] for item in revenue_access["items"]}
+        self.assertTrue(access["Plan catalogue"])
+        self.assertTrue(access["Product catalogue"])
+        self.assertTrue(access["Global base prices"])
+        self.assertTrue(access["Geo price overrides"])
+        self.assertTrue(access["Plan feature bullets"])
+        self.assertTrue(access["Community channel mappings"])
+
+        course_offer_detail = self.client.get(
+            reverse(
+                "staff_admin_desk_plan_detail",
+                args=[course_offer_plan.pk],
+            )
+        )
+        self.assertEqual(
+            course_offer_detail.status_code, 200, course_offer_detail.content
+        )
+        self.assertEqual(
+            course_offer_detail.context["course_offer"]["name"],
+            course_offer.name,
+        )
+        self.assertTrue(
+            course_offer_detail.context["course_offer"]["catalogue_eligible"]
+        )
+        self.assertEqual(
+            course_offer_detail.context["course_offer"]["access_duration"],
+            "90 days",
+        )
+        self.assertEqual(
+            course_offer_detail.context["subscription_summary"]["total"], 0
+        )
+        self.assertContains(course_offer_detail, course.title)
+        self.assertContains(course_offer_detail, "Eligible by current course/offer state")
+        self.assertContains(course_offer_detail, "90 days")
+
+    def test_global_search_includes_disputes_only_with_revenue_permission(self):
+        from django.contrib.auth.models import Permission
+        from apps.disputes.models import Dispute
+        from apps.payments.models import PaymentIntent
+        from apps.subscriptions.models import Plan
+
+        member = User.objects.create_user(
+            username="needle-dispute-member",
+            email="needle-dispute-member@example.test",
+        )
+        plan = Plan.objects.create(
+            name="Dispute search plan",
+            tier=Plan.Tier.BASIC,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=plan,
+            provider=PaymentIntent.Provider.STRIPE,
+            amount=459900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        provider_dispute_id = "dp_private_search_9381"
+        dispute = Dispute.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_dispute_id=provider_dispute_id,
+            reason_category=Dispute.ReasonCategory.NOT_RECEIVED,
+            amount_cents=459900,
+            currency="INR",
+            status=Dispute.Status.OPENED,
+        )
+        other_member = User.objects.create_user(
+            username="unrelated-dispute-member",
+            email="unrelated-dispute-member@example.test",
+        )
+        other_payment = PaymentIntent.objects.create(
+            user=other_member,
+            plan=plan,
+            provider=PaymentIntent.Provider.RAZORPAY,
+            amount=129900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        Dispute.objects.create(
+            payment_intent=other_payment,
+            provider=PaymentIntent.Provider.RAZORPAY,
+            provider_dispute_id="dp_unrelated_case_6421",
+            reason_category=Dispute.ReasonCategory.DUPLICATE,
+            amount_cents=129900,
+            currency="INR",
+            status=Dispute.Status.OPENED,
+        )
+
+        limited_operator = User.objects.create_user(
+            username="dispute-search-limited",
+            email="dispute-search-limited@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(limited_operator)
+        denied_response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(denied_response.status_code, 200)
+        self.assertEqual(denied_response.context["search_groups"], [])
+        self.assertNotContains(denied_response, member.email)
+        self.assertNotContains(denied_response, provider_dispute_id)
+
+        reviewer = User.objects.create_user(
+            username="dispute-search-reviewer",
+            email="dispute-search-reviewer@example.test",
+            is_staff=True,
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="disputes",
+            codename="view_dispute",
+        )
+        reviewer.user_permissions.add(permission)
+        self.client.force_login(reviewer)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        groups = {
+            group["name"]: group["results"]
+            for group in response.context["search_groups"]
+        }
+        self.assertEqual(set(groups), {"Revenue"})
+        self.assertEqual(len(groups["Revenue"]), 1)
+        result = groups["Revenue"][0]
+        self.assertEqual(result["kind"], "Dispute")
+        self.assertIn(member.username, result["title"])
+        self.assertIn("Service not received", result["detail"])
+        self.assertIn("INR 4,599.00", result["detail"])
+        self.assertEqual(
+            result["url"],
+            reverse("disputes:dashboard") + "?q=" + member.username,
+        )
+        self.assertContains(response, "Dispute")
+        self.assertNotContains(response, provider_dispute_id)
+
+        dispute_workspace = self.client.get(result["url"])
+        self.assertEqual(dispute_workspace.status_code, 200, dispute_workspace.content)
+        matching_rows = list(
+            dispute_workspace.context["rows"].values_list("pk", flat=True)
+        )
+        self.assertEqual(matching_rows, [dispute.pk])
+        self.assertContains(dispute_workspace, provider_dispute_id[:16])
+        self.assertNotContains(dispute_workspace, "dp_unrelated_case_6421")
+
+        application_admin = User.objects.create_user(
+            username="dispute-search-application-admin",
+            email="dispute-search-application-admin@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(application_admin)
+        admin_search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(admin_search.status_code, 200, admin_search.content)
+        admin_groups = {
+            group["name"]: group["results"]
+            for group in admin_search.context["search_groups"]
+        }
+        self.assertEqual(set(admin_groups), {"Revenue"})
+        self.assertEqual(admin_groups["Revenue"][0]["url"], result["url"])
+        admin_dispute_workspace = self.client.get(result["url"])
+        self.assertEqual(
+            admin_dispute_workspace.status_code, 200, admin_dispute_workspace.content
+        )
+
+    def test_revenue_overview_reports_recorded_refunds_by_currency(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import PaymentIntent, Refund
+        from apps.subscriptions.models import Plan
+
+        member = User.objects.create_user(
+            username="revenue-refund-summary-member",
+            email="revenue-refund-summary-member@example.test",
+        )
+        plan = Plan.objects.create(
+            name="Revenue refund summary plan",
+            tier=Plan.Tier.BASIC,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=plan,
+            provider=PaymentIntent.Provider.STRIPE,
+            amount=459900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        Refund.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_refund_id="rf_revenue_summary_inr_3921",
+            amount_cents=129900,
+            currency="INR",
+            source=Refund.Source.WEBHOOK,
+            commercial_context=Refund.CommercialContext.STANDARD,
+            refunded_at=timezone.now(),
+        )
+        Refund.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_refund_id="rf_revenue_summary_usd_3922",
+            amount_cents=2500,
+            currency="USD",
+            source=Refund.Source.WEBHOOK,
+            commercial_context=Refund.CommercialContext.STANDARD,
+            refunded_at=timezone.now(),
+        )
+
+        no_refund_access = User.objects.create_user(
+            username="revenue-refund-summary-limited",
+            email="revenue-refund-summary-limited@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(no_refund_access)
+        hidden_response = self.client.get(reverse("staff_admin_desk_revenue"))
+        self.assertEqual(hidden_response.status_code, 200)
+        self.assertNotIn("refund_summary", hidden_response.context)
+        self.assertNotContains(hidden_response, "Recorded refunds")
+
+        operator = User.objects.create_user(
+            username="revenue-refund-summary-reviewer",
+            email="revenue-refund-summary-reviewer@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_refund",
+        )
+        operator.user_permissions.add(permission)
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_revenue"))
+        self.assertEqual(response.status_code, 200, response.content)
+        summary = response.context["refund_summary"]
+        self.assertEqual(summary["count"], 2)
+        by_currency = {row["currency"]: row for row in summary["by_currency"]}
+        self.assertEqual(by_currency["INR"]["refunds"], 1)
+        self.assertEqual(by_currency["INR"]["amount_cents"], 129900)
+        self.assertEqual(by_currency["USD"]["refunds"], 1)
+        self.assertEqual(by_currency["USD"]["amount_cents"], 2500)
+        self.assertEqual(
+            summary["url"],
+            reverse("staff_admin_desk_finance") + "?tab=refunds",
+        )
+        self.assertTrue(response.context["has_revenue_sections"])
+        self.assertContains(response, "Recorded refunds")
+        self.assertContains(response, "INR")
+        self.assertContains(response, "USD")
+        self.assertNotContains(response, "Combined revenue")
+        self.assertNotContains(response, "Initiate refund")
+
+    def test_finance_refund_ledger_is_read_only_and_permission_scoped(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import PaymentIntent, Refund
+        from apps.subscriptions.models import Plan
+
+        member = User.objects.create_user(
+            username="refund-ledger-member",
+            email="refund-ledger-member@example.test",
+        )
+        plan = Plan.objects.create(
+            name="Refund ledger plan",
+            tier=Plan.Tier.BASIC,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=plan,
+            provider=PaymentIntent.Provider.STRIPE,
+            amount=459900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        provider_refund_id = "rf_private_refund_reference_9381"
+        private_metadata = "refund-metadata-must-not-render"
+        refund = Refund.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_refund_id=provider_refund_id,
+            amount_cents=129900,
+            currency="INR",
+            source=Refund.Source.WEBHOOK,
+            commercial_context=Refund.CommercialContext.STANDARD,
+            refunded_at=timezone.now(),
+            metadata={"private_payload": private_metadata},
+        )
+
+        unprivileged = User.objects.create_user(
+            username="refund-ledger-unprivileged",
+            email="refund-ledger-unprivileged@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(unprivileged)
+        denied = self.client.get(
+            reverse("staff_admin_desk_finance"),
+            {"tab": "refunds", "q": member.username},
+        )
+        self.assertEqual(denied.status_code, 403)
+
+        refund_operator = User.objects.create_user(
+            username="refund-ledger-operator",
+            email="refund-ledger-operator@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=refund_operator,
+            email=refund_operator.email,
+            verified=True,
+            primary=True,
+        )
+        refund_permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_refund",
+        )
+        refund_operator.user_permissions.add(refund_permission)
+        self.client.force_login(refund_operator)
+
+        response = self.client.get(reverse("staff_admin_desk_finance"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["tab"], "refunds")
+        self.assertTrue(response.context["can_view_refunds"])
+        self.assertTrue(response.context["desk_nav"]["finance"])
+        platform_access = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(platform_access.status_code, 200)
+        revenue_access = next(
+            section for section in platform_access.context["my_access"]["sections"]
+            if section["name"] == "Revenue"
+        )
+        refund_access = {
+            item["label"]: item for item in revenue_access["items"]
+        }
+        self.assertTrue(refund_access["Refund ledger"]["granted"])
+        self.assertFalse(response.context["can_view_payments"])
+        self.assertFalse(response.context["can_view_invoices"])
+        self.assertEqual(
+            [item.pk for item in response.context["refund_page"].object_list],
+            [refund.pk],
+        )
+        self.assertContains(response, member.username)
+        self.assertContains(response, "Refund ledger plan")
+        self.assertContains(response, "Stripe")
+        self.assertContains(response, "INR 1,299.00")
+        self.assertContains(response, "Webhook")
+        self.assertContains(response, "Standard paid plan")
+        self.assertNotContains(response, provider_refund_id)
+        self.assertNotContains(response, private_metadata)
+        self.assertNotContains(response, "Initiate refund")
+        self.assertEqual(Refund.objects.count(), 1)
+
+        search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(search.status_code, 200, search.content)
+        self.assertEqual(len(search.context["search_groups"]), 1)
+        results = search.context["search_groups"][0]["results"]
+        self.assertEqual(search.context["search_groups"][0]["name"], "Revenue")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["kind"], "Refund record")
+        self.assertIn(member.username, results[0]["title"])
+        self.assertIn("Standard paid plan", results[0]["detail"])
+        self.assertIn("INR 1,299.00", results[0]["detail"])
+        self.assertEqual(
+            results[0]["url"],
+            reverse("staff_admin_desk_finance")
+            + f"?q={member.username}&tab=refunds",
+        )
+        self.assertNotIn(provider_refund_id, str(results))
+        self.assertNotIn(private_metadata, str(results))
+
+        payment_operator = User.objects.create_user(
+            username="payment-only-operator",
+            email="payment-only-operator@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=payment_operator,
+            email=payment_operator.email,
+            verified=True,
+            primary=True,
+        )
+        payment_permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_paymentintent",
+        )
+        payment_operator.user_permissions.add(payment_permission)
+        self.client.force_login(payment_operator)
+
+        payment_only_response = self.client.get(
+            reverse("staff_admin_desk_finance"),
+            {"tab": "refunds"},
+        )
+        self.assertEqual(payment_only_response.status_code, 200)
+        self.assertEqual(payment_only_response.context["tab"], "payments")
+        self.assertFalse(payment_only_response.context["can_view_refunds"])
+        payment_platform_access = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(payment_platform_access.status_code, 200)
+        payment_revenue_access = next(
+            section for section in payment_platform_access.context["my_access"]["sections"]
+            if section["name"] == "Revenue"
+        )
+        payment_refund_access = {
+            item["label"]: item for item in payment_revenue_access["items"]
+        }
+        self.assertFalse(payment_refund_access["Refund ledger"]["granted"])
+        self.assertNotContains(payment_only_response, "tab=refunds")
+
+        payment_only_search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(payment_only_search.status_code, 200)
+        payment_results = [
+            result
+            for group in payment_only_search.context["search_groups"]
+            for result in group["results"]
+        ]
+        self.assertNotIn("Refund record", [result["kind"] for result in payment_results])
+        self.assertNotIn(provider_refund_id, str(payment_results))
+        self.assertNotIn(private_metadata, str(payment_results))
+
+    def test_platform_webhook_summary_omits_provider_ids_payloads_and_errors(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import WebhookEvent
+
+        operator = User.objects.create_user(
+            username="platform-webhook-staff",
+            email="platform-webhook-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_webhookevent",
+        )
+        operator.user_permissions.add(permission)
+        provider_event_id = "evt_private_provider_reference_9834"
+        payload_secret = "payload-secret-do-not-render"
+        error_detail = "provider-internal-error-do-not-render"
+        WebhookEvent.objects.create(
+            provider="stripe",
+            provider_event_id=provider_event_id,
+            event_type="payment_intent.succeeded",
+            payload={"secret": payload_secret},
+            status=WebhookEvent.Status.FAILED,
+            error=error_detail,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_platform"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["webhook_summary"]["total_7d"], 1)
+        self.assertEqual(response.context["webhook_summary"]["failed"], 1)
+        self.assertContains(response, "Provider webhook evidence")
+        self.assertContains(response, "payment_intent.succeeded")
+        self.assertContains(response, "Failed")
+        self.assertNotContains(response, provider_event_id)
+        self.assertNotContains(response, payload_secret)
+        self.assertNotContains(response, error_detail)
+        access_sections = {
+            section["name"]: section["items"]
+            for section in response.context["my_access"]["sections"]
+        }
+        platform_access = {
+            item["label"]: item["granted"]
+            for item in access_sections["Platform"]
+        }
+        self.assertTrue(platform_access["Provider webhook events"])
+        self.assertFalse(platform_access["Background jobs"])
+
+    def test_platform_access_summary_shows_only_current_staff_permissions(self):
+        from django.contrib.auth.models import Group, Permission
+
+        operator = User.objects.create_user(
+            username="platform-access-staff",
+            email="platform-access-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="jobs",
+            codename="view_job",
+        )
+        operator.user_permissions.add(permission)
+        group = Group.objects.create(name="Platform Operations")
+        operator.groups.add(group)
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_platform"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        access = response.context["my_access"]
+        self.assertEqual(access["identity"]["application_role"], "User")
+        self.assertTrue(access["identity"]["is_staff"])
+        self.assertFalse(access["identity"]["is_superuser"])
+        self.assertEqual(access["groups"], ["Platform Operations"])
+        sections = {section["name"]: section["items"] for section in access["sections"]}
+        platform_items = {item["label"]: item for item in sections["Platform"]}
+        customer_items = {item["label"]: item for item in sections["Customers"]}
+        self.assertTrue(platform_items["Background jobs"]["granted"])
+        self.assertFalse(platform_items["Provisioning operations"]["granted"])
+        self.assertFalse(customer_items["Learner accounts"]["granted"])
+        self.assertTrue(customer_items["Support tickets"]["granted"])
+        self.assertContains(response, "Your access")
+        self.assertContains(response, "plan scope")
+        self.assertNotContains(response, "Edit permissions")
+
+    def test_application_admin_access_summary_matches_growth_and_dispute_routes(self):
+        application_admin = User.objects.create_user(
+            username="application-admin-access-summary",
+            email="application-admin-access-summary@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(application_admin)
+
+        platform_response = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(platform_response.status_code, 200, platform_response.content)
+        sections = {
+            section["name"]: {
+                item["label"]: item
+                for item in section["items"]
+            }
+            for section in platform_response.context["my_access"]["sections"]
+        }
+        revenue_access = sections["Revenue"]
+        self.assertTrue(revenue_access["Disputes"]["granted"])
+        self.assertTrue(revenue_access["Change disputes"]["granted"])
+        self.assertFalse(revenue_access["Refund ledger"]["granted"])
+
+        growth_access = sections["Growth"]
+        self.assertTrue(growth_access["Growth overview & reporting"]["granted"])
+        self.assertTrue(growth_access["Referral rewards"]["granted"])
+        self.assertTrue(growth_access["Create and send gifts"]["granted"])
+        self.assertFalse(growth_access["Campaign register"]["granted"])
+        self.assertFalse(growth_access["Gift invite register"]["granted"])
+
+        growth_response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(growth_response.status_code, 200, growth_response.content)
+        self.assertTrue(growth_response.context["can_view_campaigns"])
+        self.assertTrue(growth_response.context["can_view_email"])
+        self.assertTrue(growth_response.context["can_view_promotions"])
+        self.assertTrue(growth_response.context["can_view_purchases"])
+        self.assertEqual(
+            growth_response.context["campaign_workspace_url"],
+            reverse("staff_admin_desk_campaigns"),
+        )
+        campaigns_response = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(campaigns_response.status_code, 200, campaigns_response.content)
+        self.assertContains(campaigns_response, "Campaigns &amp; Audiences")
+        self.assertContains(campaigns_response, "Frozen audience snapshots")
+
+        from apps.campaigns.models import Audience, Campaign
+        from apps.emailing.models import Template, TemplateVersion
+
+        template = Template.objects.create(name="Admin Desk Campaign Detail Test")
+        template_version = TemplateVersion.objects.create(
+            template=template,
+            version_number=1,
+            editor_mode=TemplateVersion.EditorMode.HTML,
+            subject="Campaign detail test",
+            html="<p>Campaign detail test</p>",
+        )
+        audience = Audience.objects.create(
+            name="Campaign detail test audience",
+            description="Disposable test audience",
+            rules={"is_active": True},
+        )
+        campaign = Campaign.objects.create(
+            name="Campaign detail test",
+            template_version=template_version,
+            audience=audience,
+        )
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200, detail_response.content)
+        self.assertContains(detail_response, "Campaign lifecycle")
+        self.assertContains(detail_response, "Audience context")
+        self.assertContains(detail_response, "Template snapshot")
+        self.assertContains(detail_response, "This page is read-only")
+
+        self.assertFalse(growth_response.context.get("campaign_url"))
+        self.assertFalse(growth_response.context.get("email_url"))
+        self.assertFalse(growth_response.context.get("promotion_url"))
+        self.assertFalse(growth_response.context.get("events_url"))
+        self.assertFalse(growth_response.context["gift_summary"]["url"])
+        self.assertContains(
+            growth_response,
+            "Register access requires its model permission",
+        )
+        self.assertNotContains(growth_response, "/admin/campaigns/campaign/")
+        self.assertNotContains(growth_response, "/admin/growth/giftinvite/")
+
+        dispute_response = self.client.get(reverse("disputes:dashboard"))
+        self.assertEqual(dispute_response.status_code, 200, dispute_response.content)
+
+    def test_global_search_returns_safe_webhook_results_only_with_view_permission(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import WebhookEvent
+
+        operator = User.objects.create_user(
+            username="global-search-webhook-staff",
+            email="global-search-webhook-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_webhookevent",
+        )
+        operator.user_permissions.add(permission)
+        provider_event_id = "evt_search_private_6812"
+        payload_secret = "webhook-search-secret"
+        internal_error = "webhook-search-internal-error"
+        WebhookEvent.objects.create(
+            provider="stripe",
+            provider_event_id=provider_event_id,
+            event_type="charge.dispute.created",
+            payload={"api_secret": payload_secret},
+            status=WebhookEvent.Status.FAILED,
+            error=internal_error,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "dispute"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        groups = response.context["search_groups"]
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]["name"], "Platform")
+        self.assertEqual(len(groups[0]["results"]), 1)
+        self.assertContains(response, "charge.dispute.created")
+        self.assertContains(response, "Failed")
+        self.assertNotContains(response, provider_event_id)
+        self.assertNotContains(response, payload_secret)
+        self.assertNotContains(response, internal_error)
+        self.assertEqual(
+            groups[0]["results"][0]["url"],
+            f"{reverse('admin:payments_webhookevent_changelist')}?q=dispute",
+        )
+
+    def test_global_search_preserves_unknown_provisioning_state_without_exposing_id(self):
+        from uuid import uuid4
+        from django.contrib.auth.models import Permission
+        from apps.jobs.models import ProvisioningOperation
+
+        operator = User.objects.create_user(
+            username="global-search-platform-staff",
+            email="global-search-platform-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="jobs",
+            codename="view_provisioningoperation",
+        )
+        operator.user_permissions.add(permission)
+        operation = ProvisioningOperation.objects.create(
+            operation=ProvisioningOperation.OP_GRANT,
+            user_id=uuid4(),
+            channel_id="staging-channel",
+            state=ProvisioningOperation.ST_UNKNOWN,
+        )
+        self.client.force_login(operator)
+
+        by_identifier = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": str(operation.operation_id)},
+        )
+        self.assertEqual(by_identifier.status_code, 200, by_identifier.content)
+        self.assertEqual(by_identifier.context["search_groups"], [])
+        # The search input retains the query for usability; the UUID must not
+        # appear as a result, URL, or provisioning-detail identifier.
+        self.assertEqual(by_identifier.context["total_results"], 0)
+
+        by_operation = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "grant"},
+        )
+        self.assertEqual(by_operation.status_code, 200, by_operation.content)
+        self.assertContains(by_operation, "Needs verification")
+        self.assertNotContains(by_operation, str(operation.operation_id))
+
+    def test_global_search_does_not_expose_unpermitted_account_or_course_records(self):
+        operator = User.objects.create_user(
+            username="global-search-limited-staff",
+            email="global-search-limited-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        User.objects.create_user(
+            username="private-search-target",
+            email="private-search-target@example.test",
+        )
+        Course.objects.create(
+            title="Private Search Course",
+            slug="private-search-course",
+            status=Course.Status.DRAFT,
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "private-search"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["search_groups"], [])
+        self.assertEqual(response.context["total_results"], 0)
+        self.assertNotContains(response, "private-search-target")
+        self.assertNotContains(response, "Private Search Course")
+
+    def test_domain_overviews_render_for_superuser(self):
+        owner = User.objects.create_superuser(
+            username="domain-overview-owner",
+            email="domain-overview-owner@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=owner, email=owner.email, verified=True, primary=True
+        )
+        Course.objects.create(
+            title="Overview Draft Course",
+            slug="overview-draft-course",
+            status=Course.Status.DRAFT,
+        )
+        self.client.force_login(owner)
+
+        academy = self.client.get(reverse("staff_admin_desk_academy"))
+        self.assertEqual(academy.status_code, 200, academy.content)
+        self.assertEqual(academy.context["course_summary"]["draft"], 1)
+        self.assertTrue(academy.context["can_review_courses"])
+
+        for route_name in (
+            "staff_admin_desk_revenue",
+            "staff_admin_desk_growth",
+            "staff_admin_desk_platform",
+        ):
+            with self.subTest(route=route_name):
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.content)
+
+        growth = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertContains(growth, "Simulation only")
+        self.assertContains(growth, "not sent to provider")
+        self.assertContains(growth, "Marked sent")
+
+    def test_staff_domain_overviews_do_not_expose_unpermitted_panels(self):
+        operator = User.objects.create_user(
+            username="domain-overview-staff",
+            email="domain-overview-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        self.client.force_login(operator)
+
+        expectations = {
+            "staff_admin_desk_academy": (
+                "course_summary", "review_summary", "offer_summary",
+                "entitlement_summary",
+            ),
+            "staff_admin_desk_revenue": (
+                "payment_summary", "invoice_summary", "subscription_summary",
+                "dispute_summary",
+            ),
+            "staff_admin_desk_growth": (
+                "purchase_report", "email_report", "campaign_report",
+                "promotion_report", "referral_report", "gift_summary",
+            ),
+            "staff_admin_desk_platform": (
+                "job_summary", "provisioning_summary", "scheduler_summary",
+                "audit_summary", "security_summary",
+            ),
+        }
+        for route_name, forbidden_context_keys in expectations.items():
+            with self.subTest(route=route_name):
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.content)
+                for key in forbidden_context_keys:
+                    self.assertNotIn(key, response.context)
+
+    def test_specialist_overviews_only_build_explicitly_granted_panels(self):
+        from django.contrib.auth.models import Permission
+
+        def staff_with_permission(username, app_label, codename):
+            operator = User.objects.create_user(
+                username=username,
+                email=f"{username}@example.test",
+                is_staff=True,
+            )
+            EmailAddress.objects.create(
+                user=operator, email=operator.email, verified=True, primary=True
+            )
+            permission = Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            operator.user_permissions.add(permission)
+            return operator
+
+        scenarios = (
+            (
+                "academy-specialist",
+                "academy",
+                "view_course",
+                "staff_admin_desk_academy",
+                {"course_summary"},
+                {"review_summary", "offer_summary", "entitlement_summary"},
+            ),
+            (
+                "revenue-specialist",
+                "payments",
+                "view_paymentintent",
+                "staff_admin_desk_revenue",
+                {"payment_summary"},
+                {
+                    "invoice_summary",
+                    "subscription_summary",
+                    "dispute_summary",
+                    "business_url",
+                },
+            ),
+            (
+                "growth-specialist",
+                "events",
+                "view_event",
+                "staff_admin_desk_growth",
+                {"purchase_report"},
+                {
+                    "email_report",
+                    "campaign_report",
+                    "promotion_report",
+                    "referral_report",
+                    "gift_summary",
+                },
+            ),
+            (
+                "platform-specialist",
+                "jobs",
+                "view_job",
+                "staff_admin_desk_platform",
+                {"job_summary"},
+                {
+                    "provisioning_summary",
+                    "scheduler_summary",
+                    "audit_summary",
+                    "security_summary",
+                },
+            ),
+        )
+
+        for (
+            username,
+            app_label,
+            codename,
+            route_name,
+            allowed_keys,
+            denied_keys,
+        ) in scenarios:
+            with self.subTest(username=username):
+                operator = staff_with_permission(username, app_label, codename)
+                self.client.force_login(operator)
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, 200, response.content)
+                for key in allowed_keys:
+                    self.assertIn(key, response.context)
+                for key in denied_keys:
+                    self.assertNotIn(key, response.context)
+
+    def test_staff_notifications_escape_untrusted_title_and_message(self):
+        operator = User.objects.create_user(
+            username="notification-render-staff",
+            email="notification-render-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        Notification.objects.create(
+            user=operator,
+            title="<script>alert('title-xss')</script>",
+            message='<img src=x onerror="alert(\'message-xss\')">',
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get("/notifications/")
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(
+            response,
+            "&lt;script&gt;alert(&#x27;title-xss&#x27;)&lt;/script&gt;",
+        )
+        self.assertContains(
+            response,
+            "&lt;img src=x onerror=&quot;alert(&#x27;message-xss&#x27;)&quot;&gt;",
+        )
+        self.assertNotContains(response, "<script>alert('title-xss')</script>")
+        self.assertNotContains(response, '<img src=x onerror="alert(\'message-xss\')">')
+        self.assertContains(response, 'class="tt-admin-desk-layout"')
+        self.assertContains(response, 'id="ttDeskSidebar"')
 
     def test_non_staff_user_is_forbidden(self):
         learner = User.objects.create_user(

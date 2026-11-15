@@ -43,12 +43,24 @@
         }
     </style>
     <link rel="stylesheet" href="{% static 'css/tradethesis-design-system.css' %}">
+    {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
+    <link rel="stylesheet" href="{% static 'css/admin-desk-shell.css' %}">
+    {% endif %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <a class="tt-skip-link" href="#mainContent">Skip to main content</a>
     {% include "partials/sitewide_nav.html" %}
+    {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
+    <div class="tt-admin-desk-layout" data-admin-desk-shell>
+        {% include "admin/desk_sidebar.html" %}
+        <main class="main-content tt-admin-desk-main" id="mainContent" tabindex="-1">
+            <button class="tt-desk-mobile-trigger" type="button" data-desk-mobile-toggle aria-expanded="false" aria-controls="ttDeskSidebar">
+                <i class="bi bi-list" aria-hidden="true"></i> Admin Desk navigation
+            </button>
+    {% else %}
     <main class="main-content" id="mainContent" tabindex="-1">
+    {% endif %}
         {% if user.is_authenticated %}
         {% block page_context %}
 <header class="page-context{% if request.resolver_match.url_name == 'staff_admin_desk' %} page-context--site-grid{% endif %}">
@@ -75,13 +87,21 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
-    {% if request.resolver_match.url_name != "staff_admin_desk" %}
-    {% include "partials/sitewide_footer.html" %}
+    {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
+    </div>
+    {% endif %}
+    {% if request.path|slice:":17" != "/staff/admin-desk" %}
+        {% if not user.is_authenticated or not user.is_staff or request.path|slice:":14" != "/notifications" %}
+        {% include "partials/sitewide_footer.html" %}
+        {% endif %}
     {% endif %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="{% static 'js/referral-celebrations.js' %}"></script>
     <script src="{% static 'js/sitewide-nav.js' %}" defer></script>
+    {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
+    <script src="{% static 'js/admin-desk-shell.js' %}" defer></script>
+    {% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 </html>
