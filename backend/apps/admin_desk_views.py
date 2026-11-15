@@ -1874,6 +1874,14 @@ def admin_desk_growth(request):
         }
         context["has_growth_data"] = True
 
+    context["campaign_workspace_url"] = (
+        reverse("staff_admin_desk_campaigns")
+        if (
+            has_growth_permission(request.user, "campaigns.view_campaign")
+            or has_growth_permission(request.user, "campaigns.view_audience")
+        )
+        else ""
+    )
     context["can_view_campaigns"] = "campaign_report" in context
     context["can_view_email"] = "email_report" in context
     context["can_view_promotions"] = "promotion_report" in context
@@ -1978,15 +1986,12 @@ def admin_desk_campaigns(request):
             }
             if can_view_audiences:
                 row["audience_name"] = campaign.audience.name
-                if campaign.snapshot_at:
-                    row["live_audience_estimate"] = None
-                else:
-                    try:
-                        row["live_audience_estimate"] = (
-                            campaign.audience.members().count()
-                        )
-                    except Exception:  # malformed/stale audience filters are not evaluated in the UI
-                        row["live_audience_estimate"] = "Unable to estimate"
+                try:
+                    row["live_audience_estimate"] = (
+                        campaign.audience.members().count()
+                    )
+                except Exception:  # malformed/stale audience filters are not evaluated in the UI
+                    row["live_audience_estimate"] = "Unable to estimate"
             if can_view_recipients:
                 row["frozen_recipient_count"] = campaign.frozen_recipient_count
             if can_view_template_versions:
