@@ -276,6 +276,8 @@ class MemberCourseDashboardDataTests(TestCase):
         self.course = Course.objects.create(
             title="Dashboard Course",
             slug="dashboard-course",
+            summary="Build a practical understanding of market structure and trading decisions.",
+            catalogue_role=Course.CatalogueRole.MINI,
             status=Course.Status.PUBLISHED,
         )
         self.module = CourseModule.objects.create(
@@ -308,6 +310,58 @@ class MemberCourseDashboardDataTests(TestCase):
             position=3,
             is_preview=True,
             is_published=False,
+        )
+
+    def test_new_member_dashboard_recommends_real_published_courses(self):
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+
+        recommendations = response.context["member_discovery_courses"]
+        self.assertEqual(len(recommendations), 1)
+        self.assertEqual(recommendations[0]["course"].pk, self.course.pk)
+        self.assertEqual(recommendations[0]["role_label"], "Mini-course")
+        self.assertContains(
+            response,
+            reverse("academy:course-detail", args=[self.course.slug]),
+        )
+        self.assertContains(response, "View course &amp; access details")
+
+    def test_discovery_prioritises_flagship_and_excludes_hidden_draft_or_unready_courses(self):
+        flagship = Course.objects.create(
+            title="Trade Construction Programme",
+            slug="trade-construction-programme",
+            summary="Build, manage and review a complete trading thesis.",
+            catalogue_role=Course.CatalogueRole.FLAGSHIP,
+            status=Course.Status.PUBLISHED,
+            position=50,
+        )
+        Course.objects.create(
+            title="Hidden Course",
+            slug="hidden-course",
+            summary="A complete learner-facing description for a hidden course.",
+            catalogue_role=Course.CatalogueRole.HIDDEN,
+            status=Course.Status.PUBLISHED,
+        )
+        Course.objects.create(
+            title="Unready Course",
+            slug="unready-course",
+            catalogue_role=Course.CatalogueRole.MINI,
+            status=Course.Status.PUBLISHED,
+        )
+        Course.objects.create(
+            title="Draft Course",
+            slug="draft-course",
+            summary="A complete learner-facing description for a draft course.",
+            catalogue_role=Course.CatalogueRole.FLAGSHIP,
+            status=Course.Status.DRAFT,
+        )
+
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        recommendations = response.context["member_discovery_courses"]
+        self.assertEqual(
+            [item["course"].pk for item in recommendations],
+            [flagship.pk, self.course.pk],
         )
 
     def test_missing_telegram_bot_config_is_explained_in_connections(self):
