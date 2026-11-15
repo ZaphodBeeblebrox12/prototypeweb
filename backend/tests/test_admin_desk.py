@@ -432,6 +432,14 @@ class AdminDeskTests(TestCase):
         self.assertContains(audience_response, "Restricted Audience Name")
         self.assertContains(audience_response, "Audience-only description")
         self.assertNotContains(audience_response, "Restricted Campaign Name")
+        self.assertContains(audience_response, "Campaigns &amp; Audiences")
+
+        audience_growth_response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(
+            audience_growth_response.status_code, 200, audience_growth_response.content
+        )
+        self.assertTrue(audience_growth_response.context["can_view_audiences"])
+        self.assertContains(audience_growth_response, "Campaigns &amp; Audiences workspace")
 
     def test_growth_email_report_uses_marked_sent_not_delivered_language(self):
         owner = User.objects.create_superuser(
