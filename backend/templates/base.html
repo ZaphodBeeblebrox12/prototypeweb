@@ -8,7 +8,7 @@
     {% block extra_meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css?v=20261031-post-logout">
+    <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css?v=20261115-workspace-switcher-green">
     <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css?v=20261022-footer-full-width-r1">
     <link rel="stylesheet" href="{% static 'css/referral.css' %}">
     <style>
@@ -45,9 +45,7 @@
     <link rel="stylesheet" href="{% static 'css/tradethesis-design-system.css' %}">
     {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
     <link rel="stylesheet" href="{% static 'css/admin-desk-shell.css' %}">
-    {% endif %}
-    <link rel="stylesheet" href="/{% static 'css/staff-workspace-switcher.css' %}?v=20261115-workspace-switcher-fix3">
-    {% block extra_css %}{% endblock %}
+    {% endif %}\n{% block extra_css %}{% endblock %}
 </head>
 <body>
     <a class="tt-skip-link" href="#mainContent">Skip to main content</a>
