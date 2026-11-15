@@ -768,7 +768,7 @@ class AdminDeskTests(TestCase):
             item["label"]: item for item in payment_revenue_access["items"]
         }
         self.assertFalse(payment_refund_access["Refund ledger"]["granted"])
-        self.assertNotContains(payment_only_response, "href=\"?tab=refunds")
+        self.assertNotContains(payment_only_response, "tab=refunds")
 
         payment_only_search = self.client.get(
             reverse("staff_admin_desk_search"),
