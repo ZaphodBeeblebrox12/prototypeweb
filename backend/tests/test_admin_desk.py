@@ -424,6 +424,89 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "INR 1,299.00")
         self.assertNotContains(response, "Needle restricted support request")
 
+    def test_global_search_includes_disputes_only_with_revenue_permission(self):
+        from django.contrib.auth.models import Permission
+        from apps.disputes.models import Dispute
+        from apps.payments.models import PaymentIntent
+        from apps.subscriptions.models import Plan
+
+        member = User.objects.create_user(
+            username="needle-dispute-member",
+            email="needle-dispute-member@example.test",
+        )
+        plan = Plan.objects.create(
+            name="Dispute search plan",
+            tier=Plan.Tier.BASIC,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=plan,
+            provider=PaymentIntent.Provider.STRIPE,
+            amount=459900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        provider_dispute_id = "dp_private_search_9381"
+        Dispute.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_dispute_id=provider_dispute_id,
+            reason_category=Dispute.ReasonCategory.NOT_RECEIVED,
+            amount_cents=459900,
+            currency="INR",
+            status=Dispute.Status.OPENED,
+        )
+
+        limited_operator = User.objects.create_user(
+            username="dispute-search-limited",
+            email="dispute-search-limited@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(limited_operator)
+        denied_response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(denied_response.status_code, 200)
+        self.assertEqual(denied_response.context["search_groups"], [])
+        self.assertNotContains(denied_response, member.email)
+        self.assertNotContains(denied_response, provider_dispute_id)
+
+        reviewer = User.objects.create_user(
+            username="dispute-search-reviewer",
+            email="dispute-search-reviewer@example.test",
+            is_staff=True,
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="disputes",
+            codename="view_dispute",
+        )
+        reviewer.user_permissions.add(permission)
+        self.client.force_login(reviewer)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        groups = {
+            group["name"]: group["results"]
+            for group in response.context["search_groups"]
+        }
+        self.assertEqual(set(groups), {"Revenue"})
+        self.assertEqual(len(groups["Revenue"]), 1)
+        result = groups["Revenue"][0]
+        self.assertEqual(result["kind"], "Dispute")
+        self.assertIn(member.username, result["title"])
+        self.assertIn("Service not received", result["detail"])
+        self.assertIn("INR 4,599.00", result["detail"])
+        self.assertEqual(
+            result["url"],
+            reverse("admin:disputes_dispute_changelist") + "?q=" + member.username,
+        )
+        self.assertContains(response, "Dispute")
+        self.assertNotContains(response, provider_dispute_id)
+
     def test_platform_webhook_summary_omits_provider_ids_payloads_and_errors(self):
         from django.contrib.auth.models import Permission
         from apps.payments.models import WebhookEvent
