@@ -121,7 +121,7 @@
     </section>
     {% endif %}
 
-    {% if user.is_superuser or user.role == "admin" or perms.events.view_event or perms.emailing.view_delivery or perms.campaigns.view_campaign or perms.promotions.view_couponredemption or perms.growth.view_referralreward or perms.growth.view_giftinvite or perms.growth.add_giftinvite and perms.subscriptions.add_giftsubscription and perms.subscriptions.view_plan %}
+    {% if user.is_superuser or user.role == "admin" or perms.events.view_event or perms.emailing.view_delivery or perms.campaigns.view_campaign or perms.campaigns.view_audience or perms.promotions.view_couponredemption or perms.growth.view_referralreward or perms.growth.view_giftinvite or perms.growth.add_giftinvite and perms.subscriptions.add_giftsubscription and perms.subscriptions.view_plan %}
     <section class="tt-desk-nav-group" aria-labelledby="tt-nav-growth">
       <h2 id="tt-nav-growth">Growth</h2>
       <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_growth' %} is-active{% endif %}" href="{% url 'staff_admin_desk_growth' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_growth' %} aria-current="page"{% endif %}>
