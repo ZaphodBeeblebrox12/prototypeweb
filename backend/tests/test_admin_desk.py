@@ -2146,3 +2146,50 @@ class AdminDeskTests(TestCase):
             with self.subTest(destination=destination):
                 self.assertEqual(self.client.get(destination).status_code, 200)
 
+
+
+    def test_command_centre_policy_signal_counts_only_unready_policy_types(self):
+        from apps.policies.models import PolicyVersion
+
+        admin = User.objects.create_superuser(
+            username="desk-policy-count-admin",
+            email="desk-policy-count-admin@example.test",
+            password="test-password-123!",
+        )
+        policy_types = (
+            PolicyVersion.PolicyType.TERMS,
+            PolicyVersion.PolicyType.REFUND,
+            PolicyVersion.PolicyType.CANCELLATION,
+            PolicyVersion.PolicyType.RISK,
+            PolicyVersion.PolicyType.PRIVACY,
+        )
+        for policy_type in policy_types:
+            # One policy is missing entirely; one exists but is still placeholder
+            # content. The other three are complete and active.
+            if policy_type == PolicyVersion.PolicyType.CANCELLATION:
+                continue
+            content_html = "<p>Approved legal text for this policy.</p>"
+            if policy_type == PolicyVersion.PolicyType.PRIVACY:
+                content_html = "<p>Replace with approved legal content</p>"
+            PolicyVersion.objects.create(
+                policy_type=policy_type,
+                version="1.0",
+                title=f"{policy_type.title()} Policy",
+                content_html=content_html,
+                status=PolicyVersion.Status.ACTIVE,
+                effective_from=timezone.now(),
+            )
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("staff_admin_desk"))
+
+        self.assertEqual(response.status_code, 200)
+        policy_signal = next(
+            item for item in response.context["action_items"]
+            if item["title"] == "Sales policy readiness blocked"
+        )
+        self.assertEqual(policy_signal["count"], 2)
+        self.assertEqual(
+            sum(not item["ready"] for item in response.context["policy_readiness"]["items"]),
+            2,
+        )
