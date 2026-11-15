@@ -137,6 +137,7 @@
       <div class="module">
         <div class="module-title">
           <strong>{{ row.offer.name }}</strong>
+          {% if row.offer.is_active %}<span class="pill good">Offer active</span>{% else %}<span class="pill">Offer inactive</span>{% endif %}
           {% if row.readiness %}<span class="pill{% if row.readiness.saleable %} good{% elif row.offer.is_active %} warn{% endif %}">{{ row.readiness.label }}</span>{% else %}<span class="pill">Commercial checks restricted</span>{% endif %}
         </div>
         <span class="muted">Access duration: {% if row.offer.access_duration_days %}{{ row.offer.access_duration_days }} days{% else %}Permanent{% endif %}</span>
