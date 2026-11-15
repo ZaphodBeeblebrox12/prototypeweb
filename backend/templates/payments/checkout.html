@@ -2,7 +2,7 @@
 {% block content %}
 <section class="container py-4" style="max-width:620px">
   <h2>Checkout — {{ plan.name }}</h2>
-  <p class="lead">Total: <strong>{{ amount }} {{ currency }}</strong></p>
+  <p class="lead">Total: <strong>{{ amount_display }}</strong></p>
   {% if canceled %}<p class="alert alert-warning"><strong>Payment canceled.</strong> You can try again below.</p>{% endif %}
   {% if intent.provider == "razorpay" %}
     <div class="card">
