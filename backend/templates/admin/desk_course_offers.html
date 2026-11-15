@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Offers &amp; Access | Academy | TradeThesis{% endblock %}
+{% block page_title %}Offers &amp; Access{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-offers{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1500px;margin:4px auto 36px;color:var(--ink)}
+  .tt-offers *{box-sizing:border-box}
+  .tt-offers a{color:#315b43;text-underline-offset:3px}
+  .tt-offers .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 18px}
+  .tt-offers .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-offers h1{margin:0;font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-offers .intro{max-width:800px;margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+  .tt-offers .actions,.tt-offers .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tt-offers .button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-offers .button.primary{border-color:var(--green);background:var(--green);color:#fff}
+  .tt-offers .filters{padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:#f8f8f3}
+  .tt-offers input,.tt-offers select{min-height:34px;padding:6px 9px;border:1px solid #d4d8cf;border-radius:3px;background:#fff;color:var(--ink);font:inherit;font-size:10px}
+  .tt-offers input[type=search]{min-width:210px;flex:1}
+  .tt-offers .table-panel{margin-top:12px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-offers .table-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tt-offers .table-head h2{margin:0;font-size:12px;font-weight:800}
+  .tt-offers .table-head p{margin:4px 0 0;color:var(--muted);font-size:9px}
+  .tt-offers .table-wrap{overflow:auto}
+  .tt-offers table{width:100%;border-collapse:collapse;min-width:900px}
+  .tt-offers th,.tt-offers td{padding:10px 9px;border-bottom:1px solid var(--soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-offers th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+  .tt-offers tr:last-child td{border-bottom:0}
+  .tt-offers .name{display:block;font-weight:800}
+  .tt-offers .muted{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.4}
+  .tt-offers .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:8px;font-weight:800;white-space:nowrap}
+  .tt-offers .pill.good{border-color:#cbd9cb;background:#eff4ed;color:#3c5c43}
+  .tt-offers .pill.warn{border-color:#e7d6b8;background:#fbf4e8;color:#835f30}
+  .tt-offers .pill.bad{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-offers .empty{padding:28px 14px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-offers .pagination{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:11px 14px;color:var(--muted);font-size:10px}
+  .tt-offers .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+  @media(max-width:650px){.tt-offers h1{font-size:27px}.tt-offers .head{align-items:flex-start}.tt-offers .actions,.tt-offers .actions .button{width:100%}.tt-offers input[type=search]{min-width:100%}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-offers">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Academy / Offers &amp; access</p>
+      <h1>Course offers</h1>
+      <p class="intro">Inspect Academy-owned CourseOffer records and their Revenue relationship. Stored active state, course eligibility, hidden Plan configuration and one-time price evidence remain separate. This register is read-only.</p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{% url 'staff_admin_desk_academy' %}">← Academy overview</a>
+      <a class="button" href="{% url 'staff_admin_desk_courses' %}">Course Catalogue</a>
+    </div>
+  </header>
+
+  <form class="filters" method="get" action="{% url 'staff_admin_desk_course_offers' %}">
+    <input type="search" name="q" value="{{ query }}" maxlength="120" placeholder="Search offer, course or slug" aria-label="Search course offers">
+    <select name="active" aria-label="Stored offer state">
+      <option value="">All stored states</option>
+      <option value="active"{% if active_filter == "active" %} selected{% endif %}>Active</option>
+      <option value="inactive"{% if active_filter == "inactive" %} selected{% endif %}>Inactive</option>
+    </select>
+    <button class="button primary" type="submit">Apply</button>
+    <a class="button" href="{% url 'staff_admin_desk_course_offers' %}">Clear</a>
+  </form>
+
+  <section class="table-panel" aria-labelledby="offers-register-heading">
+    <div class="table-head">
+      <div><h2 id="offers-register-heading">CourseOffer register</h2><p>{{ matched_count }} matching offer{{ matched_count|pluralize }} · canonical Academy records</p></div>
+      <span class="pill">Read only</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Course / offer</th><th>Course state</th><th>Stored offer state</th><th>Derived saleability</th><th>Revenue Plan</th><th>One-time price</th><th>Access duration</th><th>Updated</th></tr></thead>
+        <tbody>
+          {% for row in offers_page %}
+          <tr>
+            <td>
+              {% if row.detail_url %}<a class="name" href="{{ row.detail_url }}">{{ row.course.title }}</a>{% else %}<strong class="name">{{ row.course.title }}</strong>{% endif %}
+              <span class="muted">{{ row.offer.name }} · {{ row.offer.slug }}</span>
+            </td>
+            <td><span class="pill{% if row.course.status == 'published' %} good{% else %} warn{% endif %}">{{ row.course.get_status_display }}</span><span class="muted">{{ row.course.get_access_type_display }}</span></td>
+            <td>{% if row.offer.is_active %}<span class="pill good">Active</span>{% else %}<span class="pill">Inactive</span>{% endif %}</td>
+            <td>
+              {% if row.readiness %}
+                {% if row.readiness.saleable %}<span class="pill good">Saleable</span>{% else %}<span class="pill warn">Needs attention</span>{% endif %}
+                {% if row.readiness.reasons %}<span class="muted">{{ row.readiness.reasons|join:" " }}</span>{% endif %}
+              {% else %}<span class="pill">Commercial checks restricted</span>{% endif %}
+            </td>
+            <td>
+              {% if row.plan_url %}<a href="{{ row.plan_url }}">{{ row.plan_name }} ↗</a>{% else %}{{ row.plan_name }}{% endif %}
+              {% if row.plan_hidden != None %}<span class="muted">{% if row.plan_hidden %}Hidden from public plan catalogue{% else %}Not hidden{% endif %}</span>{% endif %}
+            </td>
+            <td>{{ row.price_state }}</td>
+            <td>{% if row.offer.access_duration_days %}{{ row.offer.access_duration_days }} days{% else %}Permanent{% endif %}</td>
+            <td>{{ row.offer.updated_at|date:"j M Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td class="empty" colspan="8">{% if query or active_filter %}No CourseOffer records match the current filters.{% else %}No CourseOffer records are configured yet.{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if offers_page.paginator.num_pages > 1 %}
+    <div class="pagination">
+      <span>Page {{ offers_page.number }} of {{ offers_page.paginator.num_pages }}</span>
+      {% if offers_page.has_previous %}<a href="?page={{ offers_page.previous_page_number }}&amp;q={{ query|urlencode }}&amp;active={{ active_filter|urlencode }}">Previous</a>{% endif %}
+      {% if offers_page.has_next %}<a href="?page={{ offers_page.next_page_number }}&amp;q={{ query|urlencode }}&amp;active={{ active_filter|urlencode }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+  <p class="note">Revenue owns Plan and price configuration. This Academy register does not edit prices or Plans. “Saleable” is shown only when the viewer can inspect the linked Plan and both base/geo price records; otherwise the commercial check is explicitly restricted.</p>
+</div>
+{% endblock %}
