@@ -232,28 +232,32 @@ def admin_desk_courses(request):
     global_enabled = bool(getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False))
     rows = []
     for course in courses:
+        offer_records = (
+            getattr(course, "admin_desk_offers", ()) if can_view_offers else ()
+        )
         offer_audits = []
         if can_view_offers and can_view_commercial_readiness:
             offer_audits = [
                 _admin_desk_course_offer_readiness(offer, course)
-                for offer in getattr(course, "admin_desk_offers", ())
+                for offer in offer_records
             ]
         saleable_count = sum(1 for row in offer_audits if row["saleable"])
-        active_offer_count = sum(
-            1 for offer in getattr(course, "admin_desk_offers", ()) if offer.is_active
-        ) if can_view_offers else None
+        active_offer_count = (
+            sum(1 for offer in offer_records if offer.is_active)
+            if can_view_offers else None
+        )
         offer_state = None
         if can_view_offers:
-            if not getattr(course, "admin_desk_offers", ()):
+            if not offer_records:
                 offer_state = "No offer"
+            elif not active_offer_count:
+                offer_state = "Inactive"
             elif not can_view_commercial_readiness:
-                offer_state = "Stored state visible · commercial check restricted"
+                offer_state = "Active · commercial check restricted"
             elif saleable_count:
                 offer_state = "Saleable"
-            elif active_offer_count:
-                offer_state = "Active · needs attention"
             else:
-                offer_state = "Inactive"
+                offer_state = "Active · needs attention"
 
         seo_reasons = _course_indexability_reasons(course, global_enabled)
         indexable = not seo_reasons
