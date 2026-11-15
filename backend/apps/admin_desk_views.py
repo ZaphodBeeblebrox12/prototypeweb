@@ -1653,7 +1653,8 @@ def admin_desk_platform(request):
             {
                 "name": "Revenue",
                 "items": [
-                    access_item("Payments and refunds", "payments.view_paymentintent"),
+                    access_item("Payments", "payments.view_paymentintent"),
+                    access_item("Refund ledger", "payments.view_refund"),
                     access_item("Invoices", "payments.view_invoice"),
                     access_item("Subscriptions", "subscriptions.view_subscription"),
                     access_item("Change subscriptions", "subscriptions.change_subscription"),
