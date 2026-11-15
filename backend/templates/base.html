@@ -46,6 +46,7 @@
     {% if request.path|slice:":17" == "/staff/admin-desk" or user.is_authenticated and user.is_staff and request.path|slice:":14" == "/notifications" %}
     <link rel="stylesheet" href="{% static 'css/admin-desk-shell.css' %}">
     {% endif %}
+    <link rel="stylesheet" href="{% static 'css/staff-workspace-switcher.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
