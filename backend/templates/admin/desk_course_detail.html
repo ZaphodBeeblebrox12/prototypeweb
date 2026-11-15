@@ -137,16 +137,16 @@
       <div class="module">
         <div class="module-title">
           <strong>{{ row.offer.name }}</strong>
-          <span class="pill{% if row.readiness.saleable %} good{% elif row.offer.is_active %} warn{% endif %}">{{ row.readiness.label }}</span>
+          {% if row.readiness %}<span class="pill{% if row.readiness.saleable %} good{% elif row.offer.is_active %} warn{% endif %}">{{ row.readiness.label }}</span>{% else %}<span class="pill">Commercial checks restricted</span>{% endif %}
         </div>
         <span class="muted">Access duration: {% if row.offer.access_duration_days %}{{ row.offer.access_duration_days }} days{% else %}Permanent{% endif %}</span>
         {% if row.offer.plan_id %}
-          {% if row.readiness.price_ready %}<span class="pill good">One-time price configured</span>{% else %}<span class="pill warn">No active one-time price</span>{% endif %}
+          <span class="muted">{{ row.price_state }}</span>
           {% if row.plan_visible %}
           <p class="note">Revenue Plan: {% if row.plan_url %}<a href="{{ row.plan_url }}">{{ row.offer.plan.name }} ↗</a>{% else %}{{ row.offer.plan.name }}{% endif %} · {% if row.offer.plan.is_hidden %}Hidden{% else %}Not hidden{% endif %}</p>
           {% else %}<p class="note">A linked Revenue Plan exists; Plan details are hidden by the current Revenue permissions.</p>{% endif %}
         {% else %}<p class="note">No Revenue Plan is linked.</p>{% endif %}
-        {% if row.readiness.reasons %}
+        {% if row.readiness and row.readiness.reasons %}
         <ul class="reason-list">{% for reason in row.readiness.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
         {% endif %}
       </div>
