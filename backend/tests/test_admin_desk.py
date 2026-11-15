@@ -480,6 +480,251 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "INR 1,299.00")
         self.assertNotContains(response, "Needle restricted support request")
 
+    def test_plans_workspace_requires_plan_view_and_hides_unpermitted_related_data(self):
+        from django.contrib.auth.models import Permission
+        from apps.subscriptions.models import Plan, PlanFeature, PlanPrice, Product
+        from apps.subscriptions.models import GeoPlanPrice
+        from apps.bot_integration.models import PlanChannelMapping
+
+        product = Product.objects.create(
+            name="Private catalogue product",
+            slug="private-catalogue-product",
+            description="A private product description.",
+            is_active=True,
+        )
+        plan = Plan.objects.create(
+            product=product,
+            name="Private Premium Market Plan",
+            tier=Plan.Tier.PRO,
+            description="A read-only plan description.",
+            is_active=True,
+        )
+        PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.MONTHLY,
+            price_cents=399900,
+            currency="INR",
+            is_active=True,
+        )
+        GeoPlanPrice.objects.create(
+            plan=plan,
+            interval=GeoPlanPrice.Interval.MONTHLY,
+            price_cents=49900,
+            currency="INR",
+            country="IN",
+            is_active=True,
+        )
+        PlanFeature.objects.create(
+            plan=plan,
+            text="Private advanced feature bullet",
+            position=1,
+        )
+        external_channel_id = "-1009876543210"
+        PlanChannelMapping.objects.create(
+            plan=plan,
+            platform="telegram",
+            external_id=external_channel_id,
+            name="Private Trading Channel",
+        )
+
+        unprivileged = User.objects.create_user(
+            username="plans-view-denied",
+            email="plans-view-denied@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(unprivileged)
+        denied = self.client.get(reverse("staff_admin_desk_plans"))
+        self.assertEqual(denied.status_code, 403)
+
+        operator = User.objects.create_user(
+            username="plans-view-only",
+            email="plans-view-only@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="subscriptions",
+            codename="view_plan",
+        )
+        operator.user_permissions.add(permission)
+        self.client.force_login(operator)
+
+        listing = self.client.get(
+            reverse("staff_admin_desk_plans"),
+            {"q": "Private Premium"},
+        )
+        self.assertEqual(listing.status_code, 200, listing.content)
+        self.assertEqual(listing.context["plans_page"].paginator.count, 1)
+        self.assertFalse(listing.context["can_view_products"])
+        self.assertFalse(listing.context["can_view_base_prices"])
+        self.assertFalse(listing.context["can_view_geo_prices"])
+        self.assertContains(listing, plan.name)
+        self.assertNotContains(listing, product.name)
+        self.assertNotContains(listing, "3,999.00")
+
+        detail = self.client.get(
+            reverse("staff_admin_desk_plan_detail", args=[plan.pk])
+        )
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertFalse(detail.context["can_view_product"])
+        self.assertFalse(detail.context["can_view_base_prices"])
+        self.assertFalse(detail.context["can_view_geo_prices"])
+        self.assertFalse(detail.context["can_view_features"])
+        self.assertFalse(detail.context["can_view_channel_mappings"])
+        self.assertContains(detail, plan.name)
+        self.assertNotContains(detail, product.name)
+        self.assertNotContains(detail, "3,999.00")
+        self.assertNotContains(detail, "499.00")
+        self.assertNotContains(detail, "Private advanced feature bullet")
+        self.assertNotContains(detail, "Private Trading Channel")
+        self.assertNotContains(detail, external_channel_id)
+        self.assertEqual(
+            self.client.post(
+                reverse("staff_admin_desk_plan_detail", args=[plan.pk]),
+                {"name": "Changed from the read-only workspace"},
+            ).status_code,
+            405,
+        )
+
+    def test_plans_workspace_shows_only_individually_permitted_pricing_and_mappings(self):
+        from django.contrib.auth.models import Permission
+        from apps.subscriptions.models import Plan, PlanFeature, PlanPrice, Product
+        from apps.subscriptions.models import GeoPlanPrice
+        from apps.bot_integration.models import PlanChannelMapping
+
+        product = Product.objects.create(
+            name="Visible catalogue product",
+            slug="visible-catalogue-product",
+            description="Product description shown to authorised staff.",
+        )
+        plan = Plan.objects.create(
+            product=product,
+            name="Visible Pro Market Plan",
+            tier=Plan.Tier.PRO,
+            description="Inspectable plan summary.",
+            is_trial=True,
+            trial_duration_days=14,
+        )
+        PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.MONTHLY,
+            price_cents=399900,
+            currency="INR",
+            is_active=True,
+        )
+        GeoPlanPrice.objects.create(
+            plan=plan,
+            interval=GeoPlanPrice.Interval.MONTHLY,
+            price_cents=49900,
+            currency="INR",
+            country="IN",
+            region="APAC",
+            is_active=True,
+        )
+        PlanFeature.objects.create(
+            plan=plan,
+            text="Authorised feature bullet",
+            position=1,
+        )
+        external_channel_id = "-1009876543210"
+        PlanChannelMapping.objects.create(
+            plan=plan,
+            platform="telegram",
+            external_id=external_channel_id,
+            name="Authorised Trading Channel",
+        )
+
+        operator = User.objects.create_user(
+            username="plans-config-reviewer",
+            email="plans-config-reviewer@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permissions = [
+            ("subscriptions", "view_plan"),
+            ("subscriptions", "view_product"),
+            ("subscriptions", "view_planprice"),
+            ("subscriptions", "view_geoplanprice"),
+            ("subscriptions", "view_planfeature"),
+            ("bot_integration", "view_planchannelmapping"),
+        ]
+        operator.user_permissions.add(*[
+            Permission.objects.get(
+                content_type__app_label=app_label,
+                codename=codename,
+            )
+            for app_label, codename in permissions
+        ])
+        self.client.force_login(operator)
+
+        listing = self.client.get(
+            reverse("staff_admin_desk_plans"),
+            {"q": product.name},
+        )
+        self.assertEqual(listing.status_code, 200, listing.content)
+        self.assertTrue(listing.context["can_view_products"])
+        self.assertTrue(listing.context["can_view_base_prices"])
+        self.assertTrue(listing.context["can_view_geo_prices"])
+        self.assertContains(listing, product.name)
+        self.assertContains(listing, plan.name)
+        self.assertContains(listing, "Active base prices")
+        self.assertContains(listing, "Active geo overrides")
+
+        detail = self.client.get(
+            reverse("staff_admin_desk_plan_detail", args=[plan.pk])
+        )
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertContains(detail, product.name)
+        self.assertContains(detail, "INR 3,999.00")
+        self.assertContains(detail, "INR 499.00")
+        self.assertContains(detail, "Country IN")
+        self.assertContains(detail, "Region APAC")
+        self.assertContains(detail, "Authorised feature bullet")
+        self.assertContains(detail, "Authorised Trading Channel")
+        self.assertNotContains(detail, external_channel_id)
+        self.assertContains(
+            detail,
+            "country-specific GeoPlanPrice first",
+        )
+        self.assertEqual(
+            detail.context["advanced_admin_url"],
+            reverse("admin:subscriptions_plan_changelist"),
+        )
+
+        search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "Visible Pro Market"},
+        )
+        self.assertEqual(search.status_code, 200, search.content)
+        groups = {
+            group["name"]: group["results"]
+            for group in search.context["search_groups"]
+        }
+        self.assertEqual(set(groups), {"Revenue"})
+        self.assertEqual(groups["Revenue"][0]["kind"], "Plan")
+        self.assertEqual(
+            groups["Revenue"][0]["url"],
+            reverse("staff_admin_desk_plan_detail", args=[plan.pk]),
+        )
+
+        platform = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(platform.status_code, 200, platform.content)
+        revenue_access = next(
+            section for section in platform.context["my_access"]["sections"]
+            if section["name"] == "Revenue"
+        )
+        access = {item["label"]: item["granted"] for item in revenue_access["items"]}
+        self.assertTrue(access["Plan catalogue"])
+        self.assertTrue(access["Product catalogue"])
+        self.assertTrue(access["Global base prices"])
+        self.assertTrue(access["Geo price overrides"])
+        self.assertTrue(access["Plan feature bullets"])
+        self.assertTrue(access["Community channel mappings"])
+
     def test_global_search_includes_disputes_only_with_revenue_permission(self):
         from django.contrib.auth.models import Permission
         from apps.disputes.models import Dispute
