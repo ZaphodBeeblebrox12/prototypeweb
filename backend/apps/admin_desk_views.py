@@ -75,32 +75,52 @@ def _admin_desk_course_offer_readiness(offer, course):
     }
 
 
-def _admin_desk_course_offer_queryset():
-    """Prefetch only active one-time price existence for safe saleability summaries."""
+def _admin_desk_course_offer_queryset(
+    *, include_plan=True, include_base_prices=True, include_geo_prices=True
+):
+    """Load Revenue-owned plan/price fields only for separately authorised readers."""
     from apps.academy.models import CourseOffer
-    from apps.subscriptions.models import GeoPlanPrice, PlanPrice
 
-    return CourseOffer.objects.select_related("plan").prefetch_related(
-        Prefetch(
-            "plan__prices",
-            queryset=PlanPrice.objects.filter(
-                interval=PlanPrice.Interval.ONE_TIME,
-                is_active=True,
-            ),
-            to_attr="desk_active_one_time_prices",
-        ),
-        Prefetch(
-            "plan__geo_prices",
-            queryset=GeoPlanPrice.objects.filter(
-                interval=GeoPlanPrice.Interval.ONE_TIME,
-                is_active=True,
-            ),
-            to_attr="desk_active_one_time_geo_prices",
-        ),
-    )
+    queryset = CourseOffer.objects.all()
+    if include_plan:
+        queryset = queryset.select_related("plan")
+
+    price_prefetches = []
+    if include_plan and include_base_prices:
+        from apps.subscriptions.models import PlanPrice
+
+        price_prefetches.append(
+            Prefetch(
+                "plan__prices",
+                queryset=PlanPrice.objects.filter(
+                    interval=PlanPrice.Interval.ONE_TIME,
+                    is_active=True,
+                ),
+                to_attr="desk_active_one_time_prices",
+            )
+        )
+    if include_plan and include_geo_prices:
+        from apps.subscriptions.models import GeoPlanPrice
+
+        price_prefetches.append(
+            Prefetch(
+                "plan__geo_prices",
+                queryset=GeoPlanPrice.objects.filter(
+                    interval=GeoPlanPrice.Interval.ONE_TIME,
+                    is_active=True,
+                ),
+                to_attr="desk_active_one_time_geo_prices",
+            )
+        )
+    if price_prefetches:
+        queryset = queryset.prefetch_related(*price_prefetches)
+    return queryset
 
 
-def _admin_desk_course_queryset(*, include_offers):
+def _admin_desk_course_queryset(
+    *, include_offers, include_plan=True,
+    include_base_prices=True, include_geo_prices=True
+):
     from apps.academy.models import Course
 
     queryset = Course.objects.annotate(
@@ -124,7 +144,11 @@ def _admin_desk_course_queryset(*, include_offers):
         queryset = queryset.prefetch_related(
             Prefetch(
                 "offers",
-                queryset=_admin_desk_course_offer_queryset(),
+                queryset=_admin_desk_course_offer_queryset(
+                    include_plan=include_plan,
+                    include_base_prices=include_base_prices,
+                    include_geo_prices=include_geo_prices,
+                ),
                 to_attr="admin_desk_offers",
             )
         )
@@ -167,9 +191,22 @@ def admin_desk_courses(request):
         seo_filter = ""
 
     can_view_offers = _allowed(request.user, "academy.view_courseoffer")
+    can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_commercial_readiness = (
+        can_view_plans and can_view_base_prices and can_view_geo_prices
+    )
     if not can_view_offers:
         offer_filter = ""
-    courses = _admin_desk_course_queryset(include_offers=can_view_offers)
+    elif not can_view_commercial_readiness and offer_filter in {"saleable", "attention"}:
+        offer_filter = ""
+    courses = _admin_desk_course_queryset(
+        include_offers=can_view_offers,
+        include_plan=can_view_plans,
+        include_base_prices=can_view_base_prices,
+        include_geo_prices=can_view_geo_prices,
+    )
     if query:
         courses = courses.filter(
             Q(title__icontains=query)
@@ -194,7 +231,7 @@ def admin_desk_courses(request):
     rows = []
     for course in courses:
         offer_audits = []
-        if can_view_offers:
+        if can_view_offers and can_view_commercial_readiness:
             offer_audits = [
                 _admin_desk_course_offer_readiness(offer, course)
                 for offer in getattr(course, "admin_desk_offers", ())
@@ -205,8 +242,10 @@ def admin_desk_courses(request):
         ) if can_view_offers else None
         offer_state = None
         if can_view_offers:
-            if not offer_audits:
+            if not getattr(course, "admin_desk_offers", ()):
                 offer_state = "No offer"
+            elif not can_view_commercial_readiness:
+                offer_state = "Stored state visible · commercial check restricted"
             elif saleable_count:
                 offer_state = "Saleable"
             elif active_offer_count:
@@ -254,6 +293,7 @@ def admin_desk_courses(request):
         "offer_filter": offer_filter,
         "seo_filter": seo_filter,
         "can_view_offers": can_view_offers,
+        "can_view_commercial_readiness": can_view_commercial_readiness,
         "role_choices": Course.CatalogueRole.choices,
         "status_choices": Course.Status.choices,
         "access_choices": Course.AccessType.choices,
@@ -289,7 +329,11 @@ def admin_desk_course_offers(request):
     if active_filter not in {"active", "inactive"}:
         active_filter = ""
 
-    offers = _admin_desk_course_offer_queryset().select_related("course")
+    offers = _admin_desk_course_offer_queryset(
+        include_plan=can_view_plans,
+        include_base_prices=can_view_base_prices,
+        include_geo_prices=can_view_geo_prices,
+    ).select_related("course")
     if query:
         offers = offers.filter(
             Q(name__icontains=query)
@@ -390,6 +434,11 @@ def admin_desk_course_detail(request, course_id):
 
     can_view_offers = _allowed(request.user, "academy.view_courseoffer")
     can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_commercial_readiness = (
+        can_view_plans and can_view_base_prices and can_view_geo_prices
+    )
     can_view_entitlements = _allowed(request.user, "academy.view_courseentitlement")
     can_view_progress = _allowed(request.user, "academy.view_lessonprogress")
     can_view_entitlement_events = (
@@ -398,7 +447,12 @@ def admin_desk_course_detail(request, course_id):
     )
 
     course = get_object_or_404(
-        _admin_desk_course_queryset(include_offers=can_view_offers),
+        _admin_desk_course_queryset(
+            include_offers=can_view_offers,
+            include_plan=can_view_plans,
+            include_base_prices=can_view_base_prices,
+            include_geo_prices=can_view_geo_prices,
+        ),
         pk=course_id,
     )
     modules = (
@@ -443,10 +497,19 @@ def admin_desk_course_detail(request, course_id):
     offer_rows = []
     if can_view_offers:
         for offer in getattr(course, "admin_desk_offers", ()):
-            readiness = _admin_desk_course_offer_readiness(offer, course)
+            readiness = (
+                _admin_desk_course_offer_readiness(offer, course)
+                if can_view_commercial_readiness else None
+            )
             offer_rows.append({
                 "offer": offer,
                 "readiness": readiness,
+                "price_state": (
+                    "Active one-time price recorded"
+                    if readiness and readiness["price_ready"]
+                    else "No active one-time price"
+                    if readiness else "Commercial checks require Revenue permissions"
+                ),
                 "plan_visible": bool(can_view_plans and offer.plan_id),
                 "plan_url": (
                     reverse("staff_admin_desk_plan_detail", args=[offer.plan_id])
@@ -516,6 +579,7 @@ def admin_desk_course_detail(request, course_id):
         "module_rows": module_rows,
         "can_view_offers": can_view_offers,
         "can_view_plans": can_view_plans,
+        "can_view_commercial_readiness": can_view_commercial_readiness,
         "offer_rows": offer_rows,
         "seo_reasons": seo_reasons,
         "seo_indexable": not seo_reasons,
