@@ -873,6 +873,94 @@ class AdminDeskTests(TestCase):
             admin_dispute_workspace.status_code, 200, admin_dispute_workspace.content
         )
 
+    def test_revenue_overview_reports_recorded_refunds_by_currency(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import PaymentIntent, Refund
+        from apps.subscriptions.models import Plan
+
+        member = User.objects.create_user(
+            username="revenue-refund-summary-member",
+            email="revenue-refund-summary-member@example.test",
+        )
+        plan = Plan.objects.create(
+            name="Revenue refund summary plan",
+            tier=Plan.Tier.BASIC,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=plan,
+            provider=PaymentIntent.Provider.STRIPE,
+            amount=459900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        Refund.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_refund_id="rf_revenue_summary_inr_3921",
+            amount_cents=129900,
+            currency="INR",
+            source=Refund.Source.WEBHOOK,
+            commercial_context=Refund.CommercialContext.STANDARD,
+            refunded_at=timezone.now(),
+        )
+        Refund.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_refund_id="rf_revenue_summary_usd_3922",
+            amount_cents=2500,
+            currency="USD",
+            source=Refund.Source.WEBHOOK,
+            commercial_context=Refund.CommercialContext.STANDARD,
+            refunded_at=timezone.now(),
+        )
+
+        no_refund_access = User.objects.create_user(
+            username="revenue-refund-summary-limited",
+            email="revenue-refund-summary-limited@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(no_refund_access)
+        hidden_response = self.client.get(reverse("staff_admin_desk_revenue"))
+        self.assertEqual(hidden_response.status_code, 200)
+        self.assertNotIn("refund_summary", hidden_response.context)
+        self.assertNotContains(hidden_response, "Recorded refunds")
+
+        operator = User.objects.create_user(
+            username="revenue-refund-summary-reviewer",
+            email="revenue-refund-summary-reviewer@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_refund",
+        )
+        operator.user_permissions.add(permission)
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk_revenue"))
+        self.assertEqual(response.status_code, 200, response.content)
+        summary = response.context["refund_summary"]
+        self.assertEqual(summary["count"], 2)
+        by_currency = {row["currency"]: row for row in summary["by_currency"]}
+        self.assertEqual(by_currency["INR"]["refunds"], 1)
+        self.assertEqual(by_currency["INR"]["amount_cents"], 129900)
+        self.assertEqual(by_currency["USD"]["refunds"], 1)
+        self.assertEqual(by_currency["USD"]["amount_cents"], 2500)
+        self.assertEqual(
+            summary["url"],
+            reverse("staff_admin_desk_finance") + "?tab=refunds",
+        )
+        self.assertTrue(response.context["has_revenue_sections"])
+        self.assertContains(response, "Recorded refunds")
+        self.assertContains(response, "INR")
+        self.assertContains(response, "USD")
+        self.assertNotContains(response, "Combined revenue")
+        self.assertNotContains(response, "Initiate refund")
+
     def test_finance_refund_ledger_is_read_only_and_permission_scoped(self):
         from django.contrib.auth.models import Permission
         from apps.payments.models import PaymentIntent, Refund
