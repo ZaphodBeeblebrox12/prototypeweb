@@ -3051,7 +3051,10 @@ def admin_desk_academy(request):
             "archived": Course.objects.filter(
                 status=Course.Status.ARCHIVED
             ).count(),
-            "url": (\n                reverse("staff_admin_desk_courses")\n                if is_course_content_admin(request.user) else ""\n            ),
+            "url": (
+                reverse("staff_admin_desk_courses")
+                if is_course_content_admin(request.user) else ""
+            ),
         }
 
     if context["can_review_courses"]:
