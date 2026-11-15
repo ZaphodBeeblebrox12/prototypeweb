@@ -475,17 +475,19 @@
 }
 
 
-/* Staff-only workspace switcher. It replaces the public Member Area CTA only
-   inside Admin Desk and keeps the two staff destinations in one compact control. */
+/* One staff-only workspace switcher shared by Member Area and Admin Desk. */
 .sitewide-header--admin-desk .nav {
   grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) auto auto;
 }
 .sitewide-header--staff .tt-admin-workspace-switcher {
   position: relative;
-  grid-column: 3;
+  grid-column: auto;
   justify-self: end;
   z-index: 100;
   font-family: var(--sans);
+}
+.sitewide-header--admin-desk .tt-admin-workspace-switcher {
+  grid-column: 3;
 }
 .sitewide-header--staff .tt-admin-workspace-switcher > summary {
   display: inline-flex;
