@@ -35,6 +35,7 @@ from apps.admin_desk_views import (
     admin_desk_course_import_cleanup, admin_desk_course_import_delete,
     admin_desk_support_tickets, admin_desk_support_ticket,
     admin_desk_support_ticket_action, admin_desk_customer_360,
+    admin_desk_campaigns, admin_desk_campaign_detail,
     admin_desk_customers, admin_desk_academy, admin_desk_platform, admin_desk_growth, admin_desk_revenue, admin_desk_operations_timeline,
     admin_desk_operations_job, admin_desk_operations_provisioning, admin_desk_search,
 )
@@ -75,6 +76,8 @@ urlpatterns = [
     path("staff/admin-desk/customers/", admin_desk_customers, name="staff_admin_desk_customers"),
     path("staff/admin-desk/platform/", admin_desk_platform, name="staff_admin_desk_platform"),
     path("staff/admin-desk/growth/", admin_desk_growth, name="staff_admin_desk_growth"),
+    path("staff/admin-desk/growth/campaigns/", admin_desk_campaigns, name="staff_admin_desk_campaigns"),
+    path("staff/admin-desk/growth/campaigns/<uuid:campaign_id>/", admin_desk_campaign_detail, name="staff_admin_desk_campaign_detail"),
     path("staff/admin-desk/revenue/", admin_desk_revenue, name="staff_admin_desk_revenue"),
     path("staff/admin-desk/support/tickets/", admin_desk_support_tickets, name="staff_admin_desk_support_tickets"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/", admin_desk_support_ticket, name="staff_admin_desk_support_ticket"),
