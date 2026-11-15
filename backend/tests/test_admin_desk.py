@@ -463,11 +463,10 @@ class AdminDeskTests(TestCase):
             is_active=False,
         )
 
-        owner = User.objects.create_user(
+        owner = User.objects.create_superuser(
             username="academy-offers-content-admin",
             email="academy-offers-content-admin@example.test",
-            role=User.Role.ADMIN,
-            is_staff=True,
+            password="test-password-123!",
         )
         self.client.force_login(owner)
         response = self.client.get(reverse("staff_admin_desk_course_offers"))
