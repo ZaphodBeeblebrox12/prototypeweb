@@ -27,7 +27,9 @@ def course_share_message(course):
     title = str(course.title)
     authored = str(getattr(course, "share_message", "") or "").strip()
     override = COURSE_SHARE_MESSAGE_OVERRIDES.get(str(getattr(course, "slug", "") or ""))
-    message = authored or override or DEFAULT_SHARE_MESSAGE
+    # The named course override intentionally replaces its previous generic
+    # invitation even if that old copy was saved directly on the Course row.
+    message = override or authored or DEFAULT_SHARE_MESSAGE
     return message.replace("{course_title}", title).strip()
 
 
