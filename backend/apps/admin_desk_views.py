@@ -265,6 +265,103 @@ def admin_desk_courses(request):
 
 @login_required
 @require_GET
+def admin_desk_course_offers(request):
+    """Read-only CourseOffer register; Revenue details require their own grants."""
+    _guard(request, "academy.view_courseoffer")
+    if not _allowed(request.user, "academy.view_course"):
+        raise PermissionDenied
+
+    from django.core.paginator import Paginator
+
+    from apps.academy.models import CourseOffer
+
+    can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_base_prices = _allowed(request.user, "subscriptions.view_planprice")
+    can_view_geo_prices = _allowed(request.user, "subscriptions.view_geoplanprice")
+    can_view_commercial_readiness = (
+        can_view_plans and can_view_base_prices and can_view_geo_prices
+    )
+
+    query = request.GET.get("q", "").strip()[:120]
+    active_filter = request.GET.get("active", "").strip().lower()
+    if active_filter not in {"active", "inactive"}:
+        active_filter = ""
+
+    offers = _admin_desk_course_offer_queryset().select_related("course")
+    if query:
+        offers = offers.filter(
+            Q(name__icontains=query)
+            | Q(slug__icontains=query)
+            | Q(course__title__icontains=query)
+            | Q(course__slug__icontains=query)
+        )
+    if active_filter == "active":
+        offers = offers.filter(is_active=True)
+    elif active_filter == "inactive":
+        offers = offers.filter(is_active=False)
+
+    offers = offers.order_by(
+        "course__position", "course__title", "position", "name"
+    )
+
+    rows = []
+    for offer in offers:
+        readiness = (
+            _admin_desk_course_offer_readiness(offer, offer.course)
+            if can_view_commercial_readiness else None
+        )
+        if can_view_plans and offer.plan_id:
+            plan_name = offer.plan.name
+            plan_hidden = offer.plan.is_hidden
+            plan_url = reverse(
+                "staff_admin_desk_plan_detail", args=[offer.plan_id]
+            )
+        elif offer.plan_id:
+            plan_name = "Linked Revenue Plan"
+            plan_hidden = None
+            plan_url = ""
+        else:
+            plan_name = "No plan linked"
+            plan_hidden = None
+            plan_url = ""
+
+        if can_view_commercial_readiness:
+            price_state = (
+                "Active one-time price recorded"
+                if readiness["price_ready"] else "No active one-time price"
+            )
+        elif can_view_plans and offer.plan_id:
+            price_state = "Price visibility requires Revenue price permissions"
+        else:
+            price_state = "Commercial detail restricted"
+
+        rows.append({
+            "offer": offer,
+            "course": offer.course,
+            "plan_name": plan_name,
+            "plan_hidden": plan_hidden,
+            "plan_url": plan_url,
+            "price_state": price_state,
+            "readiness": readiness,
+            "detail_url": reverse(
+                "staff_admin_desk_course_detail", args=[offer.course_id]
+            ),
+        })
+
+    page = Paginator(rows, 25).get_page(request.GET.get("page"))
+    return render(request, "admin/desk_course_offers.html", {
+        "offers_page": page,
+        "query": query,
+        "active_filter": active_filter,
+        "can_view_plans": can_view_plans,
+        "can_view_commercial_readiness": can_view_commercial_readiness,
+        "matched_count": len(rows),
+        "desk_nav": _nav(request),
+    })
+
+
+@login_required
+@require_GET
 def admin_desk_course_detail(request, course_id):
     """Read-only Course control page with canonical links to owning workflows."""
     _guard(request)
