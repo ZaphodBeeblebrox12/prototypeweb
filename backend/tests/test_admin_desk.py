@@ -482,8 +482,10 @@ class AdminDeskTests(TestCase):
 
     def test_plans_workspace_requires_plan_view_and_hides_unpermitted_related_data(self):
         from django.contrib.auth.models import Permission
-        from apps.subscriptions.models import Plan, PlanFeature, PlanPrice, Product
-        from apps.subscriptions.models import GeoPlanPrice
+        from apps.academy.models import Course, CourseOffer
+        from apps.subscriptions.models import (
+            GeoPlanPrice, Plan, PlanFeature, PlanPrice, Product, Subscription,
+        )
         from apps.bot_integration.models import PlanChannelMapping
 
         product = Product.objects.create(
@@ -637,6 +639,54 @@ class AdminDeskTests(TestCase):
             text="Authorised feature bullet",
             position=1,
         )
+
+        learner = User.objects.create_user(
+            username="plan-usage-learner",
+            email="plan-usage-learner@example.test",
+        )
+        Subscription.objects.create(
+            user=learner,
+            plan=plan,
+            status=Subscription.Status.ACTIVE,
+            is_active=True,
+            started_at=timezone.now() - timedelta(days=1),
+            expires_at=timezone.now() + timedelta(days=13),
+            price_cents=0,
+            price_currency="INR",
+            is_trial=True,
+        )
+
+        course_offer_plan = Plan.objects.create(
+            product=product,
+            name="One-time Academy Course Plan",
+            tier=Plan.Tier.ENTERPRISE,
+            is_hidden=True,
+            is_active=True,
+        )
+        PlanPrice.objects.create(
+            plan=course_offer_plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=199900,
+            currency="INR",
+            is_active=True,
+        )
+        course = Course.objects.create(
+            title="One-time Academy Course",
+            slug="one-time-academy-course",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.PAID,
+        )
+        course_offer = CourseOffer(
+            course=course,
+            name="One-time Academy Offer",
+            slug="one-time-academy-offer",
+            plan=course_offer_plan,
+            access_duration_days=90,
+            is_active=True,
+        )
+        course_offer.full_clean()
+        course_offer.save()
+
         external_channel_id = "-1009876543210"
         PlanChannelMapping.objects.create(
             plan=plan,
@@ -660,6 +710,8 @@ class AdminDeskTests(TestCase):
             ("subscriptions", "view_geoplanprice"),
             ("subscriptions", "view_planfeature"),
             ("bot_integration", "view_planchannelmapping"),
+            ("subscriptions", "view_subscription"),
+            ("academy", "view_courseoffer"),
         ]
         operator.user_permissions.add(*[
             Permission.objects.get(
@@ -694,6 +746,20 @@ class AdminDeskTests(TestCase):
         self.assertContains(detail, "Region APAC")
         self.assertContains(detail, "Authorised feature bullet")
         self.assertContains(detail, "Authorised Trading Channel")
+        self.assertTrue(detail.context["can_view_subscriptions"])
+        self.assertEqual(detail.context["subscription_summary"]["total"], 1)
+        self.assertEqual(detail.context["subscription_summary"]["active"], 1)
+        self.assertEqual(
+            detail.context["subscription_rows"][0]["learner"],
+            learner.username,
+        )
+        self.assertEqual(
+            detail.context["subscription_rows"][0]["source"], "Trial"
+        )
+        self.assertContains(detail, learner.username)
+        self.assertContains(detail, "INR 0.00")
+        self.assertTrue(detail.context["can_view_course_offer"])
+        self.assertIsNone(detail.context["course_offer"])
         self.assertContains(detail, "30 days")
         self.assertContains(detail, "Email")
         self.assertContains(detail, "Any staff (default)")
@@ -736,6 +802,33 @@ class AdminDeskTests(TestCase):
         self.assertTrue(access["Geo price overrides"])
         self.assertTrue(access["Plan feature bullets"])
         self.assertTrue(access["Community channel mappings"])
+
+        course_offer_detail = self.client.get(
+            reverse(
+                "staff_admin_desk_plan_detail",
+                args=[course_offer_plan.pk],
+            )
+        )
+        self.assertEqual(
+            course_offer_detail.status_code, 200, course_offer_detail.content
+        )
+        self.assertEqual(
+            course_offer_detail.context["course_offer"]["name"],
+            course_offer.name,
+        )
+        self.assertTrue(
+            course_offer_detail.context["course_offer"]["catalogue_eligible"]
+        )
+        self.assertEqual(
+            course_offer_detail.context["course_offer"]["access_duration"],
+            "90 days",
+        )
+        self.assertEqual(
+            course_offer_detail.context["subscription_summary"]["total"], 0
+        )
+        self.assertContains(course_offer_detail, course.title)
+        self.assertContains(course_offer_detail, "Eligible by current course/offer state")
+        self.assertContains(course_offer_detail, "90 days")
 
     def test_global_search_includes_disputes_only_with_revenue_permission(self):
         from django.contrib.auth.models import Permission
