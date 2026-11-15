@@ -1,17 +1,17 @@
 # TradeThesis Admin Desk Redesign — Handoff & Resume
 
-**Last updated:** 14 November 2026  
+**Last updated:** 15 November 2026  
 **Repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Planning branch:** `admin-desk-redesign-planning`  
 **Source/code baseline:** `my-new-branch`  
-**Current phase:** Phase 0 security remediation merged and CI-validated; Academy staging deploy pending explicit Render workspace confirmation; specialist roles and cross-persona object scope remain outstanding.  
-**Implementation status:** PR #67 security remediation is merged to my-new-branch and CI-validated. No staging deploy has been triggered yet; obtain owner confirmation of the Render workspace before deploying. Production is untouched.
+**Current phase:** Admin Desk V2 (PR #68) is merged, CI-green and live on Academy staging. The deployed Admin session passed 25/25 route checks and the generic Staff session passed 17/17 route checks. Support object-scope and specialist-role verification remain outstanding. A separate Command Centre policy-count correction (PR #69) is CI-green but remains draft, unmerged and undeployed.  
+**Implementation status:** Admin Desk V2 PR #68 is merged to `my-new-branch` at `828c46eb1741190f85bfb6c3e7e0edd93a6eb980` and deployed to Academy staging as `dep-dbslvagae00c738ef8n0`. PR #69 contains a narrow policy-readiness count fix; all checks pass on head `eb7d1f8969129926a740b7b2bf0672859ce30918`, but it remains a draft and has not been merged or deployed. Production and public-static staging are untouched.
 
 ## 1. Resume instruction for a new chat
 
 Start a new chat and say:
 
-> Resume the TradeThesis Admin Desk redesign. Read `docs/admin-desk-redesign/HANDOFF_AND_RESUME.md` on branch `admin-desk-redesign-planning`, then inspect the latest Decision Log, Owner Decision Register, Implementation Readiness & Sequence, Mockup Register, Domain Workspace Blueprint and screen specifications. First complete the pending Academy staging deploy only after confirming the Render workspace with me, verify the deployed SHA and run the read-only learner/generic-staff access audit. Do not deploy to production or change the global Django Admin boundary.
+> Resume the TradeThesis Admin Desk redesign. Read `docs/admin-desk-redesign/HANDOFF_AND_RESUME.md`, `ADMIN_DESK_FINAL_IMPLEMENTATION_TEST_PLAN.md` and `PHASE_0_POST_DEPLOY_PERMISSION_VERIFICATION_2026-11-15.md` on `admin-desk-redesign-planning`. Admin Desk V2 is already live on Academy staging at `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`; Admin route checks are 25/25 and generic Staff route checks are 17/17. Continue with Support ticket object-scope and authorised specialist-role verification. PR #69 is CI-green but still draft; do not merge or deploy it without explicit approval. Do not deploy to production/public-static or change the global Django Admin boundary.
 
 The resume document is intended to restore project context without depending on the previous chat transcript.
 
@@ -834,3 +834,44 @@ A direct external browser check was not available from the deployment runtime, s
 Run the consolidated manual/browser/persona/permissions/workflow/accessibility test plan against this deployed staging version. Include each specialist persona and negative object-scope cases; do not treat the platform health check as UI acceptance. Record screenshots/URLs and outcomes, fix defects on a follow-up branch/PR, and redeploy staging after those fixes. Do not promote to production until the acceptance campaign is signed off.
 
 Tiptap remains non-default, the legacy Course Builder remains the production authoring path, learner-level M09 remains deferred for object-scope review, and global Django Admin lockout remains deferred pending workflow parity/cutover.
+
+
+## 18. Admin Desk V2 authenticated route acceptance — 15 November 2026
+
+**Staging service:** `tradethesis-academy-staging`  
+**Deployed commit:** `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`  
+**Render deployment:** `dep-dbslvagae00c738ef8n0`  
+**Method:** authenticated same-origin GET requests only; no mutations.
+
+### Owner Admin session
+
+- **25/25 expected routes returned HTTP 200.**
+- Covered Command Centre, My Work, Operations, Academy overview/catalogue/review/offers/SEO, Customers/Accounts/Support, Revenue/Plans/Subscriptions/Finance/Business, Growth/Campaigns, Platform/Global Search, Referral Rewards, Staff Approvals API, Growth Analytics API, Gift Sending and Disputes.
+- Disputes was independently rechecked after the first console table was incomplete: HTTP 200, no redirect, HTML response.
+
+### Generic Staff session
+
+- **17/17 expected route decisions matched.**
+- Allowed: Command Centre, Operations, Support Tickets and own Notifications API — HTTP 200.
+- Denied: Learner Accounts, Course Approvals, SEO, legacy Course Builder, Tiptap Builder, Finance, Subscriptions, Business Settings, Referral Rewards, Gift Sending, Disputes, Staff Approvals API and Growth Analytics — HTTP 403.
+- The pasted console table was truncated after row 11, but browser network output explicitly showed all 13 restricted requests returning HTTP 403; the first four allowed results were visible in the table.
+- The async console's immediate `Promise { <state>: "pending" }` line was not a failure; the subsequent route responses completed.
+
+### Interpretation / limits
+
+These are authenticated route-access checks for the deployed V2 release. They are not proof of content minimisation, page correctness, action safety or object-level isolation. No business mutation was submitted.
+
+Still outstanding:
+1. Support-ticket object scope: test a known in-scope and out-of-scope ticket for the same generic staff persona. The source-audit fallback for tickets with no assigned approver still needs a deliberate policy decision.
+2. Specialist personas: test real authorised Academy, Revenue, Growth and Platform accounts/groups; do not substitute the owner Admin or generic Staff account.
+3. Platform job/provisioning detail permissions and end-to-end action workflows.
+4. Accessibility, responsive-browser and final manual UAT/sign-off.
+
+### Separate Command Centre count correction
+
+During screenshot review, the Command Centre showed five blocked policy categories even though the service's five-item list can contain ready and unready entries. PR [#69](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/69) changes the signal count to count only unready items and adds a regression test (three ready, one missing and one placeholder; expected count two).
+
+- PR head: `eb7d1f8969129926a740b7b2bf0672859ce30918`
+- Backend full suites: Python 3.11 and 3.12 both green; each reports **1,364 passed, 1 skipped and 197 subtests passed**.
+- Tiptap compatibility and integration-target gate: green.
+- PR #69 remains draft, unmerged and undeployed. The live staging screenshot still reflects the old count until a separately approved merge and staging deploy.
