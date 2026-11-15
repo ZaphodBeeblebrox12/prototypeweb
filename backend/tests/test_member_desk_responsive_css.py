@@ -10,7 +10,7 @@ class MemberDeskResponsiveCssTests(SimpleTestCase):
         css_path = Path(__file__).resolve().parents[1] / "static" / "css" / "member-desk.css"
         css = css_path.read_text(encoding="utf-8")
 
-        base_grid_rule = ".no-purchase-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))"
+        base_grid_rule = ".no-purchase-course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))"
         override_marker = "/* Mobile responsive overrides for the signed-in member dashboard."
 
         self.assertIn(base_grid_rule, css)
