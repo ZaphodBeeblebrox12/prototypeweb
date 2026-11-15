@@ -557,6 +557,7 @@ class AdminDeskTests(TestCase):
         )
         self.assertEqual(listing.status_code, 200, listing.content)
         self.assertEqual(listing.context["plans_page"].paginator.count, 1)
+        self.assertIsNone(listing.context["products_page"])
         self.assertFalse(listing.context["can_view_products"])
         self.assertFalse(listing.context["can_view_base_prices"])
         self.assertFalse(listing.context["can_view_geo_prices"])
@@ -598,6 +599,11 @@ class AdminDeskTests(TestCase):
             name="Visible catalogue product",
             slug="visible-catalogue-product",
             description="Product description shown to authorised staff.",
+        )
+        standalone_product = Product.objects.create(
+            name="Catalogue product awaiting a Plan",
+            slug="catalogue-product-awaiting-plan",
+            description="A configured product with no linked Plan yet.",
         )
         plan = Plan.objects.create(
             product=product,
@@ -661,15 +667,15 @@ class AdminDeskTests(TestCase):
         ])
         self.client.force_login(operator)
 
-        listing = self.client.get(
-            reverse("staff_admin_desk_plans"),
-            {"q": product.name},
-        )
+        listing = self.client.get(reverse("staff_admin_desk_plans"))
         self.assertEqual(listing.status_code, 200, listing.content)
         self.assertTrue(listing.context["can_view_products"])
         self.assertTrue(listing.context["can_view_base_prices"])
         self.assertTrue(listing.context["can_view_geo_prices"])
+        self.assertEqual(listing.context["plan_summary"]["products"], 2)
+        self.assertEqual(listing.context["products_page"].paginator.count, 2)
         self.assertContains(listing, product.name)
+        self.assertContains(listing, standalone_product.name)
         self.assertContains(listing, plan.name)
         self.assertContains(listing, "Active base prices")
         self.assertContains(listing, "Active geo overrides")
