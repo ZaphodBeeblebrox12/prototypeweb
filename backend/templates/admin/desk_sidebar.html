@@ -87,15 +87,15 @@
       </a>
     </section>
 
-    {% if user.is_superuser or user.role == "admin" or perms.payments.view_paymentintent or perms.payments.view_invoice or perms.subscriptions.view_subscription or perms.payments.change_billingsettings or perms.payments.add_billingsettings or desk_nav.business or desk_access.business or perms.disputes.view_dispute %}
+    {% if user.is_superuser or user.role == "admin" or perms.payments.view_paymentintent or perms.payments.view_refund or perms.payments.view_invoice or perms.subscriptions.view_subscription or perms.subscriptions.view_plan or perms.payments.change_billingsettings or perms.payments.add_billingsettings or desk_nav.business or desk_access.business or perms.disputes.view_dispute %}
     <section class="tt-desk-nav-group" aria-labelledby="tt-nav-revenue">
       <h2 id="tt-nav-revenue">Revenue</h2>
       <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_revenue' %} is-active{% endif %}" href="{% url 'staff_admin_desk_revenue' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_revenue' %} aria-current="page"{% endif %}>
         <i class="bi bi-currency-exchange" aria-hidden="true"></i><span>Overview</span>
       </a>
-      {% if perms.payments.view_paymentintent or perms.payments.view_invoice %}
-      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_finance' or request.resolver_match.url_name == 'staff_admin_desk_invoice_detail' %} is-active{% endif %}" href="{% url 'staff_admin_desk_finance' %}{% if not perms.payments.view_paymentintent and perms.payments.view_invoice %}?tab=invoices{% endif %}"{% if request.resolver_match.url_name == 'staff_admin_desk_finance' or request.resolver_match.url_name == 'staff_admin_desk_invoice_detail' %} aria-current="page"{% endif %}>
-        <i class="bi bi-wallet2" aria-hidden="true"></i><span>Payments &amp; Invoices</span>
+      {% if perms.payments.view_paymentintent or perms.payments.view_refund or perms.payments.view_invoice %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_finance' or request.resolver_match.url_name == 'staff_admin_desk_invoice_detail' %} is-active{% endif %}" href="{% url 'staff_admin_desk_finance' %}{% if not perms.payments.view_paymentintent and perms.payments.view_invoice %}?tab=invoices{% elif not perms.payments.view_paymentintent and not perms.payments.view_invoice and perms.payments.view_refund %}?tab=refunds{% endif %}"{% if request.resolver_match.url_name == 'staff_admin_desk_finance' or request.resolver_match.url_name == 'staff_admin_desk_invoice_detail' %} aria-current="page"{% endif %}>
+        <i class="bi bi-wallet2" aria-hidden="true"></i><span>Payments, Refunds &amp; Invoices</span>
       </a>
       {% endif %}
       {% if user.is_superuser or user.role == "admin" or perms.disputes.view_dispute %}
@@ -103,9 +103,14 @@
         <i class="bi bi-shield-exclamation" aria-hidden="true"></i><span>Disputes</span>
       </a>
       {% endif %}
+      {% if perms.subscriptions.view_plan %}
+      <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_plans' or request.resolver_match.url_name == 'staff_admin_desk_plan_detail' %} is-active{% endif %}" href="{% url 'staff_admin_desk_plans' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_plans' or request.resolver_match.url_name == 'staff_admin_desk_plan_detail' %} aria-current="page"{% endif %}>
+        <i class="bi bi-tags" aria-hidden="true"></i><span>Plans &amp; Pricing</span>
+      </a>
+      {% endif %}
       {% if perms.subscriptions.view_subscription or desk_nav.subscriptions %}
       <a class="tt-desk-nav-link{% if request.resolver_match.url_name == 'staff_admin_desk_subscriptions' %} is-active{% endif %}" href="{% url 'staff_admin_desk_subscriptions' %}"{% if request.resolver_match.url_name == 'staff_admin_desk_subscriptions' %} aria-current="page"{% endif %}>
-        <i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>Subscriptions &amp; Plans</span>
+        <i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>Subscriptions</span>
       </a>
       {% endif %}
       {% if desk_nav.business or desk_access.business or perms.payments.change_billingsettings or perms.payments.add_billingsettings %}
