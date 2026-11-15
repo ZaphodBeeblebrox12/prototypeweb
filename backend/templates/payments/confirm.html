@@ -1,6 +1,49 @@
-{% extends "base.html" %}{% block content %}
-<h2>Payment {{ status }}</h2>
-{% if status == "success" %}<p>Your access is active. This was a one-time payment; access does not renew automatically.</p>
-{% elif status == "failed" %}<p>Payment failed. <a href="{% url 'checkout-page' intent.id %}">Try again</a>.</p>
-{% else %}<p>Payment pending — refresh shortly.</p>{% endif %}
+{% extends "base.html" %}
+{% block title %}Payment {{ status }} · TradeThesis{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:680px">
+  <article class="card">
+    <div class="card-body p-4">
+      <p class="text-uppercase text-muted small mb-2">TRADETHESIS · PAYMENT CONFIRMATION</p>
+      <h1 class="h3 mb-3">
+        {% if status == "success" %}Payment confirmed{% elif status == "failed" %}Payment not completed{% else %}Confirming your payment{% endif %}
+      </h1>
+      {% if course_offer %}
+        <p class="text-muted mb-3">Course: <strong>{{ course_offer.course.title }}</strong></p>
+      {% endif %}
+
+      {% if status == "success" %}
+        {% if course_offer %}
+          {% if course_access_active %}
+            <p>Your one-time payment is confirmed and course access is active. It will not renew automatically.</p>
+            <a class="btn btn-primary" href="{{ course_url }}">Start learning ↗</a>
+            <p class="small text-muted mt-3 mb-0">You can return to this course at any time from My learning in your member area.</p>
+          {% else %}
+            <p>Your payment is confirmed, but the course access record is still being finalised. Please check again shortly; do not make a second payment.</p>
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-primary" href="{{ request.path }}">Check access again</a>
+              <a class="btn btn-outline-secondary" href="{{ course_url }}">View course</a>
+            </div>
+          {% endif %}
+        {% else %}
+          <p>Your access is active. This was a one-time payment; access does not renew automatically.</p>
+          <a class="btn btn-primary" href="{% url 'dashboard' %}">Return to member area ↗</a>
+        {% endif %}
+      {% elif status == "failed" %}
+        <p>The payment provider did not confirm this payment. No course access has been granted. You can return to the course and start a new checkout.</p>
+        {% if course_offer %}
+          <a class="btn btn-primary" href="{{ course_url }}">Return to course ↗</a>
+        {% else %}
+          <a class="btn btn-primary" href="{% url 'dashboard' %}">Return to member area ↗</a>
+        {% endif %}
+      {% else %}
+        <p>We are waiting for the payment provider to confirm the result. You will not receive course access until that confirmation arrives. Please do not start another payment while this one is pending.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-primary" href="{{ request.path }}">Refresh payment status</a>
+          {% if course_offer %}<a class="btn btn-outline-secondary" href="{{ course_url }}">View course</a>{% else %}<a class="btn btn-outline-secondary" href="{% url 'dashboard' %}">Member area</a>{% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </article>
+</section>
 {% endblock %}
