@@ -86,7 +86,7 @@
     <section class="panel" aria-labelledby="academy-offers-heading">
       <div class="panel-head">
         <div><h2 id="academy-offers-heading">Offers &amp; pricing</h2><p>Course offer records linked to commerce Plans</p></div>
-        <a href="{{ offer_summary.url }}">Offer register ↗</a>
+        {% if offer_summary.url %}<a href="{{ offer_summary.url }}">Offer register →</a>{% else %}<span>Course catalogue permission required for the full register</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">
