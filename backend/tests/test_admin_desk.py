@@ -503,12 +503,33 @@ class AdminDeskTests(TestCase):
             status=PaymentIntent.Status.SUCCESS,
         )
         provider_dispute_id = "dp_private_search_9381"
-        Dispute.objects.create(
+        dispute = Dispute.objects.create(
             payment_intent=payment,
             provider=PaymentIntent.Provider.STRIPE,
             provider_dispute_id=provider_dispute_id,
             reason_category=Dispute.ReasonCategory.NOT_RECEIVED,
             amount_cents=459900,
+            currency="INR",
+            status=Dispute.Status.OPENED,
+        )
+        other_member = User.objects.create_user(
+            username="unrelated-dispute-member",
+            email="unrelated-dispute-member@example.test",
+        )
+        other_payment = PaymentIntent.objects.create(
+            user=other_member,
+            plan=plan,
+            provider=PaymentIntent.Provider.RAZORPAY,
+            amount=129900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        Dispute.objects.create(
+            payment_intent=other_payment,
+            provider=PaymentIntent.Provider.RAZORPAY,
+            provider_dispute_id="dp_unrelated_case_6421",
+            reason_category=Dispute.ReasonCategory.DUPLICATE,
+            amount_cents=129900,
             currency="INR",
             status=Dispute.Status.OPENED,
         )
@@ -558,10 +579,42 @@ class AdminDeskTests(TestCase):
         self.assertIn("INR 4,599.00", result["detail"])
         self.assertEqual(
             result["url"],
-            reverse("admin:disputes_dispute_changelist") + "?q=" + member.username,
+            reverse("disputes:dashboard") + "?q=" + member.username,
         )
         self.assertContains(response, "Dispute")
         self.assertNotContains(response, provider_dispute_id)
+
+        dispute_workspace = self.client.get(result["url"])
+        self.assertEqual(dispute_workspace.status_code, 200, dispute_workspace.content)
+        matching_rows = list(
+            dispute_workspace.context["rows"].values_list("pk", flat=True)
+        )
+        self.assertEqual(matching_rows, [dispute.pk])
+        self.assertContains(dispute_workspace, provider_dispute_id[:16])
+        self.assertNotContains(dispute_workspace, "dp_unrelated_case_6421")
+
+        application_admin = User.objects.create_user(
+            username="dispute-search-application-admin",
+            email="dispute-search-application-admin@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(application_admin)
+        admin_search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(admin_search.status_code, 200, admin_search.content)
+        admin_groups = {
+            group["name"]: group["results"]
+            for group in admin_search.context["search_groups"]
+        }
+        self.assertEqual(set(admin_groups), {"Revenue"})
+        self.assertEqual(admin_groups["Revenue"][0]["url"], result["url"])
+        admin_dispute_workspace = self.client.get(result["url"])
+        self.assertEqual(
+            admin_dispute_workspace.status_code, 200, admin_dispute_workspace.content
+        )
 
     def test_platform_webhook_summary_omits_provider_ids_payloads_and_errors(self):
         from django.contrib.auth.models import Permission
@@ -653,6 +706,56 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "Your access")
         self.assertContains(response, "plan scope")
         self.assertNotContains(response, "Edit permissions")
+
+    def test_application_admin_access_summary_matches_growth_and_dispute_routes(self):
+        application_admin = User.objects.create_user(
+            username="application-admin-access-summary",
+            email="application-admin-access-summary@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(application_admin)
+
+        platform_response = self.client.get(reverse("staff_admin_desk_platform"))
+        self.assertEqual(platform_response.status_code, 200, platform_response.content)
+        sections = {
+            section["name"]: {
+                item["label"]: item
+                for item in section["items"]
+            }
+            for section in platform_response.context["my_access"]["sections"]
+        }
+        revenue_access = sections["Revenue"]
+        self.assertTrue(revenue_access["Disputes"]["granted"])
+        self.assertTrue(revenue_access["Change disputes"]["granted"])
+
+        growth_access = sections["Growth"]
+        self.assertTrue(growth_access["Growth overview & reporting"]["granted"])
+        self.assertTrue(growth_access["Referral rewards"]["granted"])
+        self.assertTrue(growth_access["Create and send gifts"]["granted"])
+        self.assertFalse(growth_access["Campaign register"]["granted"])
+        self.assertFalse(growth_access["Gift invite register"]["granted"])
+
+        growth_response = self.client.get(reverse("staff_admin_desk_growth"))
+        self.assertEqual(growth_response.status_code, 200, growth_response.content)
+        self.assertTrue(growth_response.context["can_view_campaigns"])
+        self.assertTrue(growth_response.context["can_view_email"])
+        self.assertTrue(growth_response.context["can_view_promotions"])
+        self.assertTrue(growth_response.context["can_view_purchases"])
+        self.assertFalse(growth_response.context.get("campaign_url"))
+        self.assertFalse(growth_response.context.get("email_url"))
+        self.assertFalse(growth_response.context.get("promotion_url"))
+        self.assertFalse(growth_response.context.get("events_url"))
+        self.assertFalse(growth_response.context["gift_summary"]["url"])
+        self.assertContains(
+            growth_response,
+            "Register access requires its model permission",
+        )
+        self.assertNotContains(growth_response, "/admin/campaigns/campaign/")
+        self.assertNotContains(growth_response, "/admin/growth/giftinvite/")
+
+        dispute_response = self.client.get(reverse("disputes:dashboard"))
+        self.assertEqual(dispute_response.status_code, 200, dispute_response.content)
 
     def test_global_search_returns_safe_webhook_results_only_with_view_permission(self):
         from django.contrib.auth.models import Permission
