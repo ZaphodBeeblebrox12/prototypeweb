@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Course Catalogue | Academy | TradeThesis{% endblock %}
+{% block page_title %}Course Catalogue{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-catalogue{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1500px;margin:4px auto 36px;color:var(--ink)}
+  .tt-catalogue *{box-sizing:border-box}
+  .tt-catalogue a{color:#315b43;text-underline-offset:3px}
+  .tt-catalogue .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 18px}
+  .tt-catalogue .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-catalogue h1{margin:0;font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-catalogue .intro{max-width:780px;margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+  .tt-catalogue .actions,.tt-catalogue .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tt-catalogue .button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-catalogue .button.primary{border-color:var(--green);background:var(--green);color:#fff}
+  .tt-catalogue .filters{padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:#f8f8f3}
+  .tt-catalogue input,.tt-catalogue select{min-height:34px;padding:6px 9px;border:1px solid #d4d8cf;border-radius:3px;background:#fff;color:var(--ink);font:inherit;font-size:10px}
+  .tt-catalogue input[type=search]{min-width:210px;flex:1}
+  .tt-catalogue .table-panel{margin-top:12px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-catalogue .table-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tt-catalogue .table-head h2{margin:0;font-size:12px;font-weight:800}
+  .tt-catalogue .table-head p{margin:4px 0 0;color:var(--muted);font-size:9px}
+  .tt-catalogue .table-wrap{overflow:auto}
+  .tt-catalogue table{width:100%;border-collapse:collapse;min-width:890px}
+  .tt-catalogue th,.tt-catalogue td{padding:10px 9px;border-bottom:1px solid var(--soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-catalogue th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+  .tt-catalogue tr:last-child td{border-bottom:0}
+  .tt-catalogue .course-name{display:block;font-weight:800}
+  .tt-catalogue .meta{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.4}
+  .tt-catalogue .pill{display:inline-flex;align-items:center;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:8px;font-weight:800;white-space:nowrap}
+  .tt-catalogue .pill.good{border-color:#cbd9cb;background:#eff4ed;color:#3c5c43}
+  .tt-catalogue .pill.warn{border-color:#e7d6b8;background:#fbf4e8;color:#835f30}
+  .tt-catalogue .pill.bad{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-catalogue .empty{padding:28px 14px;color:var(--muted);font-size:11px;text-align:center}
+  .tt-catalogue .pagination{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:11px 14px;color:var(--muted);font-size:10px}
+  .tt-catalogue .pagination a{font-weight:700}
+  .tt-catalogue .note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
+  @media(max-width:650px){.tt-catalogue h1{font-size:27px}.tt-catalogue .head{align-items:flex-start}.tt-catalogue .actions,.tt-catalogue .actions .button{width:100%}.tt-catalogue input[type=search]{min-width:100%}.tt-catalogue .filters select{flex:1;min-width:135px}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-catalogue">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Academy / Learning products</p>
+      <h1>Course Catalogue</h1>
+      <p class="intro">A searchable register of canonical Course records. Publication, catalogue role, learner access, offer saleability and search indexing are shown separately; this page does not edit or publish course content.</p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{% url 'staff_admin_desk_academy' %}">← Academy overview</a>
+      <a class="button" href="{% url 'staff_course_builder_preview' %}">Open Course Builder →</a>
+    </div>
+  </header>
+
+  <form class="filters" method="get" action="{% url 'staff_admin_desk_courses' %}">
+    <input type="search" name="q" value="{{ query }}" maxlength="120" placeholder="Search course title, slug or summary" aria-label="Search courses">
+    <select name="role" aria-label="Catalogue role">
+      <option value="">All catalogue roles</option>
+      {% for value,label in role_choices %}<option value="{{ value }}"{% if role_filter == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="status" aria-label="Publication status">
+      <option value="">All publication states</option>
+      {% for value,label in status_choices %}<option value="{{ value }}"{% if status_filter == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="access" aria-label="Access type">
+      <option value="">All access types</option>
+      {% for value,label in access_choices %}<option value="{{ value }}"{% if access_filter == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% if can_view_offers %}
+    <select name="offer" aria-label="Offer state">
+      <option value="">All offer states</option>
+      <option value="none"{% if offer_filter == "none" %} selected{% endif %}>No offer</option>
+      <option value="active"{% if offer_filter == "active" %} selected{% endif %}>Active offers</option>
+      <option value="inactive"{% if offer_filter == "inactive" %} selected{% endif %}>Inactive offers</option>
+      <option value="saleable"{% if offer_filter == "saleable" %} selected{% endif %}>Saleable</option>
+      <option value="attention"{% if offer_filter == "attention" %} selected{% endif %}>Active · needs attention</option>
+    </select>
+    {% endif %}
+    <select name="seo" aria-label="Search indexing">
+      <option value="">All indexing states</option>
+      <option value="indexable"{% if seo_filter == "indexable" %} selected{% endif %}>Indexable</option>
+      <option value="blocked"{% if seo_filter == "blocked" %} selected{% endif %}>Published · blocked</option>
+    </select>
+    <button class="button primary" type="submit">Apply</button>
+    <a class="button" href="{% url 'staff_admin_desk_courses' %}">Clear</a>
+  </form>
+
+  <section class="table-panel" aria-labelledby="course-register-heading">
+    <div class="table-head">
+      <div><h2 id="course-register-heading">Course records</h2><p>{{ matched_count }} matching course{{ matched_count|pluralize }} · ordered by catalogue position and title</p></div>
+      <span class="pill">Read only</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Course</th><th>Catalogue role</th><th>Publication</th><th>Access type</th><th>Curriculum</th>{% if can_view_offers %}<th>Offer readiness</th>{% endif %}<th>Search visibility</th><th>Updated</th></tr></thead>
+        <tbody>
+          {% for row in courses_page %}
+          <tr>
+            <td><a class="course-name" href="{{ row.detail_url }}">{{ row.course.title }}</a><span class="meta">{{ row.course.slug }}{% if row.course.summary %}<br>{{ row.course.summary|truncatechars:110 }}{% endif %}</span></td>
+            <td>{{ row.role_label }}</td>
+            <td><span class="pill{% if row.course.status == 'published' %} good{% elif row.course.status == 'archived' %}{% else %} warn{% endif %}">{{ row.status_label }}</span></td>
+            <td>{{ row.access_label }}</td>
+            <td>{{ row.published_modules }}/{{ row.total_modules }} modules<span class="meta">{{ row.published_lessons }}/{{ row.total_lessons }} published lessons</span></td>
+            {% if can_view_offers %}
+            <td>
+              {% if row.offer_state == "Saleable" %}<span class="pill good">{{ row.offer_state }}</span>
+              {% elif row.offer_state == "Active · needs attention" %}<span class="pill warn">{{ row.offer_state }}</span>
+              {% elif row.offer_state == "Inactive" %}<span class="pill">{{ row.offer_state }}</span>
+              {% else %}<span class="meta">{{ row.offer_state }}</span>{% endif %}
+            </td>
+            {% endif %}
+            <td>
+              {% if row.seo_indexable %}<span class="pill good">Indexable</span>
+              {% else %}<span class="pill bad">Blocked</span><span class="meta">{{ row.seo_reasons|length }} reason{{ row.seo_reasons|length|pluralize }}</span>{% endif %}
+            </td>
+            <td>{{ row.course.updated_at|date:"j M Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td class="empty" colspan="8">{% if query or role_filter or status_filter or access_filter or offer_filter or seo_filter %}No courses match the selected search and filters.{% else %}No Course records are available in the catalogue yet.{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if courses_page.paginator.num_pages > 1 %}
+    <div class="pagination">
+      <span>Page {{ courses_page.number }} of {{ courses_page.paginator.num_pages }}</span>
+      {% if courses_page.has_previous %}<a href="?page={{ courses_page.previous_page_number }}&amp;q={{ query|urlencode }}&amp;role={{ role_filter|urlencode }}&amp;status={{ status_filter|urlencode }}&amp;access={{ access_filter|urlencode }}&amp;offer={{ offer_filter|urlencode }}&amp;seo={{ seo_filter|urlencode }}">Previous</a>{% endif %}
+      {% if courses_page.has_next %}<a href="?page={{ courses_page.next_page_number }}&amp;q={{ query|urlencode }}&amp;role={{ role_filter|urlencode }}&amp;status={{ status_filter|urlencode }}&amp;access={{ access_filter|urlencode }}&amp;offer={{ offer_filter|urlencode }}&amp;seo={{ seo_filter|urlencode }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+  <p class="note">Search visibility reflects the same global deployment, publication, course, catalogue and content checks used by the SEO inventory. A Published course is not automatically indexable, and an Active offer is not automatically saleable.</p>
+</div>
+{% endblock %}
