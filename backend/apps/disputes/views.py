@@ -3,6 +3,7 @@ from functools import wraps
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -46,6 +47,13 @@ def _visible(user):
 @dispute_permission_required("disputes.view_dispute")
 def dashboard(request):
     qs = _visible(request.user)
+    query = request.GET.get("q", "").strip()[:120]
+    if query:
+        qs = qs.filter(
+            Q(provider_dispute_id__icontains=query)
+            | Q(payment_intent__user__username__icontains=query)
+            | Q(payment_intent__user__email__icontains=query)
+        )
     now = timezone.now()
     soon = now + timezone.timedelta(hours=72)
     live = [Dispute.Status.OPENED, Dispute.Status.EVIDENCE_PREP,
@@ -67,7 +75,7 @@ def dashboard(request):
         rows = rows.filter(status=f)
     return render(request, "disputes/dashboard.html",
                   {"buckets": buckets, "rows": rows[:100], "filter": f,
-                   "now": now})
+                   "query": query, "now": now})
 
 
 @dispute_permission_required("disputes.view_dispute")
