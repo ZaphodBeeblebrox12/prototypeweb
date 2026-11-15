@@ -407,9 +407,17 @@ def _checkout_response(request, pk):
             CheckoutEvidence.objects.filter(payment_intent=intent).exists():
         # The agreement moment must be captured before provider handoff.
         return redirect("checkout-consent", pk=pk)
-    context = {"intent": intent, "plan": intent.plan, "amount": intent.amount,
-               "currency": intent.currency,
-               "canceled": bool(request.GET.get("canceled"))}
+    from apps.subscriptions.services import format_price
+    context = {
+        "intent": intent,
+        "plan": intent.plan,
+        # Keep the provider amount in minor units for Razorpay Checkout.js;
+        # display a separately formatted major-unit amount to the learner.
+        "amount": intent.amount,
+        "amount_display": format_price(intent.amount, intent.currency),
+        "currency": intent.currency,
+        "canceled": bool(request.GET.get("canceled")),
+    }
     if intent.provider == "razorpay":
         context["razorpay_key_id"] = settings.RAZORPAY_KEY_ID
         context["razorpay_order_id"] = intent.provider_reference
