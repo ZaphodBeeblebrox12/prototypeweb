@@ -107,7 +107,7 @@
             <td><a href="{% url 'staff_admin_desk_plan_detail' plan.pk %}">Inspect →</a></td>
           </tr>
           {% empty %}
-          <tr><td class="empty" colspan="8">No plans match these filters.</td></tr>
+          <tr><td class="empty" colspan="{{ plan_table_columns }}">No plans match these filters.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -121,7 +121,7 @@
     {% endif %}
   </section>
 
-  <p class="notice">A configured price is not a tested checkout result. For a country, checkout resolves an active country-specific override first, then an active region override, then the active global base price. Different currencies and markets remain separate; this page does not combine them or change historical payment/subscription snapshots.</p>
+  <p class="notice">A configured price is not a tested checkout result. For standard plan intervals, checkout resolves an active country-specific override first, then an active region override, then the active global base price. Trial purchase uses a separate country-specific trial-price lookup; do not assume it follows the same regional/global fallback chain. Different currencies and markets remain separate; this page does not combine them or change historical payment/subscription snapshots.</p>
   <p class="muted">Inspection only. Product, Plan, price, feature and channel-mapping edits remain in their existing Advanced Administration workflows. No price is created, changed or published here.</p>
 </div>
 {% endblock %}
