@@ -28,6 +28,7 @@ from apps.academy.catalogue_api import public_course_catalogue
 from apps.admin_desk_views import (
     admin_desk_accounts, admin_desk_account_detail, admin_desk_account_action, admin_desk_my_work,
     admin_desk_subscriptions, admin_desk_subscription_action,
+    admin_desk_plans, admin_desk_plan_detail,
     admin_desk_business, admin_desk_finance, admin_desk_invoice_detail,
     admin_desk_course_reviews, admin_desk_course_review, admin_desk_course_asset,
     admin_desk_course_approve, admin_desk_course_reject,
@@ -87,6 +88,8 @@ urlpatterns = [
     path("staff/admin-desk/accounts/<uuid:user_id>/action/", admin_desk_account_action, name="staff_admin_desk_account_action"),
     path("staff/admin-desk/subscriptions/", admin_desk_subscriptions, name="staff_admin_desk_subscriptions"),
     path("staff/admin-desk/subscriptions/<uuid:subscription_id>/action/", admin_desk_subscription_action, name="staff_admin_desk_subscription_action"),
+    path("staff/admin-desk/plans/", admin_desk_plans, name="staff_admin_desk_plans"),
+    path("staff/admin-desk/plans/<uuid:plan_id>/", admin_desk_plan_detail, name="staff_admin_desk_plan_detail"),
     path("staff/admin-desk/business/", admin_desk_business, name="staff_admin_desk_business"),
     path("staff/admin-desk/finance/", admin_desk_finance, name="staff_admin_desk_finance"),
     path("staff/admin-desk/invoices/<uuid:invoice_id>/", admin_desk_invoice_detail, name="staff_admin_desk_invoice_detail"),
