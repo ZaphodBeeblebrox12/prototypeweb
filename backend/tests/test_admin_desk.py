@@ -352,6 +352,87 @@ class AdminDeskTests(TestCase):
         self.assertIn("referral_report", response.context)
         self.assertTrue(response.context["can_view_referrals"])
 
+    def test_campaign_workspace_separates_campaign_and_audience_permissions(self):
+        from django.contrib.auth.models import Permission
+        from apps.campaigns.models import Audience, Campaign
+        from apps.emailing.models import Template, TemplateVersion
+
+        template = Template.objects.create(name="Permission boundary test")
+        version = TemplateVersion.objects.create(
+            template=template,
+            version_number=1,
+            editor_mode=TemplateVersion.EditorMode.HTML,
+            subject="Permission boundary",
+            html="<p>Permission boundary</p>",
+        )
+        audience = Audience.objects.create(
+            name="Restricted Audience Name",
+            description="Audience-only description",
+            rules={"is_active": True},
+        )
+        campaign = Campaign.objects.create(
+            name="Restricted Campaign Name",
+            template_version=version,
+            audience=audience,
+        )
+
+        campaign_permission = Permission.objects.get(
+            content_type__app_label="campaigns",
+            codename="view_campaign",
+        )
+        audience_permission = Permission.objects.get(
+            content_type__app_label="campaigns",
+            codename="view_audience",
+        )
+
+        generic_staff = User.objects.create_user(
+            username="campaign-workspace-no-growth-grants",
+            email="campaign-workspace-no-growth-grants@example.test",
+            is_staff=True,
+        )
+        campaign_staff = User.objects.create_user(
+            username="campaign-workspace-campaign-only",
+            email="campaign-workspace-campaign-only@example.test",
+            is_staff=True,
+        )
+        campaign_staff.user_permissions.add(campaign_permission)
+        audience_staff = User.objects.create_user(
+            username="campaign-workspace-audience-only",
+            email="campaign-workspace-audience-only@example.test",
+            is_staff=True,
+        )
+        audience_staff.user_permissions.add(audience_permission)
+
+        self.client.force_login(generic_staff)
+        denied = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(denied.status_code, 403)
+        denied_detail = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(denied_detail.status_code, 403)
+
+        self.client.force_login(campaign_staff)
+        campaign_response = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(campaign_response.status_code, 200, campaign_response.content)
+        self.assertContains(campaign_response, "Restricted Campaign Name")
+        self.assertNotContains(campaign_response, "Restricted Audience Name")
+        self.assertNotContains(campaign_response, "Audience-only description")
+
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200, detail_response.content)
+        self.assertContains(detail_response, "Restricted Campaign Name")
+        self.assertNotContains(detail_response, "Restricted Audience Name")
+        self.assertNotContains(detail_response, "Audience context")
+
+        self.client.force_login(audience_staff)
+        audience_response = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(audience_response.status_code, 200, audience_response.content)
+        self.assertContains(audience_response, "Restricted Audience Name")
+        self.assertContains(audience_response, "Audience-only description")
+        self.assertNotContains(audience_response, "Restricted Campaign Name")
+
     def test_growth_email_report_uses_marked_sent_not_delivered_language(self):
         owner = User.objects.create_superuser(
             username="growth-email-report-owner",
