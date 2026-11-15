@@ -1352,6 +1352,14 @@ class AdminDeskTests(TestCase):
         self.assertTrue(growth_response.context["can_view_email"])
         self.assertTrue(growth_response.context["can_view_promotions"])
         self.assertTrue(growth_response.context["can_view_purchases"])
+        self.assertEqual(
+            growth_response.context["campaign_workspace_url"],
+            reverse("staff_admin_desk_campaigns"),
+        )
+        campaigns_response = self.client.get(reverse("staff_admin_desk_campaigns"))
+        self.assertEqual(campaigns_response.status_code, 200, campaigns_response.content)
+        self.assertContains(campaigns_response, "Campaigns &amp; Audiences")
+        self.assertContains(campaigns_response, "Frozen audience snapshots")
         self.assertFalse(growth_response.context.get("campaign_url"))
         self.assertFalse(growth_response.context.get("email_url"))
         self.assertFalse(growth_response.context.get("promotion_url"))
