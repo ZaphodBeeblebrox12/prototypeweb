@@ -44,6 +44,7 @@ def admin_desk_course_reviews(request):
     """List course submissions awaiting administrator approval."""
     _guard(request)
     from apps.academy.permissions import is_course_content_admin
+    from apps.growth.permissions import has_growth_permission
 
     if not is_course_content_admin(request.user):
         raise PermissionDenied
@@ -1664,34 +1665,91 @@ def admin_desk_platform(request):
                         ),
                         "detail": "Add or change BillingSettings",
                     },
-                    access_item("Disputes", "disputes.view_dispute"),
-                    access_item("Change disputes", "disputes.change_dispute"),
+                    {
+                        "label": "Disputes",
+                        "granted": (
+                            request.user.is_superuser
+                            or getattr(request.user, "role", None) == "admin"
+                            or access_granted("disputes.view_dispute")
+                        ),
+                        "detail": "Custom dispute workspace · Admin role/superuser bypass or explicit view permission",
+                    },
+                    {
+                        "label": "Change disputes",
+                        "granted": (
+                            request.user.is_superuser
+                            or getattr(request.user, "role", None) == "admin"
+                            or (
+                                access_granted("disputes.view_dispute")
+                                and access_granted("disputes.change_dispute")
+                            )
+                        ),
+                        "detail": "Admin role/superuser bypass or both view and change permissions",
+                    },
                 ],
             },
             {
                 "name": "Growth",
                 "items": [
-                    access_item("Analytics events", "events.view_event"),
-                    access_item("Campaigns", "campaigns.view_campaign"),
-                    access_item("Email delivery", "emailing.view_delivery"),
-                    access_item("Coupon redemptions", "promotions.view_couponredemption"),
+                    {
+                        "label": "Growth overview & reporting",
+                        "granted": any(
+                            has_growth_permission(request.user, permission)
+                            for permission in (
+                                "events.view_event",
+                                "emailing.view_delivery",
+                                "campaigns.view_campaign",
+                                "promotions.view_couponredemption",
+                                "growth.view_referralreward",
+                                "growth.view_giftinvite",
+                            )
+                        ),
+                        "detail": "Admin role/superuser or at least one source permission; each report panel is separately gated",
+                    },
+                    access_item(
+                        "Analytics event register",
+                        "events.view_event",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    access_item(
+                        "Campaign register",
+                        "campaigns.view_campaign",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    access_item(
+                        "Email delivery register",
+                        "emailing.view_delivery",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
+                    access_item(
+                        "Coupon redemption register",
+                        "promotions.view_couponredemption",
+                        "Explicit model permission for the legacy register; Admin-role overview reporting is separate",
+                    ),
                     {
                         "label": "Referral rewards",
-                        "granted": (
-                            access_granted("growth.view_referralreward")
-                            and access_granted("growth.view_referralsettings")
+                        "granted": has_growth_permission(
+                            request.user,
+                            ("growth.view_referralreward", "growth.view_referralsettings"),
                         ),
-                        "detail": "Both reward and settings read permissions are required",
+                        "detail": "Admin role/superuser bypass or both reward and settings read permissions",
                     },
-                    access_item("Gift invite register", "growth.view_giftinvite"),
+                    access_item(
+                        "Gift invite register",
+                        "growth.view_giftinvite",
+                        "Explicit model permission for the legacy register; overview counts are separately gated",
+                    ),
                     {
                         "label": "Create and send gifts",
-                        "granted": (
-                            access_granted("growth.add_giftinvite")
-                            and access_granted("subscriptions.add_giftsubscription")
-                            and access_granted("subscriptions.view_plan")
+                        "granted": has_growth_permission(
+                            request.user,
+                            (
+                                "growth.add_giftinvite",
+                                "subscriptions.add_giftsubscription",
+                                "subscriptions.view_plan",
+                            ),
                         ),
-                        "detail": "Requires all underlying create and plan-read permissions",
+                        "detail": "Admin role/superuser bypass or all underlying create and plan-read permissions",
                     },
                 ],
             },
@@ -2861,7 +2919,7 @@ def admin_desk_search(request):
                 "status", "opened_at", "payment_intent__user__username",
             ).order_by("-opened_at")[:5]
             dispute_url = (
-                reverse("admin:disputes_dispute_changelist")
+                reverse("disputes:dashboard")
                 + "?"
                 + urlencode({"q": query})
             )
