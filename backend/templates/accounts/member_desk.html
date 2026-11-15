@@ -52,7 +52,7 @@
               <h1>Your trading education starts with <em>a decision.</em></h1>
               <p class="hero-description">Welcome back, {{ user.first_name|default:user.username }}. Explore the learning paths, understand how TradeThesis teaches, and choose a next step that fits your goals.</p>
               <div class="no-purchase-hero-actions">
-                <a class="btn" href="{% url 'academy:home' %}">Explore course library ↗</a>
+                <a class="btn" href="#recommended-courses">Explore available courses ↓</a>
                 <a class="btn secondary" href="{{ public_site_url }}/index.html#approach">Our approach ↗</a>
               </div>
             </div>
@@ -68,20 +68,47 @@
           </aside>
         </div>
 
-        <div class="no-purchase-section-title">
-          <div><h2>Choose your starting point</h2><p>Begin with the area that best matches your goal.</p></div>
-          <a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">View course library →</a>
-        </div>
-        <div class="no-purchase-choice-grid">
-          <article class="no-purchase-choice-card"><span class="no-purchase-choice-icon" aria-hidden="true">⌁</span><span class="no-purchase-choice-category">FOUNDATIONS</span><h3>Build your foundations</h3><p>Start with the bigger picture and build a more structured way to think about trading decisions.</p><a class="btn secondary" href="{% url 'academy:home' %}">Explore learning paths ↗</a></article>
-          <article class="no-purchase-choice-card"><span class="no-purchase-choice-icon" aria-hidden="true">◫</span><span class="no-purchase-choice-category">MICRO-COURSES</span><h3>Develop a specific skill</h3><p>Study a focused topic, work through examples and apply the idea at your own pace.</p><a class="btn secondary" href="{% url 'academy:home' %}">Browse focused courses ↗</a></article>
-          <article class="no-purchase-choice-card"><span class="no-purchase-choice-icon" aria-hidden="true">↗</span><span class="no-purchase-choice-category">OUR METHOD</span><h3>Understand the approach</h3><p>Get familiar with context, construction, risk, management and review before choosing a course.</p><a class="btn secondary" href="{{ public_site_url }}/index.html#approach">See how we teach ↗</a></article>
-        </div>
+        <section class="no-purchase-course-discovery" id="recommended-courses" aria-labelledby="recommended-courses-title">
+          <div class="no-purchase-section-title">
+            <div>
+              <h2 id="recommended-courses-title">Explore published courses</h2>
+              <p>Compare real course outlines and access details before you decide.</p>
+            </div>
+            <a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">View full course library →</a>
+          </div>
+          {% if member_discovery_courses %}
+          <div class="no-purchase-course-grid">
+            {% for item in member_discovery_courses %}
+            <article class="no-purchase-course-card">
+              <div class="no-purchase-course-card-top">
+                <span class="no-purchase-course-role">{{ item.role_label }}</span>
+                {% if item.course.category %}<span class="no-purchase-course-category">{{ item.course.category }}</span>{% endif %}
+              </div>
+              <h3>{{ item.course.title }}</h3>
+              <p>{{ item.course.summary }}</p>
+              {% if item.course.level or item.course.estimated_duration %}
+              <div class="no-purchase-course-meta">
+                {% if item.course.level %}<span>{{ item.course.level }}</span>{% endif %}
+                {% if item.course.estimated_duration %}<span>{{ item.course.estimated_duration }}</span>{% endif %}
+              </div>
+              {% endif %}
+              <a class="btn secondary" href="{% url 'academy:course-detail' item.course.slug %}">View course &amp; access details ↗</a>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="no-purchase-course-empty">
+            <strong>New courses will appear here when they are published.</strong>
+            <p>The course library is the best place to check what is currently available.</p>
+            <a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">Open the course library →</a>
+          </div>
+          {% endif %}
+        </section>
 
         <div class="no-purchase-lower-grid">
           <article class="no-purchase-panel">
             <div class="no-purchase-panel-head"><h2>Your learning library</h2><p>Purchased course access and saved progress are kept with your account.</p></div>
-            <div class="no-purchase-empty-row"><span class="no-purchase-empty-symbol" aria-hidden="true">▤</span><div><strong>No purchased course access yet</strong><p>No purchased course access is linked to this account yet. You can still browse published courses and open previews that are available to you.</p><a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">Browse published courses →</a></div></div>
+            <div class="no-purchase-empty-row"><span class="no-purchase-empty-symbol" aria-hidden="true">▤</span><div><strong>No course access is linked yet</strong><p>Once you enrol or receive access, your courses and saved lesson progress will appear in My learning.</p><button class="no-purchase-inline-action" type="button" data-goto="learning">Open My learning →</button></div></div>
           </article>
           <article class="no-purchase-panel">
             <div class="no-purchase-panel-head"><h2>Community connections</h2><p>Connect a service when you are ready to use it.</p></div>
