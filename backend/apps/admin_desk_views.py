@@ -2613,16 +2613,32 @@ def admin_desk_finance(request):
     _guard(request)
     can_pay = _allowed(request.user, "payments.view_paymentintent")
     can_invoice = _allowed(request.user, "payments.view_invoice")
-    if not (can_pay or can_invoice):
+    can_view_refunds = _allowed(request.user, "payments.view_refund")
+    if not (can_pay or can_invoice or can_view_refunds):
         raise PermissionDenied
-    from apps.payments.models import Invoice, PaymentIntent
+    from apps.payments.models import Invoice, PaymentIntent, Refund
 
     query = request.GET.get("q", "").strip()[:120]
     status_filter = request.GET.get("payment_status", "").strip().lower()
-    tab = request.GET.get("tab", "payments").strip().lower()
-    if tab not in {"payments", "invoices"}:
-        tab = "payments"
-    payment_page = invoice_page = None
+    refund_source = request.GET.get("refund_source", "").strip().lower()
+
+    available_tabs = {
+        name for name, allowed in (
+            ("payments", can_pay),
+            ("invoices", can_invoice),
+            ("refunds", can_view_refunds),
+        ) if allowed
+    }
+    requested_tab = request.GET.get("tab", "").strip().lower()
+    if requested_tab in available_tabs:
+        tab = requested_tab
+    else:
+        tab = next(
+            (name for name in ("payments", "invoices", "refunds") if name in available_tabs),
+            "",
+        )
+
+    payment_page = invoice_page = refund_page = None
     counts = {}
     if can_pay:
         qs = PaymentIntent.objects.select_related("user", "plan")
@@ -2646,11 +2662,33 @@ def admin_desk_finance(request):
                 | Q(payment_intent__provider_reference__icontains=query)
             )
         invoice_page = Paginator(qs.order_by("-issue_date", "-issued_at"), 30).get_page(request.GET.get("invoice_page"))
+    if can_view_refunds:
+        qs = Refund.objects.select_related(
+            "payment_intent", "payment_intent__user", "payment_intent__plan"
+        )
+        if query:
+            qs = qs.filter(
+                Q(provider_refund_id__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+                | Q(payment_intent__user__email__icontains=query)
+                | Q(payment_intent__plan__name__icontains=query)
+                | Q(payment_intent__provider_reference__icontains=query)
+            )
+        if refund_source in {value for value, _ in Refund.Source.choices}:
+            qs = qs.filter(source=refund_source)
+        else:
+            refund_source = ""
+        refund_page = Paginator(
+            qs.order_by("-refunded_at"), 30
+        ).get_page(request.GET.get("refund_page"))
     return render(request, "admin/desk_finance.html", {
-        "query": query, "payment_status": status_filter, "tab": tab,
-        "payment_page": payment_page, "invoice_page": invoice_page,
-        "payment_counts": counts, "can_view_payments": can_pay, "can_view_invoices": can_invoice,
+        "query": query, "payment_status": status_filter, "refund_source": refund_source,
+        "tab": tab, "payment_page": payment_page, "invoice_page": invoice_page,
+        "refund_page": refund_page, "payment_counts": counts,
+        "can_view_payments": can_pay, "can_view_invoices": can_invoice,
+        "can_view_refunds": can_view_refunds,
         "payment_status_choices": PaymentIntent.Status.choices,
+        "refund_source_choices": Refund.Source.choices,
         "csv_url": reverse("ops-payments-csv") if can_pay else "",
         "desk_nav": _nav(request),
     })
