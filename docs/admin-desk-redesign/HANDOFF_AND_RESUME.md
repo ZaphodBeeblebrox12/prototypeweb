@@ -653,3 +653,48 @@ Use the existing promoted staff account (`role=user`, `is_staff=true`, `is_admin
 - Specialist role matrix, Support object-scope policy and true Django superuser verification remain Phase 0 follow-up items.
 
 **Current status:** security fixes are merged and CI-green, but they are not live in Academy staging until the owner confirms the Render workspace and the staging deploy completes. Phase 0 is not yet closed.
+
+
+## 13. Implementation continuation update — 15 November 2026
+
+**Current implementation branch:** `admin-desk-v2-implementation`  
+**Draft PR:** [#68 — TradeThesis Admin Desk V2 unified workspace](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/68)  
+**Latest recorded implementation head:** `c085fcdeb1d85dd39911b3d12683c56144780be5`  
+**Current state:** active implementation; do not merge or deploy on the basis of this update.
+
+### Additional implementation completed after the initial handoff
+
+**Growth**
+- The read-only Campaigns & Audiences register and campaign detail route are connected to the Growth overview and sidebar.
+- Campaign and audience visibility are independently permission-gated.
+- Regression tests cover generic staff denial, campaign-only visibility, audience-only visibility and campaign detail denial for audience-only staff.
+
+**Academy**
+- Added a filterable, read-only Course Catalogue over canonical Course records.
+- Added a Course Detail page showing course metadata, module/lesson outline, SEO indexability reasons, permission-gated offers, aggregate entitlements/progress and access events. Lesson bodies and instructor-only answer material are not rendered.
+- Added a read-only Offers & Access register for canonical CourseOffer records.
+- The Academy Course Catalogue and Course Detail retain the existing course-content-admin boundary. A generic staff member with only `academy.view_course` does not gain those screens.
+- Revenue-owned Plan identity, hidden status and price readiness are only loaded/rendered when the viewer has the corresponding Revenue model permissions. Commercial saleability is only derived when Plan, base-price and geo-price visibility are all granted.
+- Campaign, offer, plan, price, content, publication, payment and entitlement mutations remain in their canonical existing workflows. No second editor or financial ledger was introduced.
+
+### Added automated regression coverage
+
+The implementation test suite now covers:
+- Campaign register and campaign detail route rendering.
+- Separate campaign and audience visibility and denied campaign detail access for audience-only staff.
+- Academy Course Catalogue and Course Detail role boundary.
+- Lesson-body non-disclosure in Course Detail.
+- Offers & Access permission checks and Revenue-field redaction.
+- Distinguishing an inactive offer from whether a one-time price is configured.
+
+### Latest engineering gate
+
+At the time of this update, a fresh CI run is active against `c085fcdeb1d85dd39911b3d12683c56144780be5`. The integration-target check and Tiptap compatibility suite are green; Python 3.11/3.12 full backend suites and Django verification are still running. Do not record CI as fully green until all jobs complete on the latest PR head.
+
+### Still deferred / not authorised
+
+- The consolidated manual/browser/persona/end-to-end/accessibility campaign remains deferred until the integrated implementation is complete and separately deployed to Academy staging with approval.
+- No Academy staging, public-static staging or production deployment has been triggered by this implementation work.
+- No PR merge, branch rebase, Render configuration change or global Django Admin cutover has been performed.
+- Standalone learner-level access/progress workflows remain subject to dedicated object-scope and permission review; the current Course Detail only shows separately permission-gated aggregate summaries.
+- Tiptap remains non-default. The legacy Course Builder remains the production authoring path.
