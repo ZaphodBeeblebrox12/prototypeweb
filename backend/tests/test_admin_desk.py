@@ -2156,30 +2156,30 @@ class AdminDeskTests(TestCase):
             email="desk-policy-count-admin@example.test",
             password="test-password-123!",
         )
-        policy_types = (
+
+        # Migration 0002 seeds one active placeholder v1.0 per policy type.
+        # Reuse those immutable-version fixtures in this isolated TestCase DB
+        # rather than inserting duplicate active policy types.
+        for policy_type in (
             PolicyVersion.PolicyType.TERMS,
             PolicyVersion.PolicyType.REFUND,
-            PolicyVersion.PolicyType.CANCELLATION,
             PolicyVersion.PolicyType.RISK,
-            PolicyVersion.PolicyType.PRIVACY,
-        )
-        for policy_type in policy_types:
-            # One policy is missing entirely; one exists but is still placeholder
-            # content. The other three are complete and active.
-            if policy_type == PolicyVersion.PolicyType.CANCELLATION:
-                continue
-            content_html = "<p>Approved legal text for this policy.</p>"
-            if policy_type == PolicyVersion.PolicyType.PRIVACY:
-                content_html = "<p>Replace with approved legal content</p>"
-            PolicyVersion.objects.create(
+        ):
+            version = PolicyVersion.objects.get(
                 policy_type=policy_type,
                 version="1.0",
-                title=f"{policy_type.title()} Policy",
-                content_html=content_html,
-                status=PolicyVersion.Status.ACTIVE,
-                effective_from=timezone.now(),
             )
+            version.content_html = "<p>Approved legal text for this policy.</p>"
+            version.save(update_fields=["content_html", "content_sha256"])
 
+        missing_policy = PolicyVersion.objects.get(
+            policy_type=PolicyVersion.PolicyType.CANCELLATION,
+            version="1.0",
+        )
+        missing_policy.delete()
+
+        # Privacy remains the migration-seeded placeholder, giving exactly
+        # one missing category and one existing-but-placeholder category.
         self.client.force_login(admin)
         response = self.client.get(reverse("staff_admin_desk"))
 
