@@ -131,7 +131,7 @@
         <tbody>
           {% for plan in plans_page %}
           <tr>
-            {% if can_view_products %}<td>{% if plan.product %}{{ plan.product.name }}<span class="muted" style="display:block">{{ plan.product.slug }}</span>{% else %}<span class="muted">Ungrouped legacy plan</span>{% endif %}</td>{% endif %}
+            {% if can_view_products %}<td>{% if plan.product %}{{ plan.product.name }}<span class="muted" style="display:block">{{ plan.product.slug }}</span><span class="muted" style="display:block">Product {% if plan.product.is_active %}active{% else %}inactive{% endif %}</span>{% else %}<span class="muted">Ungrouped legacy plan</span>{% endif %}</td>{% endif %}
             <td><strong><a href="{% url 'staff_admin_desk_plan_detail' plan.pk %}">{{ plan.name }}</a></strong><span class="muted" style="display:block">{{ plan.description|truncatechars:110 }}</span></td>
             <td>{{ plan.get_tier_display }}</td>
             <td>{% if plan.is_hidden %}<span class="pill alert">Hidden</span>{% elif plan.is_active %}<span class="pill">Active</span>{% else %}<span class="pill alert">Inactive</span>{% endif %}</td>
