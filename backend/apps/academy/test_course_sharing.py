@@ -31,6 +31,7 @@ class CourseShareCopyTests(TestCase):
         course = Course.objects.create(
             title="Candlestick Patterns",
             slug="candlestick-patterns",
+            share_message=DEFAULT_SHARE_MESSAGE,
             status=Course.Status.PUBLISHED,
             catalogue_role=Course.CatalogueRole.MINI,
         )
