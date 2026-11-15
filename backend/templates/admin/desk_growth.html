@@ -56,7 +56,7 @@
     <section class="panel" aria-labelledby="growth-purchase-heading">
       <div class="panel-head">
         <div><h2 id="growth-purchase-heading">Purchase activity</h2><p>Recorded purchase.completed events · last {{ purchase_report.period_days }} days</p></div>
-        <a href="{{ events_url }}">Event register ↗</a>
+        {% if events_url %}<a href="{{ events_url }}">Event register ↗</a>{% else %}<span class="muted">Register access requires its model permission</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="stats" style="grid-template-columns:minmax(0,1fr)">
@@ -81,7 +81,7 @@
     <section class="panel" aria-labelledby="growth-email-heading">
       <div class="panel-head">
         <div><h2 id="growth-email-heading">Email delivery</h2><p>Stored Delivery states · last {{ email_report.period_days }} days</p></div>
-        <a href="{{ email_url }}">Delivery register ↗</a>
+        {% if email_url %}<a href="{{ email_url }}">Delivery register ↗</a>{% else %}<span class="muted">Register access requires its model permission</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="stats">
@@ -100,7 +100,7 @@
     <section class="panel" aria-labelledby="growth-campaign-heading">
       <div class="panel-head">
         <div><h2 id="growth-campaign-heading">Campaign performance</h2><p>Stored counters · current send sweep uses a stub provider</p></div>
-        <a href="{{ campaign_url }}">Campaign register ↗</a>
+        {% if campaign_url %}<a href="{{ campaign_url }}">Campaign register ↗</a>{% else %}<span class="muted">Register access requires its model permission</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="table-wrap" style="margin-top:0">
@@ -121,7 +121,7 @@
     <section class="panel" aria-labelledby="growth-promotion-heading">
       <div class="panel-head">
         <div><h2 id="growth-promotion-heading">Coupon redemptions</h2><p>Recorded redemption aggregates</p></div>
-        <a href="{{ promotion_url }}">Redemption register ↗</a>
+        {% if promotion_url %}<a href="{{ promotion_url }}">Redemption register ↗</a>{% else %}<span class="muted">Register access requires its model permission</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="table-wrap" style="margin-top:0">
@@ -158,7 +158,7 @@
     <section class="panel" aria-labelledby="growth-gift-heading">
       <div class="panel-head">
         <div><h2 id="growth-gift-heading">Gift invites</h2><p>Persisted invitation states</p></div>
-        <a href="{{ gift_summary.url }}">Gift register ↗</a>
+        {% if gift_summary.url %}<a href="{{ gift_summary.url }}">Gift register ↗</a>{% else %}<span class="muted">Register access requires its model permission</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="stats">
@@ -181,9 +181,9 @@
       <div class="workflow-links">
         {% if can_view_referrals %}<a class="workflow-link" href="{{ referrals_url }}">Referrals &amp; Rewards →</a>{% endif %}
         {% if can_send_gifts %}<a class="workflow-link" href="/admin/growth/send-gift/">Send a gift →</a>{% endif %}
-        {% if can_view_campaigns %}<a class="workflow-link" href="{{ campaign_url }}">Campaigns ↗</a>{% endif %}
-        {% if can_view_email %}<a class="workflow-link" href="{{ email_url }}">Email delivery ↗</a>{% endif %}
-        {% if can_view_promotions %}<a class="workflow-link" href="{{ promotion_url }}">Coupon redemptions ↗</a>{% endif %}
+        {% if campaign_url %}<a class="workflow-link" href="{{ campaign_url }}">Campaigns ↗</a>{% endif %}
+        {% if email_url %}<a class="workflow-link" href="{{ email_url }}">Email delivery ↗</a>{% endif %}
+        {% if promotion_url %}<a class="workflow-link" href="{{ promotion_url }}">Coupon redemptions ↗</a>{% endif %}
       </div>
       <p class="note">Mutations continue through the owning Growth, Campaigns, Emailing and Promotions services. This overview does not create gifts, edit rewards or send communications.</p>
     </div>
