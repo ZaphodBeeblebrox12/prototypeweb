@@ -7,6 +7,17 @@ DEFAULT_SHARE_MESSAGE = (
     "TradeThesis — Conviction before Execution."
 )
 
+# Tailored fallback invitations for courses whose subject benefits from a
+# more specific introduction. An editor-authored Course.share_message still
+# takes precedence, so copy can be managed from the course itself later.
+COURSE_SHARE_MESSAGE_OVERRIDES = {
+    "candlestick-patterns": (
+        "Most traders see a green or red candle and stop there. This course shows "
+        "you the story inside it: who is in control, who is losing ground, and "
+        "what that means for your next entry."
+    ),
+}
+
 
 def course_share_title(course):
     return str(getattr(course, "share_title", "") or "").strip() or str(course.title)
@@ -15,7 +26,9 @@ def course_share_title(course):
 def course_share_message(course):
     title = str(course.title)
     authored = str(getattr(course, "share_message", "") or "").strip()
-    return (authored or DEFAULT_SHARE_MESSAGE).replace("{course_title}", title).strip()
+    override = COURSE_SHARE_MESSAGE_OVERRIDES.get(str(getattr(course, "slug", "") or ""))
+    message = authored or override or DEFAULT_SHARE_MESSAGE
+    return message.replace("{course_title}", title).strip()
 
 
 def course_share_description(course):
