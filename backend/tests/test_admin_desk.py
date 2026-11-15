@@ -616,6 +616,154 @@ class AdminDeskTests(TestCase):
             admin_dispute_workspace.status_code, 200, admin_dispute_workspace.content
         )
 
+    def test_finance_refund_ledger_is_read_only_and_permission_scoped(self):
+        from django.contrib.auth.models import Permission
+        from apps.payments.models import PaymentIntent, Refund
+        from apps.subscriptions.models import Plan
+
+        member = User.objects.create_user(
+            username="refund-ledger-member",
+            email="refund-ledger-member@example.test",
+        )
+        plan = Plan.objects.create(
+            name="Refund ledger plan",
+            tier=Plan.Tier.BASIC,
+        )
+        payment = PaymentIntent.objects.create(
+            user=member,
+            plan=plan,
+            provider=PaymentIntent.Provider.STRIPE,
+            amount=459900,
+            currency="INR",
+            status=PaymentIntent.Status.SUCCESS,
+        )
+        provider_refund_id = "rf_private_refund_reference_9381"
+        private_metadata = "refund-metadata-must-not-render"
+        refund = Refund.objects.create(
+            payment_intent=payment,
+            provider=PaymentIntent.Provider.STRIPE,
+            provider_refund_id=provider_refund_id,
+            amount_cents=129900,
+            currency="INR",
+            source=Refund.Source.WEBHOOK,
+            commercial_context=Refund.CommercialContext.STANDARD,
+            refunded_at=timezone.now(),
+            metadata={"private_payload": private_metadata},
+        )
+
+        unprivileged = User.objects.create_user(
+            username="refund-ledger-unprivileged",
+            email="refund-ledger-unprivileged@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(unprivileged)
+        denied = self.client.get(
+            reverse("staff_admin_desk_finance"),
+            {"tab": "refunds", "q": member.username},
+        )
+        self.assertEqual(denied.status_code, 403)
+
+        refund_operator = User.objects.create_user(
+            username="refund-ledger-operator",
+            email="refund-ledger-operator@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=refund_operator,
+            email=refund_operator.email,
+            verified=True,
+            primary=True,
+        )
+        refund_permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_refund",
+        )
+        refund_operator.user_permissions.add(refund_permission)
+        self.client.force_login(refund_operator)
+
+        response = self.client.get(reverse("staff_admin_desk_finance"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["tab"], "refunds")
+        self.assertTrue(response.context["can_view_refunds"])
+        self.assertFalse(response.context["can_view_payments"])
+        self.assertFalse(response.context["can_view_invoices"])
+        self.assertEqual(
+            list(response.context["refund_page"].object_list.values_list("pk", flat=True)),
+            [refund.pk],
+        )
+        self.assertContains(response, member.username)
+        self.assertContains(response, "Refund ledger plan")
+        self.assertContains(response, "Stripe")
+        self.assertContains(response, "INR 1,299.00")
+        self.assertContains(response, "Webhook")
+        self.assertContains(response, "Standard paid plan")
+        self.assertNotContains(response, provider_refund_id)
+        self.assertNotContains(response, private_metadata)
+        self.assertNotContains(response, "Initiate refund")
+        self.assertEqual(Refund.objects.count(), 1)
+
+        search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(search.status_code, 200, search.content)
+        self.assertEqual(len(search.context["search_groups"]), 1)
+        results = search.context["search_groups"][0]["results"]
+        self.assertEqual(search.context["search_groups"][0]["name"], "Revenue")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["kind"], "Refund record")
+        self.assertIn(member.username, results[0]["title"])
+        self.assertIn("Standard paid plan", results[0]["detail"])
+        self.assertIn("INR 1,299.00", results[0]["detail"])
+        self.assertEqual(
+            results[0]["url"],
+            reverse("staff_admin_desk_finance")
+            + f"?q={member.username}&tab=refunds",
+        )
+        self.assertNotIn(provider_refund_id, str(results))
+        self.assertNotIn(private_metadata, str(results))
+
+        payment_operator = User.objects.create_user(
+            username="payment-only-operator",
+            email="payment-only-operator@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=payment_operator,
+            email=payment_operator.email,
+            verified=True,
+            primary=True,
+        )
+        payment_permission = Permission.objects.get(
+            content_type__app_label="payments",
+            codename="view_paymentintent",
+        )
+        payment_operator.user_permissions.add(payment_permission)
+        self.client.force_login(payment_operator)
+
+        payment_only_response = self.client.get(
+            reverse("staff_admin_desk_finance"),
+            {"tab": "refunds"},
+        )
+        self.assertEqual(payment_only_response.status_code, 200)
+        self.assertEqual(payment_only_response.context["tab"], "payments")
+        self.assertFalse(payment_only_response.context["can_view_refunds"])
+        self.assertNotContains(payment_only_response, "href=\"?tab=refunds")
+
+        payment_only_search = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": member.username},
+        )
+        self.assertEqual(payment_only_search.status_code, 200)
+        payment_results = [
+            result
+            for group in payment_only_search.context["search_groups"]
+            for result in group["results"]
+        ]
+        self.assertNotIn("Refund record", [result["kind"] for result in payment_results])
+        self.assertNotIn(provider_refund_id, str(payment_results))
+        self.assertNotIn(private_metadata, str(payment_results))
+
     def test_platform_webhook_summary_omits_provider_ids_payloads_and_errors(self):
         from django.contrib.auth.models import Permission
         from apps.payments.models import WebhookEvent
