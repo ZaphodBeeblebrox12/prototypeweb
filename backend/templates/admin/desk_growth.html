@@ -171,7 +171,14 @@
     {% endif %}
   </div>
   {% else %}
-  <div class="empty-access">No Growth reporting panels are available for the permissions assigned to this account.</div>
+  <div class="empty-access">
+    {% if can_view_audiences %}
+    No reporting panels are enabled by your current Growth permissions. You can still inspect reusable audiences and campaign snapshots in the
+    <a href="{{ campaign_workspace_url }}">Campaigns &amp; Audiences workspace →</a>
+    {% else %}
+    No Growth reporting panels are available for the permissions assigned to this account.
+    {% endif %}
+  </div>
   {% endif %}
 
   {% if can_view_referrals or can_send_gifts or can_view_campaigns or can_view_email or can_view_promotions %}
