@@ -445,6 +445,69 @@ class AdminDeskTests(TestCase):
         self.assertTrue(audience_growth_response.context["can_view_audiences"])
         self.assertContains(audience_growth_response, "Campaigns &amp; Audiences workspace")
 
+    def test_academy_course_offers_register_respects_domain_permissions(self):
+        from django.contrib.auth.models import Permission
+
+        from apps.academy.models import CourseOffer
+
+        course = Course.objects.create(
+            title="Offers Register Course",
+            slug="offers-register-course",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.PAID,
+        )
+        offer = CourseOffer.objects.create(
+            course=course,
+            name="Offers Register Offer",
+            slug="offers-register-offer",
+            is_active=False,
+        )
+
+        owner = User.objects.create_user(
+            username="academy-offers-content-admin",
+            email="academy-offers-content-admin@example.test",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(owner)
+        response = self.client.get(reverse("staff_admin_desk_course_offers"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Offers Register Course")
+        self.assertContains(response, "Offers Register Offer")
+        self.assertContains(response, "Inactive")
+        self.assertTrue(response.context["can_open_course_detail"])
+
+        limited = User.objects.create_user(
+            username="academy-offers-limited-staff",
+            email="academy-offers-limited-staff@example.test",
+            is_staff=True,
+        )
+        limited.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_course"
+            ),
+            Permission.objects.get(
+                content_type__app_label="academy", codename="view_courseoffer"
+            ),
+        )
+        self.client.force_login(limited)
+        limited_response = self.client.get(reverse("staff_admin_desk_course_offers"))
+        self.assertEqual(limited_response.status_code, 200, limited_response.content)
+        self.assertContains(limited_response, "Offers Register Offer")
+        self.assertFalse(limited_response.context["can_open_course_detail"])
+        self.assertNotContains(limited_response, reverse(
+            "staff_admin_desk_course_detail", args=[course.pk]
+        ))
+
+        denied = User.objects.create_user(
+            username="academy-offers-no-grant",
+            email="academy-offers-no-grant@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(denied)
+        denied_response = self.client.get(reverse("staff_admin_desk_course_offers"))
+        self.assertEqual(denied_response.status_code, 403)
+
     def test_academy_catalogue_and_course_detail_use_content_admin_boundary(self):
         from django.contrib.auth.models import Permission
 
