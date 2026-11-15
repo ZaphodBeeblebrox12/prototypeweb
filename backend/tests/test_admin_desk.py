@@ -433,6 +433,10 @@ class AdminDeskTests(TestCase):
         self.assertContains(audience_response, "Audience-only description")
         self.assertNotContains(audience_response, "Restricted Campaign Name")
         self.assertContains(audience_response, "Campaigns &amp; Audiences")
+        audience_detail_response = self.client.get(
+            reverse("staff_admin_desk_campaign_detail", args=[campaign.pk])
+        )
+        self.assertEqual(audience_detail_response.status_code, 403)
 
         audience_growth_response = self.client.get(reverse("staff_admin_desk_growth"))
         self.assertEqual(
