@@ -2843,6 +2843,44 @@ def admin_desk_search(request):
                     subscriptions_url,
                 )
 
+        can_view_disputes = bool(
+            request.user.is_superuser
+            or getattr(request.user, "role", None) == "admin"
+            or _allowed(request.user, "disputes.view_dispute")
+        )
+        if can_view_disputes:
+            from apps.disputes.models import Dispute
+
+            disputes = Dispute.objects.filter(
+                Q(provider_dispute_id__icontains=query)
+                | Q(payment_intent__user__username__icontains=query)
+            ).select_related(
+                "payment_intent", "payment_intent__user"
+            ).only(
+                "provider", "reason_category", "amount_cents", "currency",
+                "status", "opened_at", "payment_intent__user__username",
+            ).order_by("-opened_at")[:5]
+            dispute_url = (
+                reverse("admin:disputes_dispute_changelist")
+                + "?"
+                + urlencode({"q": query})
+            )
+            for dispute in disputes:
+                add_result(
+                    "Revenue",
+                    "Dispute",
+                    (
+                        f"{dispute.payment_intent.user.username} · "
+                        f"{dispute.get_provider_display()}"
+                    ),
+                    (
+                        f"{dispute.get_reason_category_display()} · "
+                        f"{dispute.get_status_display()} · "
+                        f"{dispute.currency} {dispute.amount_cents / 100:,.2f}"
+                    ),
+                    dispute_url,
+                )
+
         if _allowed(request.user, "campaigns.view_campaign"):
             from apps.campaigns.models import Campaign
 
