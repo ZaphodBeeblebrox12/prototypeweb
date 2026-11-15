@@ -115,8 +115,8 @@
       <div class="panel-head"><div><h2 id="seo-heading">SEO &amp; discoverability</h2><p>Same indexability rules as the SEO inventory</p></div><span class="pill{% if seo_indexable %} good{% else %} bad{% endif %}">{% if seo_indexable %}Indexable{% else %}Blocked{% endif %}</span></div>
       <div class="panel-body">
         <div class="facts">
-          <div class="fact"><span>Effective title</span><strong>{{ course.seo_title|default:course.title }}</strong></div>
-          <div class="fact"><span>Search description</span><strong>{{ course.seo_description|default:course.summary|default:"Missing" }}</strong></div>
+          <div class="fact"><span>Effective title</span><strong>{% if course.seo_title %}{{ course.seo_title }}{% else %}{{ course.title }} · TradeThesis Academy{% endif %}</strong></div>
+          <div class="fact"><span>Search description</span><strong>{% if course.seo_description %}{{ course.seo_description }}{% elif course.summary %}{{ course.summary }}{% elif course.description %}{{ course.description|truncatechars:260 }}{% else %}Missing{% endif %}</strong></div>
           <div class="fact"><span>Primary topic</span><strong>{{ course.seo_primary_topic|default:"Not recorded" }}</strong></div>
           <div class="fact"><span>Course indexing flag</span><strong>{% if course.seo_indexable %}Enabled{% else %}Disabled{% endif %}</strong></div>
           <div class="fact"><span>Global indexing</span><strong>{% if global_indexing_enabled %}Enabled{% else %}Disabled{% endif %}</strong></div>
@@ -141,6 +141,7 @@
         </div>
         <span class="muted">Access duration: {% if row.offer.access_duration_days %}{{ row.offer.access_duration_days }} days{% else %}Permanent{% endif %}</span>
         {% if row.offer.plan_id %}
+          {% if row.readiness.price_ready %}<span class="pill good">One-time price configured</span>{% else %}<span class="pill warn">No active one-time price</span>{% endif %}
           {% if row.plan_visible %}
           <p class="note">Revenue Plan: {% if row.plan_url %}<a href="{{ row.plan_url }}">{{ row.offer.plan.name }} ↗</a>{% else %}{{ row.offer.plan.name }}{% endif %} · {% if row.offer.plan.is_hidden %}Hidden{% else %}Not hidden{% endif %}</p>
           {% else %}<p class="note">A linked Revenue Plan exists; Plan details are hidden by the current Revenue permissions.</p>{% endif %}
@@ -155,7 +156,7 @@
   </section>
   {% endif %}
 
-  {% if entitlement_summary or progress_summary %}
+  {% if entitlement_summary or progress_summary or membership_rows %}
   <section class="panel" aria-labelledby="learner-activity-heading">
     <div class="panel-head"><div><h2 id="learner-activity-heading">Learner access &amp; progress</h2><p>Separate source records · no access or progress mutation is available here</p></div></div>
     <div class="panel-body">
