@@ -769,3 +769,39 @@ Do not treat post-merge CI as green until both workflows complete on merge commi
 - Continue preserving legacy Course Builder as the production authoring path; Tiptap remains non-default.
 - Learner-level Access & Progress M09 remains deferred for dedicated object-scope/permission review.
 - Do not globally restrict Django Admin until workflow parity and cutover are separately approved.
+
+
+## 16. Post-merge CI green; Academy staging deploy awaits workspace confirmation — 15 November 2026
+
+**Merged integration branch HEAD:** `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`
+
+### Post-merge CI result
+
+Both workflows completed successfully on the merge commit:
+
+- Academy backend CI [run 43688949572](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43688949572): Python 3.11 and 3.12 passed; Tiptap compatibility passed.
+- Django verification [run 43688949570](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43688949570): Python 3.11 and 3.12 passed.
+- Each Python job reported 1,363 passed, 1 skipped and 197 subtests passed.
+
+### Academy staging target — verified, not yet deployed
+
+- Render service: `tradethesis-academy-staging`
+- Service ID: `srv-db9ioke1egvs73feb8ag`
+- URL: https://tradethesis-academy-staging.onrender.com
+- Configured branch: `my-new-branch`
+- Auto-deploy: off (`autoDeployTrigger=off`), so a manual deploy is required after workspace confirmation.
+- Current live deployment: `dep-dbsa69m7bikc73f1opg0`, commit `294c173e8dd084c31595ac2d5aeab93d64f31481` (security-only baseline).
+- Desired merged commit: `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`.
+
+Render lists one workspace:
+- Name: `Roger Rose's Workspace`
+- ID: `tea-cspa923gbbvc73bakhj0`
+
+The previous owner instruction explicitly required confirmation of this exact workspace before using it. The owner has authorised a staging deploy in the current chat, but has not yet explicitly confirmed the workspace. **Do not trigger the deploy until that exact workspace is confirmed.** Then trigger only the existing Academy staging service, with `clearCache=false`, and verify the live deploy SHA is the merge commit above. Do not deploy public-static staging or production.
+
+### Next steps after workspace confirmation
+
+1. Trigger the manual deploy to `tradethesis-academy-staging` using the confirmed workspace ID.
+2. Poll the deploy until terminal/live and verify commit SHA.
+3. Smoke-test the deployed Admin Desk with approved personas and run the consolidated manual/browser/persona/permissions/workflow/accessibility acceptance plan.
+4. Record evidence, issues and remediation before any production release.
