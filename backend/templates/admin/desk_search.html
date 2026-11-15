@@ -54,7 +54,7 @@
 
   <form class="search-form" method="get" action="{% url 'staff_admin_desk_search' %}" role="search">
     <label class="sr-only" for="ttDeskSearchQuery">Search records</label>
-    <input id="ttDeskSearchQuery" type="search" name="q" value="{{ query }}" minlength="2" maxlength="120" placeholder="Search a learner, ticket, course, payment, refund, dispute or job…" autocomplete="off" autofocus>
+    <input id="ttDeskSearchQuery" type="search" name="q" value="{{ query }}" minlength="2" maxlength="120" placeholder="Search a learner, ticket, course, plan, payment, refund, dispute or job…" autocomplete="off" autofocus>
     <button type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
   </form>
 
