@@ -2149,6 +2149,7 @@ def _nav(request):
         "subscriptions": _allowed(request.user, "subscriptions.view_subscription"),
         "finance": (
             _allowed(request.user, "payments.view_paymentintent")
+            or _allowed(request.user, "payments.view_refund")
             or _allowed(request.user, "payments.view_invoice")
         ),
         "business": business_allowed,
