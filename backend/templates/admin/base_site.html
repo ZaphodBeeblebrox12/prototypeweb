@@ -18,6 +18,9 @@
 {% endblock %}
 {% block extrahead %}
   {{ block.super }}
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ public_site_url }}/assets/tradethesis-icon.png?v=20261115-dashboard-r1">
+  <link rel="shortcut icon" type="image/png" href="{{ public_site_url }}/assets/tradethesis-icon.png?v=20261115-dashboard-r1">
+  <link rel="apple-touch-icon" href="{{ public_site_url }}/assets/tradethesis-icon.png?v=20261115-dashboard-r1">
   <script src="{% static 'js/sitewide-nav.js' %}" defer></script>
 {% endblock %}
 {% block header %}
