@@ -8,34 +8,49 @@
 {% block content %}
 <div class="container py-4" style="max-width:980px">
   <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
-    <div><p class="text-uppercase text-muted small mb-1">TradeThesis / Academy</p><h1 class="mb-1">Your learning room</h1><p class="text-muted mb-0">Pick up where you left off, or choose your next course.</p></div>
+    <div>
+      <p class="text-uppercase text-muted small mb-1">TradeThesis / Academy</p>
+      <h1 class="mb-1">Your learning room</h1>
+      <p class="text-muted mb-0">Your enrolled courses, progress and next lessons live here.</p>
+    </div>
+    <a class="btn btn-primary" href="{{ public_site_url }}/courses.html">Browse course catalogue ↗</a>
   </div>
+
   <h2 class="h4 mb-3">My courses</h2>
   {% if course_cards %}
-    <div class="row g-3 mb-5">
+    <div class="row g-3">
       {% for item in course_cards %}
         <div class="col-12 col-md-6">
-          <article class="card h-100"><div class="card-body">
-            <p class="text-uppercase small text-muted mb-2">{% if item.has_access %}Enrolled{% else %}Course overview{% endif %}</p>
-            <h3 class="h5">{{ item.course.title }}</h3>
-            <p class="text-muted">{{ item.course.summary }}</p>
-            {% if item.has_access %}<p class="small mb-2">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</p><div class="progress mb-3" role="progressbar" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ item.progress_percent }}%"></div></div>{% endif %}
-            {% if item.resume_lesson %}<a class="btn btn-primary" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.has_access %}Continue learning{% else %}Open preview lesson{% endif %} ↗</a>{% else %}<a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.has_access %}Review course{% else %}Explore course{% endif %} ↗</a>{% endif %}
-          </div></article>
+          <article class="card h-100">
+            <div class="card-body">
+              <p class="text-uppercase small text-muted mb-2">Enrolled</p>
+              <h3 class="h5">{{ item.course.title }}</h3>
+              <p class="text-muted">{{ item.course.summary }}</p>
+              <p class="small mb-2">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</p>
+              <div class="progress mb-3" role="progressbar" aria-label="{{ item.course.title }} progress" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" style="width:{{ item.progress_percent }}%"></div>
+              </div>
+              {% if item.resume_lesson %}
+                <a class="btn btn-primary" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">Continue learning ↗</a>
+              {% else %}
+                <a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">Review course ↗</a>
+              {% endif %}
+            </div>
+          </article>
         </div>
       {% endfor %}
     </div>
-  {% else %}<p class="text-muted mb-5">Your courses will appear here after you enrol.</p>{% endif %}
-
-  {% if offers %}
-    <h2 class="h4 mb-3">Available courses</h2>
-    <div class="row g-3">
-      {% for offer in offers %}
-        <div class="col-12 col-md-6"><article class="card h-100"><div class="card-body">
-          <p class="text-uppercase small text-muted mb-2">Course</p><h3 class="h5">{{ offer.name }}</h3><p class="text-muted">{{ offer.course.summary }}</p><a class="btn btn-outline-primary" href="{% url 'academy:course-detail' offer.course.slug %}">View course</a>
-        </div></article></div>
-      {% endfor %}
-    </div>
+  {% else %}
+    <article class="card">
+      <div class="card-body py-5 text-center">
+        <p class="text-uppercase small text-muted mb-2">Your library is ready</p>
+        <h3 class="h4" id="learning-empty-title">No enrolled courses yet</h3>
+        <p class="text-muted mx-auto mb-4" style="max-width:520px">
+          When you enrol or receive course access, it will appear here with your progress and a link to continue learning. Browse the catalogue to find your next course.
+        </p>
+        <a class="btn btn-primary" href="{{ public_site_url }}/courses.html">Explore available courses ↗</a>
+      </div>
+    </article>
   {% endif %}
 </div>
 {% endblock %}
