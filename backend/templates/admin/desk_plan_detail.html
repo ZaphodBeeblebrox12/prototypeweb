@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}{{ plan.name }} | Plans &amp; Pricing | TradeThesis{% endblock %}
+{% block page_title %}Plan details{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-plan-detail{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--line-soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1280px;margin:4px auto 36px;color:var(--ink)}
+  .tt-plan-detail *{box-sizing:border-box}
+  .tt-plan-detail a{color:#315b43;text-underline-offset:3px}
+  .tt-plan-detail .head{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;flex-wrap:wrap;margin:4px 0 18px}
+  .tt-plan-detail .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-plan-detail h1{margin:0;font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-plan-detail .intro{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+  .tt-plan-detail .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-plan-detail .button{display:inline-flex;min-height:34px;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:4px;background:#fffefa;color:#315b43;font-size:10px;font-weight:750;text-decoration:none}
+  .tt-plan-detail .button.primary{background:#456653;border-color:#456653;color:#fff}
+  .tt-plan-detail .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tt-plan-detail .panel{min-width:0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-plan-detail .panel.full{grid-column:1/-1}
+  .tt-plan-detail .panel-head{padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tt-plan-detail .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-plan-detail .panel-body{padding:13px 14px}
+  .tt-plan-detail .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .tt-plan-detail .fact{min-width:0;padding-bottom:9px;border-bottom:1px solid var(--line-soft)}
+  .tt-plan-detail .fact span{display:block;color:var(--muted);font-size:9px}
+  .tt-plan-detail .fact strong{display:block;margin-top:4px;font-size:12px;overflow-wrap:anywhere}
+  .tt-plan-detail .muted{color:var(--muted);font-size:10px;line-height:1.5}
+  .tt-plan-detail table{width:100%;border-collapse:collapse}
+  .tt-plan-detail th,.tt-plan-detail td{padding:9px 8px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top;font-size:10px}
+  .tt-plan-detail th{color:#738078;font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+  .tt-plan-detail tr:last-child td{border-bottom:0}
+  .tt-plan-detail .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:9px;font-weight:750}
+  .tt-plan-detail .pill.alert{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-plan-detail .notice{margin:0;padding:11px 13px;border-left:3px solid var(--terracotta);background:#fbf5ef;color:#65574e;font-size:10px;line-height:1.55}
+  .tt-plan-detail ul{margin:0;padding-left:18px}
+  .tt-plan-detail li{margin:0 0 7px;font-size:11px;line-height:1.5}
+  .tt-plan-detail .empty{color:var(--muted);font-size:11px}
+  @media(max-width:780px){.tt-plan-detail .grid{grid-template-columns:1fr}.tt-plan-detail .panel.full{grid-column:auto}}
+  @media(max-width:600px){.tt-plan-detail h1{font-size:26px}.tt-plan-detail .facts{grid-template-columns:1fr}.tt-plan-detail .actions{width:100%}.tt-plan-detail .button{flex:1;justify-content:center}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-plan-detail">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Revenue / Plans &amp; Pricing / Record</p>
+      <h1>{{ plan.name }}</h1>
+      <p class="intro">{% if product %}{{ product.name }} · {% endif %}{{ plan.get_tier_display }} plan · canonical configuration record</p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{{ plans_url }}">All plans</a>
+      {% if can_view_subscriptions %}<a class="button" href="{{ subscriptions_url }}">Subscriptions</a>{% endif %}
+      {% if can_open_advanced_admin %}<a class="button primary" href="{{ advanced_admin_url }}">Advanced Administration ↗</a>{% endif %}
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="plan-identity-heading">
+      <div class="panel-head"><h2 id="plan-identity-heading">Plan configuration</h2></div>
+      <div class="panel-body">
+        <div class="facts">
+          <div class="fact"><span>Tier</span><strong>{{ plan.get_tier_display }}</strong></div>
+          <div class="fact"><span>Availability</span><strong>{% if plan.is_hidden %}<span class="pill alert">Hidden / invite-only</span>{% elif plan.is_active %}<span class="pill">Active</span>{% else %}<span class="pill alert">Inactive</span>{% endif %}</strong></div>
+          <div class="fact"><span>Plan type</span><strong>{% if plan.is_trial %}Trial · {{ plan.trial_duration_days|default:"—" }} days{% else %}Standard{% endif %}</strong></div>
+          <div class="fact"><span>Display order</span><strong>{{ plan.display_order }}</strong></div>
+          <div class="fact"><span>Max projects</span><strong>{{ plan.max_projects }}</strong></div>
+          <div class="fact"><span>Storage</span><strong>{{ plan.max_storage_mb }} MB</strong></div>
+          <div class="fact"><span>API calls / day</span><strong>{{ plan.api_calls_per_day }}</strong></div>
+          {% if plan.is_hidden %}
+          <div class="fact"><span>Grant duration</span><strong>{% if plan.grant_duration_days %}{{ plan.grant_duration_days }} days{% else %}No expiry configured{% endif %}</strong></div>
+          <div class="fact"><span>Access notice channel</span><strong>{{ plan.get_notice_channel_display }}</strong></div>
+          {% endif %}
+        </div>
+        {% if plan.description %}<p class="muted" style="margin:12px 0 0">{{ plan.description }}</p>{% endif %}
+      </div>
+    </section>
+
+    {% if can_view_product %}
+    <section class="panel" aria-labelledby="plan-product-heading">
+      <div class="panel-head"><h2 id="plan-product-heading">Product relationship</h2></div>
+      <div class="panel-body">
+        {% if product %}
+        <div class="facts">
+          <div class="fact"><span>Product</span><strong>{{ product.name }}</strong></div>
+          <div class="fact"><span>Slug</span><strong>{{ product.slug }}</strong></div>
+          <div class="fact"><span>Product state</span><strong>{% if product.is_active %}Active{% else %}Inactive{% endif %}</strong></div>
+          <div class="fact"><span>Display order</span><strong>{{ product.display_order }}</strong></div>
+        </div>
+        {% if product.description %}<p class="muted" style="margin:12px 0 0">{{ product.description }}</p>{% endif %}
+        {% else %}
+        <p class="empty">This plan is ungrouped and uses the legacy global plan hierarchy.</p>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_base_prices %}
+    <section class="panel" aria-labelledby="base-price-heading">
+      <div class="panel-head"><h2 id="base-price-heading">Global base prices</h2></div>
+      <div class="panel-body">
+        {% if base_prices %}
+        <table><thead><tr><th>Interval</th><th>Price</th><th>State</th></tr></thead><tbody>
+          {% for price in base_prices %}<tr><td>{{ price.interval }}</td><td><strong>{{ price.amount }}</strong></td><td>{% if price.active %}<span class="pill">Active</span>{% else %}<span class="pill alert">Inactive</span>{% endif %}</td></tr>{% endfor %}
+        </tbody></table>
+        {% else %}<p class="empty">No global base-price rows are recorded for this plan.</p>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_geo_prices %}
+    <section class="panel" aria-labelledby="geo-price-heading">
+      <div class="panel-head"><h2 id="geo-price-heading">Geo price overrides</h2></div>
+      <div class="panel-body">
+        {% if geo_prices %}
+        <table><thead><tr><th>Interval</th><th>Market scope</th><th>Price</th><th>State</th></tr></thead><tbody>
+          {% for price in geo_prices %}<tr><td>{{ price.interval }}</td><td>{{ price.target }}</td><td><strong>{{ price.amount }}</strong></td><td>{% if price.active %}<span class="pill">Active</span>{% else %}<span class="pill alert">Inactive</span>{% endif %}</td></tr>{% endfor %}
+        </tbody></table>
+        {% else %}<p class="empty">No geo override rows are recorded for this plan.</p>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_features %}
+    <section class="panel" aria-labelledby="plan-features-heading">
+      <div class="panel-head"><h2 id="plan-features-heading">Plan feature bullets</h2></div>
+      <div class="panel-body">
+        {% if features %}<ul>{% for feature in features %}<li>{{ feature.text }}</li>{% endfor %}</ul>
+        {% else %}<p class="empty">No PlanFeature rows are recorded. Public catalogue fallback behaviour is separate from this stored feature list.</p>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_view_channel_mappings %}
+    <section class="panel" aria-labelledby="plan-mappings-heading">
+      <div class="panel-head"><h2 id="plan-mappings-heading">Community channel mappings</h2></div>
+      <div class="panel-body">
+        {% if channel_mappings %}
+        <table><thead><tr><th>Platform</th><th>Configured target</th></tr></thead><tbody>
+          {% for mapping in channel_mappings %}<tr><td>{{ mapping.platform }}</td><td>{{ mapping.name }}</td></tr>{% endfor %}
+        </tbody></table>
+        <p class="muted" style="margin:10px 0 0">External channel and role identifiers are omitted from this general workspace.</p>
+        {% else %}<p class="empty">No direct channel mappings are recorded for this plan.</p>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="panel full" aria-labelledby="plan-pricing-resolution-heading">
+      <div class="panel-head"><h2 id="plan-pricing-resolution-heading">How checkout resolves a price</h2></div>
+      <div class="panel-body">
+        <p class="notice">For the requested country and billing interval, checkout checks an active country-specific GeoPlanPrice first. If none matches, it checks the active region override with a null country. It then falls back to the active global PlanPrice. A missing matching record is not a zero-price sale; checkout reports that no active price exists.</p>
+        <p class="muted" style="margin:10px 0 0">This page lists stored configuration only. It does not infer a visitor country, execute checkout resolution, or certify a provider price as tested.</p>
+      </div>
+    </section>
+
+    <section class="panel full" aria-labelledby="plan-boundary-heading">
+      <div class="panel-head"><h2 id="plan-boundary-heading">Administration boundary</h2></div>
+      <div class="panel-body">
+        <p class="muted" style="margin:0">This page does not edit Products, Plans, prices, feature bullets, trial settings or community mappings. Historical PaymentIntent and Subscription price snapshots are not changed by future catalogue edits. Use the existing Advanced Administration workflow for configuration changes.</p>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
