@@ -510,6 +510,7 @@
   background: var(--tt-desk-paper);
 }
 .sitewide-header--admin-desk .wrap.nav {
+  width: min(1800px, 100%);
   min-height: 68px;
   padding-top: 8px;
   padding-bottom: 8px;
