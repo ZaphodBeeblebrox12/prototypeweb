@@ -27,8 +27,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .purchase-section-total,.purchase-detail-list>div{font-size:11px}.purchase-card>p,.subscription-copy p,.bill-period,.plan-description{font-size:13px;line-height:1.6}
 .purchase-category{font-size:10px}.access-pill,.status-chip{font-size:10px}.learning-copy p{font-size:13px;line-height:1.6}.learning-meta{font-size:12px}.course-access-state{font-size:10px}
 .account-fact{font-size:13px}.account-fact strong{font-size:13px}.field,.field label{font-size:13px}.panel-head p{font-size:13px}
-@media(max-width:900px){.content{padding:25px 20px 42px}.member-section-nav{gap:7px}.overview-masthead{grid-template-columns:minmax(0,1fr)}.no-purchase-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){body{background-attachment:scroll}.content{padding:21px 16px 34px}.member-section-tab{min-height:40px;font-size:13px;padding:9px 11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.no-purchase-hero-grid,.no-purchase-choice-grid,.no-purchase-lower-grid{grid-template-columns:minmax(0,1fr)}.no-purchase-hero{min-height:0;padding:24px 22px}.no-purchase-hero h1{font-size:clamp(30px,8vw,40px)}.no-purchase-getting-started{min-height:0;padding:22px}.no-purchase-choice-card{padding:20px}.no-purchase-step{padding:12px 0}.no-purchase-service-row{flex-wrap:wrap}.no-purchase-service-row .btn{margin-left:50px}}
+@media(max-width:900px){.content{padding:25px 20px 42px}.member-section-nav{gap:7px}.overview-masthead{grid-template-columns:minmax(0,1fr)}.no-purchase-course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){body{background-attachment:scroll}.content{padding:21px 16px 34px}.member-section-tab{min-height:40px;font-size:13px;padding:9px 11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.no-purchase-hero-grid,.no-purchase-course-grid,.no-purchase-lower-grid{grid-template-columns:minmax(0,1fr)}.no-purchase-hero{min-height:0;padding:24px 22px}.no-purchase-hero h1{font-size:clamp(30px,8vw,40px)}.no-purchase-getting-started{min-height:0;padding:22px}.no-purchase-course-card{padding:20px}.no-purchase-step{padding:12px 0}.no-purchase-service-row{flex-wrap:wrap}.no-purchase-service-row .btn{margin-left:50px}}
 .no-purchase-overview{--np-green:#355a46;--np-deep:#254334}
 .no-purchase-hero-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,.82fr);gap:18px;margin-bottom:30px}
 .no-purchase-hero{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:330px;padding:31px 33px;border:1px solid #254334;border-radius:22px;background:linear-gradient(135deg,#254334 0%,#2c4d3b 58%,#355a46 100%);color:#f8f3e7;box-shadow:0 17px 36px rgba(37,67,52,.14)}
@@ -49,13 +49,22 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .no-purchase-step strong{display:block;font-size:14px;line-height:1.4}.no-purchase-step p{color:var(--muted);font-size:12px;margin:3px 0 0;line-height:1.5}
 .no-purchase-section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:34px 0 15px}
 .no-purchase-section-title h2{margin:0 0 4px;font:400 30px/1.15 var(--serif);letter-spacing:-.03em}.no-purchase-section-title p{margin:0;color:var(--muted);font-size:14px}
-.no-purchase-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
-.no-purchase-choice-card{display:flex;flex-direction:column;min-width:0;padding:22px;border:1px solid var(--line);border-radius:17px;background:rgba(255,253,248,.95);box-shadow:0 8px 22px rgba(41,56,46,.045);transition:transform .16s,box-shadow .16s}
-.no-purchase-choice-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.no-purchase-choice-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:var(--surface-green);color:var(--green);font-size:21px;margin-bottom:20px}
-.no-purchase-choice-category{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:750}
-.no-purchase-choice-card h3{margin:8px 0;font:400 24px/1.2 var(--serif);letter-spacing:-.025em}
-.no-purchase-choice-card p{margin:0 0 21px;color:var(--muted);font-size:14px;line-height:1.65}.no-purchase-choice-card .btn{align-self:flex-start;margin-top:auto}
+.no-purchase-course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.no-purchase-course-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:22px;border:1px solid var(--line);border-radius:17px;background:rgba(255,253,248,.95);box-shadow:0 8px 22px rgba(41,56,46,.045);transition:transform .16s,box-shadow .16s}
+.no-purchase-course-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.no-purchase-course-card-top{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;width:100%;margin-bottom:15px}
+.no-purchase-course-role{color:var(--green);font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.no-purchase-course-category{color:var(--muted);font-size:10px}
+.no-purchase-course-card h3{margin:0 0 9px;font:400 24px/1.2 var(--serif);letter-spacing:-.025em}
+.no-purchase-course-card>p{margin:0 0 15px;color:var(--muted);font-size:14px;line-height:1.65}
+.no-purchase-course-meta{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px}
+.no-purchase-course-meta span{padding:5px 8px;border:1px solid var(--line);border-radius:99px;background:#f8f5ed;color:var(--muted);font-size:10px;line-height:1.3}
+.no-purchase-course-card .btn{align-self:flex-start;margin-top:auto;max-width:100%;white-space:normal;text-align:left}
+.no-purchase-course-empty{padding:19px 21px;border:1px dashed var(--line);border-radius:14px;background:rgba(255,253,248,.75)}
+.no-purchase-course-empty strong{display:block;font-size:14px}
+.no-purchase-course-empty p{margin:4px 0 9px;color:var(--muted);font-size:13px;line-height:1.6}
+.no-purchase-inline-action{padding:0;border:0;background:transparent;color:var(--green);font:750 13px var(--sans);cursor:pointer}
+.no-purchase-inline-action:hover{text-decoration:underline;text-underline-offset:3px}
 .no-purchase-lower-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:17px;margin-top:28px}
 .no-purchase-panel{min-width:0;border:1px solid var(--line);border-radius:18px;background:rgba(255,253,248,.94);box-shadow:0 4px 17px rgba(41,56,46,.035);overflow:hidden}
 .no-purchase-panel-head{padding:22px 23px 16px}.no-purchase-panel-head h2{margin:0 0 5px;font:400 25px/1.15 var(--serif)}.no-purchase-panel-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
@@ -71,7 +80,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .no-purchase-panel-foot{padding:0 22px 20px;color:var(--muted);font-size:12px;line-height:1.55}
 .no-purchase-notice{margin-top:25px;padding:15px 17px;border:1px solid var(--line);border-left:3px solid var(--tomato);border-radius:0 12px 12px 0;background:rgba(255,253,248,.8);color:var(--muted);font-size:13px;line-height:1.65}
 .no-purchase-notice strong{color:var(--ink)}
-@media(prefers-reduced-motion:reduce){.no-purchase-choice-card:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.no-purchase-course-card:hover{transform:none}}
 
 
 /* My learning — match the approved member-course empty-state reference. */
@@ -128,7 +137,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 /* Mobile responsive overrides for the signed-in member dashboard.
    Keep these after the base no-purchase rules so the breakpoints win. */
 @media (max-width: 900px) {
-  .no-purchase-choice-grid {
+  .no-purchase-course-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -136,14 +145,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 @media (max-width: 650px) {
   .no-purchase-overview,
   .no-purchase-hero-grid,
-  .no-purchase-choice-grid,
+  .no-purchase-course-grid,
   .no-purchase-lower-grid,
   .no-purchase-panel {
     min-width: 0;
   }
 
   .no-purchase-hero-grid,
-  .no-purchase-choice-grid,
+  .no-purchase-course-grid,
   .no-purchase-lower-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -170,19 +179,19 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     font-size: clamp(28px, 8vw, 32px);
   }
 
-  .no-purchase-choice-card {
+  .no-purchase-course-card {
     min-width: 0;
     padding: 20px;
   }
 
-  .no-purchase-choice-card h3 {
+  .no-purchase-course-card h3 {
     font-size: clamp(23px, 6vw, 27px);
   }
 
-  .no-purchase-choice-card .btn {
+  .no-purchase-course-card .btn {
     max-width: 100%;
     white-space: normal;
-    text-align: center;
+    text-align: left;
   }
 
   .no-purchase-lower-grid {
@@ -239,7 +248,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     padding: 20px 18px;
   }
 
-  .no-purchase-choice-card {
+  .no-purchase-course-card {
     padding: 18px;
   }
 }
