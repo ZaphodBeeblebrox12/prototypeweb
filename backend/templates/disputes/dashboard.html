@@ -7,6 +7,16 @@
     <div class="col"><div class="card"><div class="card-body"><b>{{ buckets.due_soon }}</b><br>Due &le;72h</div></div></div>
     <div class="col"><div class="card"><div class="card-body"><b>{{ buckets.won }}</b> / <b>{{ buckets.lost }}</b><br>Won / Lost</div></div></div>
   </div>
+  <form method="get" class="row g-2 align-items-center mb-3" role="search">
+    <div class="col">
+      <label class="visually-hidden" for="dispute-search">Search disputes</label>
+      <input id="dispute-search" class="form-control" type="search" name="q"
+             value="{{ query }}" placeholder="Search customer or provider dispute reference">
+    </div>
+    {% if filter %}<input type="hidden" name="f" value="{{ filter }}">{% endif %}
+    <div class="col-auto"><button class="btn btn-outline-success" type="submit">Search</button></div>
+    {% if query or filter %}<div class="col-auto"><a href="{% url 'disputes:dashboard' %}">Clear</a></div>{% endif %}
+  </form>
   <table class="table table-sm">
     <thead><tr><th>Case</th><th>Customer</th><th>Amount</th><th>Reason</th>
       <th>Deadline</th><th>Status</th></tr></thead>
@@ -20,6 +30,8 @@
           {{ d.evidence_due_at|date:"m-d H:i"|default:"—" }}</td>
         <td>{{ d.get_status_display }}</td>
       </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-center text-muted">No dispute cases match this search.</td></tr>
     {% endfor %}</tbody>
   </table>
 </div>
