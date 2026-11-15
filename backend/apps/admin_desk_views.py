@@ -10,7 +10,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q, Count, Max, Sum, Case, When, Value, IntegerField
+from django.db.models import Q, Count, Max, Sum, Case, When, Value, IntegerField, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -37,6 +37,397 @@ def _audit(action, actor, object_type, object_id, metadata=None):
         action=action, user=actor, object_type=object_type,
         object_id=object_id, metadata=metadata or {},
     )
+
+
+def _admin_desk_course_offer_readiness(offer, course):
+    """Describe the stored offer state and current source-backed saleability checks."""
+    if not offer.is_active:
+        return {
+            "saleable": False,
+            "label": "Inactive",
+            "reasons": ["The CourseOffer is marked inactive."],
+            "price_ready": False,
+        }
+
+    reasons = []
+    if course.status != course.Status.PUBLISHED:
+        reasons.append("The course is not published.")
+    if course.access_type not in (course.AccessType.PAID, course.AccessType.MIXED):
+        reasons.append("The course access type is not Paid or Mixed.")
+    if not offer.plan_id:
+        reasons.append("No Revenue Plan is linked.")
+        price_ready = False
+    else:
+        plan = offer.plan
+        if not plan.is_hidden:
+            reasons.append("The linked Plan is not hidden from the subscription catalogue.")
+        base_prices = getattr(plan, "desk_active_one_time_prices", ())
+        geo_prices = getattr(plan, "desk_active_one_time_geo_prices", ())
+        price_ready = bool(base_prices or geo_prices)
+        if not price_ready:
+            reasons.append("No active one-time base or geo price is recorded.")
+
+    return {
+        "saleable": not reasons,
+        "label": "Saleable" if not reasons else "Active · needs attention",
+        "reasons": reasons,
+        "price_ready": price_ready,
+    }
+
+
+def _admin_desk_course_offer_queryset():
+    """Prefetch only active one-time price existence for safe saleability summaries."""
+    from apps.academy.models import CourseOffer
+    from apps.subscriptions.models import GeoPlanPrice, PlanPrice
+
+    return CourseOffer.objects.select_related("plan").prefetch_related(
+        Prefetch(
+            "plan__prices",
+            queryset=PlanPrice.objects.filter(
+                interval=PlanPrice.Interval.ONE_TIME,
+                is_active=True,
+            ),
+            to_attr="desk_active_one_time_prices",
+        ),
+        Prefetch(
+            "plan__geo_prices",
+            queryset=GeoPlanPrice.objects.filter(
+                interval=GeoPlanPrice.Interval.ONE_TIME,
+                is_active=True,
+            ),
+            to_attr="desk_active_one_time_geo_prices",
+        ),
+    )
+
+
+def _admin_desk_course_queryset(*, include_offers):
+    from apps.academy.models import Course
+
+    queryset = Course.objects.annotate(
+        total_modules=Count("modules", distinct=True),
+        published_modules=Count(
+            "modules",
+            filter=Q(modules__is_published=True),
+            distinct=True,
+        ),
+        total_lessons=Count("modules__lessons", distinct=True),
+        published_lesson_count=Count(
+            "modules__lessons",
+            filter=Q(
+                modules__is_published=True,
+                modules__lessons__is_published=True,
+            ),
+            distinct=True,
+        ),
+    )
+    if include_offers:
+        queryset = queryset.prefetch_related(
+            Prefetch(
+                "offers",
+                queryset=_admin_desk_course_offer_queryset(),
+                to_attr="admin_desk_offers",
+            )
+        )
+    return queryset
+
+
+@login_required
+@require_GET
+def admin_desk_courses(request):
+    """Read-only, filterable Course register owned by the Academy workspace."""
+    _guard(request)
+    from django.conf import settings
+    from django.core.paginator import Paginator
+
+    from apps.academy.permissions import is_course_content_admin
+    from apps.academy.seo_admin import _course_indexability_reasons
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+
+    query = request.GET.get("q", "").strip()[:120]
+    role_filter = request.GET.get("role", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+    access_filter = request.GET.get("access", "").strip()
+    offer_filter = request.GET.get("offer", "").strip()
+    seo_filter = request.GET.get("seo", "").strip()
+    valid_roles = {value for value, _label in Course.CatalogueRole.choices}
+    valid_statuses = {value for value, _label in Course.Status.choices}
+    valid_access_types = {value for value, _label in Course.AccessType.choices}
+    if role_filter not in valid_roles:
+        role_filter = ""
+    if status_filter not in valid_statuses:
+        status_filter = ""
+    if access_filter not in valid_access_types:
+        access_filter = ""
+    if offer_filter not in {"none", "active", "inactive", "saleable", "attention"}:
+        offer_filter = ""
+    if seo_filter not in {"indexable", "blocked"}:
+        seo_filter = ""
+
+    can_view_offers = _allowed(request.user, "academy.view_courseoffer")
+    courses = _admin_desk_course_queryset(include_offers=can_view_offers)
+    if query:
+        courses = courses.filter(
+            Q(title__icontains=query)
+            | Q(slug__icontains=query)
+            | Q(summary__icontains=query)
+        )
+    if role_filter:
+        courses = courses.filter(catalogue_role=role_filter)
+    if status_filter:
+        courses = courses.filter(status=status_filter)
+    if access_filter:
+        courses = courses.filter(access_type=access_filter)
+    if offer_filter == "none":
+        courses = courses.filter(offers__isnull=True)
+    elif offer_filter == "active":
+        courses = courses.filter(offers__is_active=True)
+    elif offer_filter == "inactive":
+        courses = courses.filter(offers__is_active=False)
+    courses = courses.order_by("position", "title", "slug").distinct()
+
+    global_enabled = bool(getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False))
+    rows = []
+    for course in courses:
+        offer_audits = []
+        if can_view_offers:
+            offer_audits = [
+                _admin_desk_course_offer_readiness(offer, course)
+                for offer in getattr(course, "admin_desk_offers", ())
+            ]
+        saleable_count = sum(1 for row in offer_audits if row["saleable"])
+        active_offer_count = sum(
+            1 for offer in getattr(course, "admin_desk_offers", ()) if offer.is_active
+        ) if can_view_offers else None
+        offer_state = None
+        if can_view_offers:
+            if not offer_audits:
+                offer_state = "No offer"
+            elif saleable_count:
+                offer_state = "Saleable"
+            elif active_offer_count:
+                offer_state = "Active · needs attention"
+            else:
+                offer_state = "Inactive"
+
+        seo_reasons = _course_indexability_reasons(course, global_enabled)
+        indexable = not seo_reasons
+        if offer_filter == "saleable" and not saleable_count:
+            continue
+        if offer_filter == "attention" and not (
+            active_offer_count and active_offer_count > saleable_count
+        ):
+            continue
+        if seo_filter == "indexable" and not indexable:
+            continue
+        if seo_filter == "blocked" and not (
+            course.status == Course.Status.PUBLISHED and not indexable
+        ):
+            continue
+
+        rows.append({
+            "course": course,
+            "role_label": course.get_catalogue_role_display(),
+            "status_label": course.get_status_display(),
+            "access_label": course.get_access_type_display(),
+            "published_modules": course.published_modules,
+            "total_modules": course.total_modules,
+            "published_lessons": course.published_lesson_count,
+            "total_lessons": course.total_lessons,
+            "offer_state": offer_state,
+            "seo_indexable": indexable,
+            "seo_reasons": seo_reasons,
+            "detail_url": reverse("staff_admin_desk_course_detail", args=[course.pk]),
+        })
+
+    page = Paginator(rows, 25).get_page(request.GET.get("page"))
+    return render(request, "admin/desk_courses.html", {
+        "courses_page": page,
+        "query": query,
+        "role_filter": role_filter,
+        "status_filter": status_filter,
+        "access_filter": access_filter,
+        "offer_filter": offer_filter,
+        "seo_filter": seo_filter,
+        "can_view_offers": can_view_offers,
+        "role_choices": Course.CatalogueRole.choices,
+        "status_choices": Course.Status.choices,
+        "access_choices": Course.AccessType.choices,
+        "matched_count": len(rows),
+        "global_indexing_enabled": global_enabled,
+        "desk_nav": _nav(request),
+    })
+
+
+@login_required
+@require_GET
+def admin_desk_course_detail(request, course_id):
+    """Read-only Course control page with canonical links to owning workflows."""
+    _guard(request)
+    from urllib.parse import urlencode
+
+    from django.conf import settings
+
+    from apps.academy.models import (
+        Course,
+        CourseEntitlement,
+        CourseEntitlementEvent,
+        CourseModule,
+        Lesson,
+        LessonProgress,
+        PlanCourseAccess,
+    )
+    from apps.academy.permissions import is_course_content_admin
+    from apps.academy.seo_admin import _course_indexability_reasons
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+
+    can_view_offers = _allowed(request.user, "academy.view_courseoffer")
+    can_view_plans = _allowed(request.user, "subscriptions.view_plan")
+    can_view_entitlements = _allowed(request.user, "academy.view_courseentitlement")
+    can_view_progress = _allowed(request.user, "academy.view_lessonprogress")
+    can_view_entitlement_events = (
+        can_view_entitlements
+        and _allowed(request.user, "academy.view_courseentitlementevent")
+    )
+
+    course = get_object_or_404(
+        _admin_desk_course_queryset(include_offers=can_view_offers),
+        pk=course_id,
+    )
+    modules = (
+        CourseModule.objects.filter(course=course)
+        .annotate(
+            total_lessons=Count("lessons", distinct=True),
+            published_lessons=Count(
+                "lessons",
+                filter=Q(lessons__is_published=True),
+                distinct=True,
+            ),
+        )
+        .prefetch_related(
+            Prefetch(
+                "lessons",
+                queryset=Lesson.objects.only(
+                    "id",
+                    "module_id",
+                    "title",
+                    "summary",
+                    "format",
+                    "duration_minutes",
+                    "is_preview",
+                    "is_published",
+                    "release_day",
+                    "position",
+                ).order_by("position", "title"),
+                to_attr="admin_desk_lessons",
+            )
+        )
+        .order_by("position", "title")
+    )
+    module_rows = []
+    for module in modules:
+        module_rows.append({
+            "module": module,
+            "lessons": module.admin_desk_lessons,
+        })
+
+    global_enabled = bool(getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False))
+    seo_reasons = _course_indexability_reasons(course, global_enabled)
+    offer_rows = []
+    if can_view_offers:
+        for offer in getattr(course, "admin_desk_offers", ()):
+            readiness = _admin_desk_course_offer_readiness(offer, course)
+            offer_rows.append({
+                "offer": offer,
+                "readiness": readiness,
+                "plan_visible": bool(can_view_plans and offer.plan_id),
+                "plan_url": (
+                    reverse("staff_admin_desk_plan_detail", args=[offer.plan_id])
+                    if can_view_plans and offer.plan_id else ""
+                ),
+            })
+
+    entitlement_summary = None
+    if can_view_entitlements:
+        entitlement_base = CourseEntitlement.objects.filter(course=course)
+        entitlement_summary = {
+            "active": entitlement_base.filter(
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__lte=timezone.now(),
+            ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())).count(),
+            "scheduled": entitlement_base.filter(
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__gt=timezone.now(),
+            ).count(),
+            "expired": entitlement_base.filter(
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__lte=timezone.now(),
+                expires_at__lte=timezone.now(),
+            ).count(),
+            "revoked": entitlement_base.filter(
+                status=CourseEntitlement.Status.REVOKED
+            ).count(),
+            "url": reverse("admin:academy_courseentitlement_changelist"),
+        }
+
+    progress_summary = None
+    if can_view_progress:
+        progress_summary = {
+            row["status"]: row["count"]
+            for row in LessonProgress.objects.filter(
+                lesson__module__course=course
+            ).values("status").annotate(count=Count("pk"))
+        }
+
+    membership_rows = []
+    can_view_membership_mappings = (
+        can_view_plans and _allowed(request.user, "academy.view_plancourseaccess")
+    )
+    if can_view_membership_mappings:
+        membership_rows = list(
+            PlanCourseAccess.objects.filter(course=course)
+            .select_related("plan")
+            .order_by("plan__name")
+        )
+
+    entitlement_events = []
+    if can_view_entitlement_events:
+        entitlement_events = list(
+            CourseEntitlementEvent.objects.filter(
+                entitlement__course=course
+            ).select_related(
+                "entitlement", "entitlement__user", "actor"
+            ).order_by("-created_at")[:10]
+        )
+
+    builder_url = "{}?{}".format(
+        reverse("staff_course_builder_preview"),
+        urlencode({"open_course": course.slug}),
+    )
+    return render(request, "admin/desk_course_detail.html", {
+        "course": course,
+        "module_rows": module_rows,
+        "can_view_offers": can_view_offers,
+        "can_view_plans": can_view_plans,
+        "offer_rows": offer_rows,
+        "seo_reasons": seo_reasons,
+        "seo_indexable": not seo_reasons,
+        "global_indexing_enabled": global_enabled,
+        "entitlement_summary": entitlement_summary,
+        "progress_summary": progress_summary,
+        "membership_rows": membership_rows,
+        "entitlement_events": entitlement_events,
+        "can_view_entitlements": can_view_entitlements,
+        "can_view_progress": can_view_progress,
+        "can_view_membership_mappings": can_view_membership_mappings,
+        "builder_url": builder_url,
+        "seo_url": reverse("staff_admin_desk_seo"),
+        "catalogue_url": reverse("staff_admin_desk_courses"),
+        "desk_nav": _nav(request),
+    })
 
 
 @login_required
