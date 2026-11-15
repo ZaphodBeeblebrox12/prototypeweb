@@ -805,3 +805,32 @@ The previous owner instruction explicitly required confirmation of this exact wo
 2. Poll the deploy until terminal/live and verify commit SHA.
 3. Smoke-test the deployed Admin Desk with approved personas and run the consolidated manual/browser/persona/permissions/workflow/accessibility acceptance plan.
 4. Record evidence, issues and remediation before any production release.
+
+
+## 17. Academy Admin Desk V2 deployed to staging — 15 November 2026
+
+**Service:** `tradethesis-academy-staging`  
+**URL:** https://tradethesis-academy-staging.onrender.com  
+**Admin Desk entry:** https://tradethesis-academy-staging.onrender.com/staff/admin-desk/  
+**Render deploy:** `dep-dbslvagae00c738ef8n0`  
+**Deployed commit:** `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`  
+**Status:** `live`  
+**Finished:** 15 November 2026, 07:33:03 UTC  
+**Cache:** preserved (`clearCache=false`)
+
+### Deployment and health evidence
+
+- Render confirms the new deploy is `live` and the prior security-only deploy `dep-dbsa69m7bikc73f1opg0` is deactivated.
+- Build completed successfully; the Tiptap bundle compiled and static assets collected.
+- Render emitted `Your service is live` and confirmed the primary staging URL.
+- The `/health/` endpoint returned HTTP 200 repeatedly after rollout.
+- The service remains configured to `my-new-branch`; auto-deploy remains off.
+- Only Academy staging was deployed. Public-static staging and production were not touched.
+
+A direct external browser check was not available from the deployment runtime, so authenticated visual acceptance of the Admin Desk pages is still pending. The owner should open the Admin Desk URL above in their staff browser session.
+
+### Next acceptance work
+
+Run the consolidated manual/browser/persona/permissions/workflow/accessibility test plan against this deployed staging version. Include each specialist persona and negative object-scope cases; do not treat the platform health check as UI acceptance. Record screenshots/URLs and outcomes, fix defects on a follow-up branch/PR, and redeploy staging after those fixes. Do not promote to production until the acceptance campaign is signed off.
+
+Tiptap remains non-default, the legacy Course Builder remains the production authoring path, learner-level M09 remains deferred for object-scope review, and global Django Admin lockout remains deferred pending workflow parity/cutover.
