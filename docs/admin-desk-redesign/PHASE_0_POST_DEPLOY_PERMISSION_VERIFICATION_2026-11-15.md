@@ -112,3 +112,34 @@ No additional application code, permissions, migrations, Render settings, deploy
 No additional application code, permissions, migrations, Render settings, deployments, merges, or rebases were changed as part of this verification.
 
 **Status:** The targeted three-persona / five-route permission matrix is verified on live Academy staging. Phase 0 remains open pending core workflow regression, Support object-scope review, specialist-role mapping and final staging cleanup.
+
+
+## 7. Admin Desk V2 superuser navigation smoke test — 15 November 2026
+
+**Deployment tested:** Academy staging, merge commit `828c46eb1741190f85bfb6c3e7e0edd93a6eb980`  
+**Render deploy:** `dep-dbslvagae00c738ef8n0`  
+**Persona:** owner's authenticated Admin session (as identified by the owner)  
+**Method:** same-origin GET requests only; no mutations.
+
+### Route results
+
+The owner supplied a browser-console route matrix on 15 November 2026. The first 24 rows returned HTTP 200; the Disputes row was incomplete and therefore initially marked pending. A dedicated follow-up GET to `/admin-disputes/` then returned:
+
+- HTTP 200
+- Final URL: `https://tradethesis-academy-staging.onrender.com/admin-disputes/`
+- `redirected=false`
+- Content type: `text/html; charset=utf-8`
+
+**Final Admin-session outcome: 25/25 expected routes returned HTTP 200**, covering Command Centre, My Work, Operations, Academy overview, Course Catalogue, Course Approvals, Offers & Access, SEO, Customers, Learners & Accounts, Support Tickets, Revenue, Plans & Pricing, Subscriptions, Finance, Business Settings, Growth, Campaigns & Audiences, Platform, Global Search, Referral Rewards, Staff Approvals API, Growth Analytics API, Gift Sending and Disputes.
+
+The immediate console output `Promise { <state>: "pending" }` was only the async function's initial Promise display; the later console result confirmed completion. The Disputes route was independently rechecked and completed with HTTP 200.
+
+### Interpretation and limitations
+
+- This is a positive route-access check for the owner's Admin session; HTTP 200 alone does not prove page content correctness, every control/action, object-level isolation or field-level minimisation.
+- All requests were GET-only. No gift, approval, dispute, account or other business mutation was submitted.
+- This does not validate specialist-role access or generic-staff denial boundaries.
+- The next required pass is the generic Django staff persona: confirm expected access to Command Centre, Operations, Support queue and own notifications, and expected denial from restricted account, Academy review/SEO, Finance/Subscriptions/Business, Growth reward/gift/analytics, Staff Approvals and Disputes routes.
+- Support object-level ticket scope and Platform detail access remain outstanding.
+
+**Status:** Admin-session navigation/route smoke test is 25/25 PASS. Overall consolidated acceptance remains open.
