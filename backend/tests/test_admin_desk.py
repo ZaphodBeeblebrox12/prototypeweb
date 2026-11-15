@@ -535,7 +535,7 @@ class AdminDeskTests(TestCase):
         )
         active_private_plan = Plan.objects.create(
             name="Active Private Revenue Plan Must Stay Hidden",
-            tier=Plan.Tier.BASIC,
+            tier=Plan.Tier.PRO,
             is_hidden=False,
         )
         CourseOffer.objects.create(
