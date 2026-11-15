@@ -1930,6 +1930,21 @@ def admin_desk_revenue(request):
             "url": reverse("staff_admin_desk_finance") + "?tab=invoices",
         }
 
+    if _allowed(request.user, "payments.view_refund"):
+        from apps.payments.models import Refund
+
+        refund_base = Refund.objects.filter(refunded_at__gte=since)
+        context["refund_summary"] = {
+            "count": refund_base.count(),
+            "by_currency": list(
+                refund_base.values("currency").annotate(
+                    refunds=Count("pk"),
+                    amount_cents=Sum("amount_cents"),
+                ).order_by("currency")
+            ),
+            "url": reverse("staff_admin_desk_finance") + "?tab=refunds",
+        }
+
     if _allowed(request.user, "subscriptions.view_subscription"):
         from apps.subscriptions.models import Subscription
 
@@ -1995,7 +2010,7 @@ def admin_desk_revenue(request):
     context["has_revenue_sections"] = any(
         key in context for key in (
             "payment_summary", "invoice_summary", "subscription_summary",
-            "dispute_summary", "business_url", "plans_url",
+            "dispute_summary", "business_url", "plans_url", "refund_summary",
         )
     )
     return render(request, "admin/desk_revenue.html", context)
