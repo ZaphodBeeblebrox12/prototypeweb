@@ -2143,7 +2143,10 @@ def admin_desk_plans(request):
 def admin_desk_plan_detail(request, plan_id):
     """Inspect one Plan and only the related configuration the operator may view."""
     _guard(request, "subscriptions.view_plan")
-    from apps.subscriptions.models import GeoPlanPrice, Plan, PlanFeature, PlanPrice
+    from urllib.parse import urlencode
+    from apps.subscriptions.models import (
+        GeoPlanPrice, Plan, PlanFeature, PlanPrice, Subscription,
+    )
     from apps.bot_integration.models import PlanChannelMapping
 
     can_view_product = _allowed(request.user, "subscriptions.view_product")
@@ -2209,6 +2212,97 @@ def admin_desk_plan_detail(request, plan_id):
         if ticket_approver_count
         else "Any staff (default)"
     )
+
+    can_view_subscriptions = _allowed(
+        request.user, "subscriptions.view_subscription"
+    )
+    subscription_rows = []
+    subscription_summary = None
+    if can_view_subscriptions:
+        subscription_queryset = (
+            Subscription.objects.filter(plan=plan)
+            .select_related("user")
+            .only(
+                "user__username", "status", "is_active", "started_at",
+                "expires_at", "is_gift", "is_admin_grant", "is_trial",
+                "price_cents", "price_currency", "created_at",
+            )
+            .order_by("-created_at")
+        )
+        subscription_summary = {
+            "total": subscription_queryset.count(),
+            "active": subscription_queryset.filter(
+                status=Subscription.Status.ACTIVE, is_active=True
+            ).count(),
+            "pending": subscription_queryset.filter(
+                status=Subscription.Status.PENDING
+            ).count(),
+            "url": (
+                reverse("staff_admin_desk_subscriptions")
+                + "?"
+                + urlencode({"q": plan.name})
+            ),
+        }
+        for subscription in subscription_queryset[:8]:
+            if subscription.is_gift:
+                source = "Gift"
+            elif subscription.is_trial:
+                source = "Trial"
+            elif subscription.is_admin_grant:
+                source = "Admin grant"
+            else:
+                source = "Standard"
+            price = (
+                f"{subscription.price_currency} "
+                f"{subscription.price_cents / 100:,.2f}"
+                if subscription.price_cents is not None
+                and subscription.price_currency
+                else "No price snapshot"
+            )
+            subscription_rows.append({
+                "learner": subscription.user.username,
+                "status": subscription.get_status_display(),
+                "is_active": subscription.is_active,
+                "source": source,
+                "price": price,
+                "started_at": subscription.started_at,
+                "expires_at": subscription.expires_at,
+            })
+
+    can_view_course_offer = _allowed(
+        request.user, "academy.view_courseoffer"
+    )
+    course_offer = None
+    if can_view_course_offer:
+        from apps.academy.models import CourseOffer
+
+        offer = (
+            CourseOffer.objects.filter(plan=plan)
+            .select_related("course")
+            .only(
+                "name", "slug", "access_duration_days", "is_active",
+                "course__title", "course__slug", "course__status",
+                "course__access_type",
+            )
+            .first()
+        )
+        if offer:
+            course_offer = {
+                "name": offer.name,
+                "slug": offer.slug,
+                "course_title": offer.course.title,
+                "course_slug": offer.course.slug,
+                "course_status": offer.course.get_status_display(),
+                "access_type": offer.course.get_access_type_display(),
+                "active": offer.is_active,
+                "catalogue_eligible": offer.is_saleable,
+                "access_duration": (
+                    f"{offer.access_duration_days} days"
+                    if offer.access_duration_days else "Permanent"
+                ),
+                "url": reverse("admin:academy_courseoffer_changelist"),
+            }
+
     context = {
         "plan": plan,
         "product": plan.product if can_view_product else None,
@@ -2222,9 +2316,11 @@ def admin_desk_plan_detail(request, plan_id):
         "can_view_geo_prices": can_view_geo_prices,
         "can_view_features": can_view_features,
         "can_view_channel_mappings": can_view_channel_mappings,
-        "can_view_subscriptions": _allowed(
-            request.user, "subscriptions.view_subscription"
-        ),
+        "can_view_subscriptions": can_view_subscriptions,
+        "subscription_summary": subscription_summary,
+        "subscription_rows": subscription_rows,
+        "can_view_course_offer": can_view_course_offer,
+        "course_offer": course_offer,
         "can_open_advanced_admin": any(
             _allowed(request.user, permission)
             for permission in (
@@ -2232,6 +2328,9 @@ def admin_desk_plan_detail(request, plan_id):
                 "subscriptions.change_planprice",
                 "subscriptions.change_geoplanprice",
                 "subscriptions.change_planfeature",
+                "subscriptions.change_product",
+                "bot_integration.change_planchannelmapping",
+                "academy.change_courseoffer",
             )
         ),
         "advanced_admin_url": reverse("admin:subscriptions_plan_changelist"),
