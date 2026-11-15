@@ -1,5 +1,5 @@
 {% load static %}
-<header class="sitewide-header{% if user.is_authenticated %} sitewide-header--authenticated{% endif %}" data-sitewide-nav>
+<header class="sitewide-header{% if user.is_authenticated %} sitewide-header--authenticated{% endif %}{% if request.path|slice:":17" == "/staff/admin-desk" %} sitewide-header--admin-desk{% endif %}" data-sitewide-nav>
   <div class="wrap nav">
     <a aria-label="TradeThesis home" class="brand" href="{{ public_site_url }}/index.html">
       <img class="brand-logo brand-logo-header" src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis — Conviction before execution">
