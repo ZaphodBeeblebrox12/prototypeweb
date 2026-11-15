@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }} | Academy | TradeThesis{% endblock %}
+{% block page_title %}Course Detail{% endblock %}
+{% block page_context %}{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-course-detail{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--soft:#ecece5;--surface:#fffefa;--green:#456653;--terracotta:#c66b50;max-width:1440px;margin:4px auto 36px;color:var(--ink)}
+  .tt-course-detail *{box-sizing:border-box}
+  .tt-course-detail a{color:#315b43;text-underline-offset:3px}
+  .tt-course-detail .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:4px 0 18px}
+  .tt-course-detail .eyebrow{margin:0 0 6px;color:var(--terracotta);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .tt-course-detail h1{margin:0;font:500 30px/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+  .tt-course-detail .intro{max-width:780px;margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+  .tt-course-detail .actions,.tt-course-detail .pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tt-course-detail .button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--green);font-size:10px;font-weight:750;text-decoration:none}
+  .tt-course-detail .button.primary{border-color:var(--green);background:var(--green);color:#fff}
+  .tt-course-detail .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tt-course-detail .panel{min-width:0;margin:12px 0;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-course-detail .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tt-course-detail .panel-head h2{margin:0;font-size:13px;font-weight:800}
+  .tt-course-detail .panel-head p{margin:4px 0 0;color:var(--muted);font-size:9px}
+  .tt-course-detail .panel-body{padding:13px 14px}
+  .tt-course-detail .facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .tt-course-detail .fact{min-width:0;padding:10px;border-bottom:1px solid var(--soft)}
+  .tt-course-detail .fact span{display:block;color:var(--muted);font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+  .tt-course-detail .fact strong{display:block;margin-top:5px;font-size:12px;overflow-wrap:anywhere}
+  .tt-course-detail .muted{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.45}
+  .tt-course-detail .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#46574b;font-size:8px;font-weight:800}
+  .tt-course-detail .pill.good{border-color:#cbd9cb;background:#eff4ed;color:#3c5c43}
+  .tt-course-detail .pill.warn{border-color:#e7d6b8;background:#fbf4e8;color:#835f30}
+  .tt-course-detail .pill.bad{border-color:#e4c4be;background:#fbefed;color:#934b40}
+  .tt-course-detail .module{padding:11px 0;border-bottom:1px solid var(--soft)}
+  .tt-course-detail .module:last-child{border-bottom:0}
+  .tt-course-detail .module-title{display:flex;justify-content:space-between;gap:12px}
+  .tt-course-detail .module-title strong{font-size:11px}
+  .tt-course-detail .lesson-list{display:grid;gap:6px;margin:9px 0 0;padding:0;list-style:none}
+  .tt-course-detail .lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;font-size:10px}
+  .tt-course-detail .reason-list{display:grid;gap:6px;margin:10px 0 0;padding-left:17px;color:#8a4f42;font-size:10px;line-height:1.45}
+  .tt-course-detail .empty{padding:15px 4px;color:var(--muted);font-size:10px}
+  .tt-course-detail .table-wrap{overflow:auto}
+  .tt-course-detail table{width:100%;border-collapse:collapse;min-width:520px}
+  .tt-course-detail th,.tt-course-detail td{padding:9px 8px;border-bottom:1px solid var(--soft);text-align:left;font-size:10px;vertical-align:top}
+  .tt-course-detail th{color:#738078;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+  .tt-course-detail tr:last-child td{border-bottom:0}
+  .tt-course-detail .note{margin:10px 0 0;color:var(--muted);font-size:9px;line-height:1.55}
+  @media(max-width:800px){.tt-course-detail .grid{grid-template-columns:1fr}.tt-course-detail .facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:600px){.tt-course-detail h1{font-size:27px}.tt-course-detail .head{align-items:flex-start}.tt-course-detail .actions,.tt-course-detail .actions .button{width:100%}.tt-course-detail .facts{grid-template-columns:1fr 1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="tt-course-detail">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Academy / Course record</p>
+      <h1>{{ course.title }}</h1>
+      <p class="intro">{{ course.slug }}{% if course.summary %} · {{ course.summary }}{% endif %}</p>
+      <div class="pills" style="margin-top:10px">
+        <span class="pill">{{ course.get_catalogue_role_display }}</span>
+        <span class="pill{% if course.status == 'published' %} good{% elif course.status == 'draft' %} warn{% endif %}">{{ course.get_status_display }}</span>
+        <span class="pill">{{ course.get_access_type_display }}</span>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button" href="{{ catalogue_url }}">← Course Catalogue</a>
+      <a class="button primary" href="{{ builder_url }}">Open in Course Builder →</a>
+      <a class="button" href="{{ seo_url }}">SEO inventory ↗</a>
+    </div>
+  </header>
+
+  <section class="panel" aria-labelledby="course-overview-heading">
+    <div class="panel-head"><div><h2 id="course-overview-heading">Course overview</h2><p>Canonical Course identity and separate readiness dimensions</p></div><span class="pill">Read only</span></div>
+    <div class="panel-body">
+      <div class="facts">
+        <div class="fact"><span>Catalogue role</span><strong>{{ course.get_catalogue_role_display }}</strong></div>
+        <div class="fact"><span>Publication</span><strong>{{ course.get_status_display }}</strong></div>
+        <div class="fact"><span>Access type</span><strong>{{ course.get_access_type_display }}</strong></div>
+        <div class="fact"><span>Modules</span><strong>{{ course.total_modules }}</strong><span class="muted">{{ course.published_modules }} published</span></div>
+        <div class="fact"><span>Lessons</span><strong>{{ course.total_lessons }}</strong><span class="muted">{{ course.published_lesson_count }} published in published modules</span></div>
+        <div class="fact"><span>Updated</span><strong>{{ course.updated_at|date:"j M Y, H:i" }}</strong></div>
+      </div>
+      {% if course.description %}<p class="intro" style="margin-top:13px">{{ course.description|truncatechars:700 }}</p>{% endif %}
+      {% if course.learning_outcomes %}
+      <p class="muted" style="margin-top:12px">Learning outcomes</p>
+      <ul>{% for outcome in course.learning_outcomes %}<li style="font-size:10px;margin:4px 0">{{ outcome }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="curriculum-heading">
+      <div class="panel-head"><div><h2 id="curriculum-heading">Curriculum</h2><p>Module and lesson structure · lesson bodies and instructor materials are not shown</p></div></div>
+      <div class="panel-body">
+        {% for row in module_rows %}
+        <div class="module">
+          <div class="module-title">
+            <strong>{{ row.module.position }}. {{ row.module.title }}</strong>
+            <span class="pill{% if row.module.is_published %} good{% else %} warn{% endif %}">{% if row.module.is_published %}Published{% else %}Draft{% endif %}</span>
+          </div>
+          <span class="muted">{{ row.module.published_lessons }}/{{ row.module.total_lessons }} published lessons</span>
+          <ul class="lesson-list">
+            {% for lesson in row.lessons %}
+            <li>
+              <span>{{ row.module.position }}.{{ lesson.position }} {{ lesson.title }}<span class="muted">{{ lesson.get_format_display }} · {{ lesson.duration_minutes }} min{% if lesson.is_preview %} · Preview{% endif %}{% if lesson.release_day > 1 %} · Day {{ lesson.release_day }}{% endif %}</span></span>
+              <span class="pill{% if lesson.is_published %} good{% else %} warn{% endif %}">{% if lesson.is_published %}Published{% else %}Draft{% endif %}</span>
+            </li>
+            {% empty %}<li class="empty">No lessons in this module.</li>{% endfor %}
+          </ul>
+        </div>
+        {% empty %}<div class="empty">No curriculum modules have been added yet.</div>{% endfor %}
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="seo-heading">
+      <div class="panel-head"><div><h2 id="seo-heading">SEO &amp; discoverability</h2><p>Same indexability rules as the SEO inventory</p></div><span class="pill{% if seo_indexable %} good{% else %} bad{% endif %}">{% if seo_indexable %}Indexable{% else %}Blocked{% endif %}</span></div>
+      <div class="panel-body">
+        <div class="facts">
+          <div class="fact"><span>Effective title</span><strong>{{ course.seo_title|default:course.title }}</strong></div>
+          <div class="fact"><span>Search description</span><strong>{{ course.seo_description|default:course.summary|default:"Missing" }}</strong></div>
+          <div class="fact"><span>Primary topic</span><strong>{{ course.seo_primary_topic|default:"Not recorded" }}</strong></div>
+          <div class="fact"><span>Course indexing flag</span><strong>{% if course.seo_indexable %}Enabled{% else %}Disabled{% endif %}</strong></div>
+          <div class="fact"><span>Global indexing</span><strong>{% if global_indexing_enabled %}Enabled{% else %}Disabled{% endif %}</strong></div>
+          <div class="fact"><span>Public catalogue role</span><strong>{{ course.get_catalogue_role_display }}</strong></div>
+        </div>
+        {% if seo_reasons %}
+        <ul class="reason-list">{% for reason in seo_reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+        {% else %}<p class="note">The current source-backed indexability checks pass. This is not a guarantee of search ranking or crawl timing.</p>{% endif %}
+      </div>
+    </section>
+  </div>
+
+  {% if can_view_offers %}
+  <section class="panel" aria-labelledby="offers-heading">
+    <div class="panel-head"><div><h2 id="offers-heading">Offers &amp; Revenue relationship</h2><p>Academy owns CourseOffer; Revenue owns Plan and price configuration</p></div></div>
+    <div class="panel-body">
+      {% for row in offer_rows %}
+      <div class="module">
+        <div class="module-title">
+          <strong>{{ row.offer.name }}</strong>
+          <span class="pill{% if row.readiness.saleable %} good{% elif row.offer.is_active %} warn{% endif %}">{{ row.readiness.label }}</span>
+        </div>
+        <span class="muted">Access duration: {% if row.offer.access_duration_days %}{{ row.offer.access_duration_days }} days{% else %}Permanent{% endif %}</span>
+        {% if row.offer.plan_id %}
+          {% if row.plan_visible %}
+          <p class="note">Revenue Plan: {% if row.plan_url %}<a href="{{ row.plan_url }}">{{ row.offer.plan.name }} ↗</a>{% else %}{{ row.offer.plan.name }}{% endif %} · {% if row.offer.plan.is_hidden %}Hidden{% else %}Not hidden{% endif %}</p>
+          {% else %}<p class="note">A linked Revenue Plan exists; Plan details are hidden by the current Revenue permissions.</p>{% endif %}
+        {% else %}<p class="note">No Revenue Plan is linked.</p>{% endif %}
+        {% if row.readiness.reasons %}
+        <ul class="reason-list">{% for reason in row.readiness.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      {% empty %}<div class="empty">No CourseOffer records are linked to this course.</div>{% endfor %}
+      <p class="note">An Active flag is not proof of saleability. The current readiness label checks publication, access type, hidden Plan linkage and an active one-time base or geo price. Existing payment and entitlement history is unchanged by this screen.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if entitlement_summary or progress_summary %}
+  <section class="panel" aria-labelledby="learner-activity-heading">
+    <div class="panel-head"><div><h2 id="learner-activity-heading">Learner access &amp; progress</h2><p>Separate source records · no access or progress mutation is available here</p></div></div>
+    <div class="panel-body">
+      {% if entitlement_summary %}
+      <strong style="font-size:11px">Direct CourseEntitlement records</strong>
+      <div class="facts" style="margin-top:8px">
+        <div class="fact"><span>Currently active</span><strong>{{ entitlement_summary.active }}</strong></div>
+        <div class="fact"><span>Scheduled</span><strong>{{ entitlement_summary.scheduled }}</strong></div>
+        <div class="fact"><span>Expired</span><strong>{{ entitlement_summary.expired }}</strong></div>
+        <div class="fact"><span>Revoked</span><strong>{{ entitlement_summary.revoked }}</strong></div>
+      </div>
+      {% endif %}
+      {% if progress_summary %}
+      <strong style="display:block;margin-top:15px;font-size:11px">Stored lesson progress records</strong>
+      <div class="facts" style="margin-top:8px">
+        <div class="fact"><span>Completed</span><strong>{{ progress_summary.completed|default:0 }}</strong></div>
+        <div class="fact"><span>In progress</span><strong>{{ progress_summary.in_progress|default:0 }}</strong></div>
+        <div class="fact"><span>Not started</span><strong>{{ progress_summary.not_started|default:0 }}</strong></div>
+      </div>
+      {% endif %}
+      {% if membership_rows %}
+      <strong style="display:block;margin-top:15px;font-size:11px">Stored membership course mappings</strong>
+      <ul>{% for mapping in membership_rows %}<li style="font-size:10px;margin:5px 0">{{ mapping.plan.name }} · {% if mapping.is_active %}Active mapping{% else %}Inactive mapping{% endif %}</li>{% endfor %}</ul>
+      <p class="note">A stored PlanCourseAccess mapping is not, by itself, proof of an individual learner's active membership or effective access. The current service applies its own eligibility checks.</p>
+      {% endif %}
+      {% if not entitlement_summary and not progress_summary and not membership_rows %}
+      <p class="empty">No learner-access or progress sections are visible under the permissions assigned to this account.</p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if entitlement_events %}
+  <section class="panel" aria-labelledby="entitlement-events-heading">
+    <div class="panel-head"><div><h2 id="entitlement-events-heading">Recent entitlement events</h2><p>Append-only access history · latest ten events</p></div></div>
+    <div class="panel-body table-wrap">
+      <table><thead><tr><th>When</th><th>Event</th><th>Actor</th><th>Reason</th></tr></thead><tbody>
+        {% for event in entitlement_events %}
+        <tr><td>{{ event.created_at|date:"j M Y, H:i" }}</td><td>{{ event.get_event_type_display }}</td><td>{{ event.actor|default:"System" }}</td><td>{{ event.reason|default:"—" }}</td></tr>
+        {% endfor %}
+      </tbody></table>
+    </div>
+  </section>
+  {% endif %}
+
+  <p class="note">This is the Course control page, not a second editor. Use Course Builder for content changes, Course Approvals for publication decisions, Revenue for Plan/price edits and Customer 360 for the full learner record.</p>
+</div>
+{% endblock %}
