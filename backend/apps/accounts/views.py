@@ -612,8 +612,41 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             ).exists()
         )
 
+        # Recommend real, learner-ready courses on the new-member dashboard.
+        # Flagship programmes come first, followed by supporting programmes
+        # and focused mini-courses. Drafts, hidden courses and starter-copy
+        # records are never surfaced as recommendations.
+        from django.db.models import Case, IntegerField, Value, When
+        from apps.academy.course_card_utils import is_course_card_recommendable
+
+        course_role_priority = Case(
+            When(catalogue_role=Course.CatalogueRole.FLAGSHIP, then=Value(0)),
+            When(catalogue_role=Course.CatalogueRole.SUPPORTING, then=Value(1)),
+            default=Value(2),
+            output_field=IntegerField(),
+        )
+        member_discovery_courses = []
+        discovery_queryset = (
+            Course.objects.filter(status=Course.Status.PUBLISHED)
+            .exclude(catalogue_role=Course.CatalogueRole.HIDDEN)
+            .annotate(_member_course_priority=course_role_priority)
+            .order_by("_member_course_priority", "position", "title")
+        )
+        for course in discovery_queryset:
+            if not is_course_card_recommendable(
+                course.title, course.summary, course.description
+            ):
+                continue
+            member_discovery_courses.append({
+                "course": course,
+                "role_label": course.get_catalogue_role_display(),
+            })
+            if len(member_discovery_courses) == 3:
+                break
+
         context.update({
             "member_course_cards": member_course_cards,
+            "member_discovery_courses": member_discovery_courses,
             "member_owned_courses": [
                 card for card in member_course_cards if card["entitlement"] is not None
             ],
