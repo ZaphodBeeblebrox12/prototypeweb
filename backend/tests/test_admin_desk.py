@@ -533,7 +533,29 @@ class AdminDeskTests(TestCase):
                 content_type__app_label="academy", codename="view_courseoffer"
             ),
         )
+        active_private_plan = Plan.objects.create(
+            name="Active Private Revenue Plan Must Stay Hidden",
+            tier=Plan.Tier.BASIC,
+            is_hidden=False,
+        )
+        CourseOffer.objects.create(
+            course=course,
+            name="Active Offers Register Offer",
+            slug="active-offers-register-offer",
+            plan=active_private_plan,
+            is_active=True,
+        )
+
         self.client.force_login(content_operator)
+        catalogue_response = self.client.get(reverse("staff_admin_desk_courses"))
+        self.assertEqual(catalogue_response.status_code, 200, catalogue_response.content)
+        self.assertContains(
+            catalogue_response, "Active · commercial check restricted"
+        )
+        self.assertNotContains(
+            catalogue_response, "Active Private Revenue Plan Must Stay Hidden"
+        )
+
         detail_response = self.client.get(
             reverse("staff_admin_desk_course_detail", args=[course.pk])
         )
