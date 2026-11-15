@@ -49,7 +49,7 @@
     <section class="panel" aria-labelledby="academy-catalogue-heading">
       <div class="panel-head">
         <div><h2 id="academy-catalogue-heading">Course catalogue</h2><p>Canonical course records by publication state</p></div>
-        <a href="{{ course_summary.url }}">Open catalogue ↗</a>
+        {% if course_summary.url %}<a href="{{ course_summary.url }}">Open catalogue ↗</a>{% else %}<span>Catalogue access requires the Academy content-admin role</span>{% endif %}
       </div>
       <div class="panel-body">
         <div class="stats">
