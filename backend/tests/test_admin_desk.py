@@ -699,7 +699,7 @@ class AdminDeskTests(TestCase):
         self.assertFalse(response.context["can_view_payments"])
         self.assertFalse(response.context["can_view_invoices"])
         self.assertEqual(
-            list(response.context["refund_page"].object_list.values_list("pk", flat=True)),
+            [item.pk for item in response.context["refund_page"].object_list],
             [refund.pk],
         )
         self.assertContains(response, member.username)
