@@ -583,3 +583,105 @@
   outline-offset: -2px;
 }
 
+
+
+/* Forward lesson navigation — clear primary action, distinct from the secondary previous link. */
+.tt-lesson-experience .tt-lesson-nav-next {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 46px;
+  grid-template-rows: auto auto;
+  align-content: center;
+  align-items: center;
+  gap: 8px 16px;
+  min-height: 112px;
+  padding: 19px 21px;
+  border: 1px solid #244b39;
+  border-radius: 12px;
+  background: linear-gradient(125deg, #28543f 0%, #193d30 100%);
+  color: #fff;
+  text-align: left;
+  text-decoration: none;
+  box-shadow: 0 8px 18px rgba(27, 62, 45, .16), inset 0 1px 0 rgba(255, 255, 255, .12);
+  transition: background .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.tt-lesson-experience .tt-lesson-nav-next span {
+  grid-column: 1;
+  grid-row: 1;
+  color: #ead69d;
+  font-size: .69rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  line-height: 1.2;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.tt-lesson-experience .tt-lesson-nav-next strong {
+  grid-column: 1;
+  grid-row: 2;
+  color: #fffdf7;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.02rem, 1.35vw, 1.2rem);
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.tt-lesson-experience .tt-lesson-nav-next::after {
+  content: "→";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  justify-self: end;
+  border: 1px solid rgba(255, 255, 255, .42);
+  border-radius: 50%;
+  background: #ead69d;
+  color: #1c4332;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .13);
+  transition: transform .16s ease, background .16s ease;
+}
+
+.tt-lesson-experience .tt-lesson-nav-next:hover {
+  border-color: #193d30;
+  background: linear-gradient(125deg, #214a38 0%, #123328 100%);
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 11px 22px rgba(27, 62, 45, .22), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+
+.tt-lesson-experience .tt-lesson-nav-next:hover::after {
+  background: #f2dfa9;
+  transform: translateX(3px);
+}
+
+.tt-lesson-experience .tt-lesson-nav-next:focus-visible {
+  outline: 3px solid #c9a85d;
+  outline-offset: 4px;
+}
+
+.tt-lesson-experience .tt-lesson-nav-next:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 620px) {
+  .tt-lesson-experience .tt-lesson-nav-next {
+    min-height: 98px;
+    padding: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-lesson-experience .tt-lesson-nav-next,
+  .tt-lesson-experience .tt-lesson-nav-next::after {
+    transition: none;
+  }
+}
