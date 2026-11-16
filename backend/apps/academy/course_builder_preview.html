@@ -857,7 +857,19 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .builder-lesson-preview-sidebar .preview-notebook-content li { display:block; padding:8px 0; border-top:1px solid #d5dbce; }
 .builder-lesson-preview-sidebar .preview-notebook-number { display:block; margin-bottom:4px; }
 .builder-lesson-preview-sidebar .preview-notebook-examples-button { width:100%; }
-.tt-editor-table-scroll { max-width:100%; overflow-x:auto; margin:10px 0; }
+.tt-editor-table-scroll {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  margin:10px 0;
+  box-sizing:border-box;
+}
+.tt-editor-table-scroll > table { margin:0; }
 .tt-editor-table-editable-wrap { position:relative; }
 .tt-editor-table-delete { position:absolute; z-index:5; top:6px; right:6px; display:grid; place-items:center; width:28px; height:28px; min-height:28px!important; padding:0!important; border:1px solid #d7c7be!important; border-radius:50%!important; background:rgba(255,253,248,.96)!important; color:#9b4c40!important; font-size:19px!important; font-weight:500!important; line-height:1!important; opacity:0; pointer-events:none; transform:translateY(-2px); transition:opacity .14s ease,transform .14s ease,background .14s ease; }
 .tt-editor-table-editable-wrap:hover > .tt-editor-table-delete,
@@ -2168,8 +2180,35 @@ body.builder-dialog-open { overflow:hidden; }
     button.textContent = '×';
     wrapper.appendChild(button);
   }
+  function ensureEditorTableScrollWrapper(table) {
+    if (!table) return null;
+    let wrapper = table.parentElement;
+    if (wrapper?.matches('.tt-editor-table-scroll, .lesson-table-wrap')) {
+      if (!wrapper.hasAttribute('role')) wrapper.setAttribute('role','region');
+      if (!wrapper.hasAttribute('tabindex')) wrapper.setAttribute('tabindex','0');
+      if (!wrapper.hasAttribute('aria-label')) {
+        const title = String(table.dataset.tableTitle || table.querySelector('caption')?.textContent || 'Lesson table').trim();
+        wrapper.setAttribute('aria-label','Scrollable table: ' + (title || 'Lesson table'));
+      }
+      return wrapper;
+    }
+
+    const parent = table.parentElement;
+    if (!parent) return null;
+    wrapper = document.createElement('div');
+    wrapper.className = 'tt-editor-table-scroll';
+    wrapper.setAttribute('role','region');
+    wrapper.setAttribute('tabindex','0');
+    const title = String(table.dataset.tableTitle || table.querySelector('caption')?.textContent || 'Lesson table').trim();
+    wrapper.setAttribute('aria-label','Scrollable table: ' + (title || 'Lesson table'));
+    parent.insertBefore(wrapper,table);
+    wrapper.appendChild(table);
+    return wrapper;
+  }
+
   function prepareEditorTable(table, rebuildHandles) {
     if (!table || !table.closest('[data-visual-editor]')) return;
+    ensureEditorTableScrollWrapper(table);
     const count = tableLogicalWidth(table);
     if (!count) return;
     prepareTableDeleteControl(table);
