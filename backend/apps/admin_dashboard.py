@@ -483,12 +483,15 @@ def staff_admin_desk(request):
 
     policy = context.get("policy_readiness") or {}
     if policy and not policy.get("ready", False):
-        policy_items = policy.get("items") or []
+        unready_policy_items = [
+            item for item in (policy.get("items") or [])
+            if not item.get("ready", False)
+        ]
         action_items.append({
             "severity": "Critical",
             "severity_key": "critical",
             "title": "Sales policy readiness blocked",
-            "count": len(policy_items),
+            "count": len(unready_policy_items),
             "detail": "Checkout remains blocked while required policy versions are missing or contain placeholders.",
             "url": policy.get("url", ""),
             "destination": "Platform / Policies",
