@@ -2534,7 +2534,7 @@ body.builder-dialog-open { overflow:hidden; }
       richFormatPickerMarkup() +
       '<button type="button" data-rich-command="bold" aria-label="Bold" title="Bold (Ctrl/Cmd+B)" aria-keyshortcuts="Control+B Meta+B" aria-pressed="false"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic" title="Italic (Ctrl/Cmd+I)" aria-keyshortcuts="Control+I Meta+I" aria-pressed="false"><em>I</em></button><button type="button" data-rich-command="underline" aria-label="Underline" title="Underline (Ctrl/Cmd+U)" aria-keyshortcuts="Control+U Meta+U" aria-pressed="false"><u>U</u></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough" title="Strikethrough" aria-pressed="false"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list" title="Bulleted list" aria-pressed="false">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list" title="Numbered list" aria-pressed="false">1. List</button>' +
-      '<button type="button" data-rich-command="link" aria-label="Insert link" title="Insert a link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote" title="Insert a pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider" title="Insert a divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table" title="Insert a table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table" title="Insert a grouped-header table">Grouped table</button>' +
+      '<button type="button" data-rich-command="link" aria-label="Insert link" title="Insert a link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote" title="Insert a pull quote">Quote</button><button type="button" data-rich-command="unblockquote" aria-label="Remove quote formatting" title="Convert the selected quote back to normal text">Remove quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider" title="Insert a divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table" title="Insert a table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table" title="Insert a grouped-header table">Grouped table</button>' +
       '<div class="rich-table-toolbar-group" data-rich-table-tools hidden role="group" aria-label="Table editing tools">' +
       '<span class="rich-table-toolbar-label" aria-hidden="true">Table tools</span>' +
       '<button type="button" data-rich-table-action="auto-fit" aria-label="Restore automatic column widths" title="Restore balanced automatic column widths">Auto-fit</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table" title="Add a column">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table" title="Add a row">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table" title="Remove the last column">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table" title="Remove the selected row">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table" title="Add grouped headers">Group headers</button></div>' +
@@ -2610,6 +2610,79 @@ body.builder-dialog-open { overflow:hidden; }
     const label = picker.querySelector('[data-rich-format-label]');
     if (label) label.textContent = option.textContent.trim();
   }
+  function removeQuoteFormatting(editor) {
+    const selection = window.getSelection();
+    if (!editor || !selection || !selection.rangeCount) {
+      toast('Place the cursor inside a quote first.');
+      return false;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!editor.contains(range.startContainer)) {
+      toast('Place the cursor inside a quote first.');
+      return false;
+    }
+
+    const quotes = Array.from(editor.querySelectorAll('blockquote')).filter(quote => {
+      try {
+        return range.collapsed
+          ? quote.contains(range.startContainer)
+          : range.intersectsNode(quote);
+      } catch (_) {
+        return false;
+      }
+    });
+    if (!quotes.length) {
+      toast('Place the cursor inside a quote first.');
+      return false;
+    }
+
+    // Remove only the outer selected quote wrappers; nested content and formatting
+    // are kept intact while inline-only contents are converted back into paragraphs.
+    const outerQuotes = quotes.filter(quote =>
+      !quotes.some(other => other !== quote && other.contains(quote))
+    );
+    const blockTags = /^(P|DIV|H[1-6]|UL|OL|BLOCKQUOTE|HR|TABLE|PRE|SECTION|ARTICLE|ASIDE)$/;
+
+    outerQuotes.forEach(quote => {
+      const parent = quote.parentNode;
+      if (!parent) return;
+      const fragment = document.createDocumentFragment();
+      let inlineParagraph = null;
+
+      const flushInlineParagraph = () => {
+        if (inlineParagraph && inlineParagraph.hasChildNodes()) {
+          fragment.appendChild(inlineParagraph);
+        }
+        inlineParagraph = null;
+      };
+
+      Array.from(quote.childNodes).forEach(child => {
+        if (child.nodeType === 1 && blockTags.test(child.tagName)) {
+          flushInlineParagraph();
+          fragment.appendChild(child);
+          return;
+        }
+        if (!inlineParagraph) inlineParagraph = document.createElement('p');
+        inlineParagraph.appendChild(child);
+      });
+      flushInlineParagraph();
+
+      if (!fragment.hasChildNodes()) {
+        const paragraph = document.createElement('p');
+        paragraph.appendChild(document.createElement('br'));
+        fragment.appendChild(paragraph);
+      }
+      parent.replaceChild(fragment, quote);
+    });
+
+    syncVisualEditorToModel(editor);
+    updateLessonOutlineFromEditor(editor);
+    captureRichEditorRange();
+    toast('Quote formatting removed. The text has been kept.');
+    return true;
+  }
+
   function captureRichEditorRange() {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) {
@@ -5045,6 +5118,9 @@ body.builder-dialog-open { overflow:hidden; }
       return;
     } else if (command === 'blockquote') {
       document.execCommand('formatBlock', false, 'blockquote');
+    } else if (command === 'unblockquote') {
+      removeQuoteFormatting(editor);
+      return;
     } else if (command === 'table') {
       const columns = await promptTableDimension('Number of columns', 3, 12);
       if (columns === null || columns === false) return;
