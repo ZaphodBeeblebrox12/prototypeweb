@@ -99,6 +99,7 @@ const imageNode = Node.create({
       alt: { default: "", renderHTML: () => ({}) },
       title: { default: null, renderHTML: () => ({}) },
       assetId: { default: null, renderHTML: () => ({}) },
+      previewUrl: { default: null, renderHTML: () => ({}) },
     };
   },
   parseHTML() {
@@ -112,7 +113,8 @@ const imageNode = Node.create({
             src,
             alt: element.getAttribute("alt") || "",
             title: element.getAttribute("title"),
-            assetId: asset ? asset[1] : null,
+            assetId: asset ? asset[1] : element.getAttribute("data-tt-asset-id") || null,
+            previewUrl: null,
           };
         },
       },
@@ -123,6 +125,7 @@ const imageNode = Node.create({
           alt: element.textContent.replace(/^Image asset(?:\s*·\s*)?/, ""),
           title: null,
           assetId: element.getAttribute("data-tt-asset-id"),
+          previewUrl: null,
         }),
       },
     ];
@@ -133,6 +136,20 @@ const imageNode = Node.create({
     );
     if (node.attrs.assetId || src.startsWith("asset://")) {
       const assetId = node.attrs.assetId || src.slice("asset://".length);
+      const previewUrl = String(node.attrs.previewUrl || "");
+      if (previewUrl) {
+        return [
+          "img",
+          mergeAttributes(HTMLAttributes, {
+            "data-tt-node": "image",
+            "data-tt-asset-id": assetId,
+            src: previewUrl,
+            alt: node.attrs.alt || "",
+            title: node.attrs.title || null,
+            loading: "lazy",
+          }),
+        ];
+      }
       return [
         "span",
         mergeAttributes(HTMLAttributes, {
@@ -159,6 +176,7 @@ const imageNode = Node.create({
         alt: String(token.text || ""),
         title: token.title || null,
         assetId: asset ? asset[1] : null,
+        previewUrl: null,
       },
     };
   },

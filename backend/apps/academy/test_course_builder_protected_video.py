@@ -116,6 +116,10 @@ class CourseBuilderProtectedVideoUploadTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.json()["video"]["kind"], "staged")
+        self.assertEqual(response.json()["video"]["status"], "stored_for_draft")
+        self.assertTrue(response.json()["video"]["id"])
+        self.assertTrue(response.json()["updated_at"])
         staged = CourseImportVideo.objects.get(
             course_import=draft,
             lesson_id="lesson-local-1",
@@ -140,6 +144,32 @@ class CourseBuilderProtectedVideoUploadTests(TestCase):
             lesson["protectedVideo"]["filename"],
             "support-resistance-intro.mp4",
         )
+
+    def test_tiptap_video_upload_rejects_stale_draft_revision_before_storage(self):
+        draft = self.create_saved_draft()
+        stale_revision = draft.updated_at.isoformat()
+        draft.title = "Changed from another editor"
+        draft.save(update_fields=["title", "updated_at"])
+
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_video_upload",
+                args=[draft.pk, "lesson-local-1"],
+            ),
+            {
+                "file": SimpleUploadedFile(
+                    "stale-video.mp4",
+                    b"stale-video-source",
+                    content_type="video/mp4",
+                ),
+                "expected_updated_at": stale_revision,
+            },
+        )
+
+        self.assertEqual(response.status_code, 409, response.content)
+        self.assertTrue(response.json()["conflict"])
+        self.assertEqual(CourseImportVideo.objects.filter(course_import=draft).count(), 0)
+        self.assertEqual(list(Path(self.temp_dir.name).rglob("*.mp4")), [])
 
     def test_upload_rejects_unknown_lesson_and_unsupported_file_type(self):
         draft = self.create_saved_draft()

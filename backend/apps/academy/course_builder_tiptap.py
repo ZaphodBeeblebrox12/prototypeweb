@@ -8,12 +8,16 @@ remain the source of lifecycle and preview behaviour.
 import hashlib
 import json
 import uuid
+from contextlib import suppress
 from copy import deepcopy
-from urllib.parse import urlencode
+from io import BytesIO
+from pathlib import Path
+from urllib.parse import urlencode, urlsplit
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.core.files.base import ContentFile
 from django.db import transaction
 from django.http import Http404, JsonResponse
 from django.middleware.csrf import get_token
@@ -21,12 +25,26 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 from django.views.decorators.http import require_GET, require_http_methods
+from PIL import Image, UnidentifiedImageError
 
 from .content_rendering import validate_markdown_source
 from .course_card_utils import is_course_card_recommendable
 from .lesson_document import LessonDocumentError, validate_lesson_document
-from .models import Course, CourseImport, Lesson
+from .models import (
+    Course,
+    CourseImport,
+    CourseImportAsset,
+    Lesson,
+    ProtectedLessonVideo,
+)
 from .permissions import is_course_content_admin
+
+_TIPTAP_MAX_IMAGE_BYTES = 10 * 1024 * 1024
+_TIPTAP_IMAGE_FORMATS = {
+    "JPEG": (".jpg", "image/jpeg"),
+    "PNG": (".png", "image/png"),
+    "WEBP": (".webp", "image/webp"),
+}
 
 
 def _require_tiptap_access(request):
@@ -60,7 +78,7 @@ def _payload_lesson(payload, lesson_id):
     return None
 
 
-def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id):
+def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id, record=None):
     """Reject document references that the existing Academy renderer cannot resolve."""
     content_json = (
         lesson_payload.get("content_json")
@@ -246,7 +264,23 @@ def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id
                 reason = "practice question is not part of this saved lesson"
         elif node_type == "videoBlock":
             reference = str(attrs.get("videoId") or "")
-            if not reference or reference != video_id:
+            staged_video_exists = bool(
+                record
+                and record.videos.filter(
+                    pk=reference,
+                    lesson_id=str(lesson_id),
+                ).exclude(source_file="").exists()
+            )
+            live_video_exists = bool(
+                record
+                and record.target_course_id
+                and ProtectedLessonVideo.objects.filter(
+                    pk=reference,
+                    lesson_id=str(lesson_id),
+                    lesson__module__course_id=record.target_course_id,
+                ).exists()
+            )
+            if not (staged_video_exists or live_video_exists or (reference and reference == video_id)):
                 reason = "protected-video reference is not part of this saved lesson"
         elif node_type == "notebookBlock":
             reference = str(attrs.get("notebookId") or "")
@@ -453,6 +487,37 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
 
     expected_updated_at = str(body.get("expected_updated_at") or "").strip()
     markdown = body.get("markdown")
+    video_url_supplied = "external_video_url" in body or "video_url" in body
+    raw_external_video_url = (
+        body.get("external_video_url")
+        if "external_video_url" in body
+        else body.get("video_url")
+    )
+    external_video_url = str(raw_external_video_url or "").strip()
+    if len(external_video_url) > 1000:
+        return JsonResponse(
+            {"detail": "External video links must be 1,000 characters or fewer."},
+            status=400,
+        )
+    if video_url_supplied and external_video_url:
+        try:
+            parsed_video_url = urlsplit(external_video_url)
+        except ValueError:
+            return JsonResponse(
+                {"detail": "External video links must be valid HTTP or HTTPS URLs."},
+                status=400,
+            )
+        if (
+            parsed_video_url.scheme.lower() not in {"https", "http"}
+            or not parsed_video_url.netloc
+            or not parsed_video_url.hostname
+            or parsed_video_url.username
+            or parsed_video_url.password
+        ):
+            return JsonResponse(
+                {"detail": "External video links must be valid HTTP or HTTPS URLs."},
+                status=400,
+            )
     if not expected_updated_at:
         return JsonResponse({"detail": "Reload the lesson before saving; its revision token is missing."}, status=400)
     if not isinstance(markdown, str):
@@ -498,11 +563,36 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         import_lesson = _payload_lesson(payload, lesson_id)
         if state_lesson is None or import_lesson is None:
             return JsonResponse({"detail": "That lesson no longer exists in this saved draft."}, status=409)
+        staged_protected_video = record.videos.filter(
+            lesson_id=str(lesson_id),
+        ).exclude(source_file="").exists()
+        live_protected_video = bool(
+            record.target_course_id
+            and ProtectedLessonVideo.objects.filter(
+                lesson_id=str(lesson_id),
+                lesson__module__course_id=record.target_course_id,
+            ).exists()
+        )
+        if video_url_supplied and external_video_url and (
+            staged_protected_video or live_protected_video
+        ):
+            return JsonResponse(
+                {
+                    "detail": (
+                        "This lesson already has a protected video. Keep that protected stream "
+                        "as the lesson video, or remove it through the existing Course Builder "
+                        "before switching to an external video link."
+                    )
+                },
+                status=409,
+            )
+
         reference_errors = _document_reference_errors(
             document,
             state_lesson,
             import_lesson,
             lesson_id,
+            record=record,
         )
         if reference_errors:
             return JsonResponse(
@@ -526,6 +616,13 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             else {}
         )
         import_content_json["lesson_document"] = document
+        if video_url_supplied:
+            state_lesson["videoUrl"] = external_video_url
+            import_content_json.pop("video_url", None)
+            if external_video_url:
+                import_content_json["external_video_url"] = external_video_url
+            else:
+                import_content_json.pop("external_video_url", None)
         import_lesson["content_markdown"] = markdown
         import_lesson["content_json"] = import_content_json
 
@@ -566,5 +663,383 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             "learner_preview_url": _learner_preview_url(record, import_lesson),
         }
     )
+    add_never_cache_headers(response)
+    return response
+
+
+
+def _tiptap_media_image(image, *, data_url=""):
+    stable_id = str(
+        image.get("assetUuid") or image.get("assetId") or image.get("id") or ""
+    ).strip()
+    if not stable_id:
+        return None
+    return {
+        "id": stable_id,
+        "assetUuid": stable_id,
+        "name": str(image.get("name") or "Course image")[:240],
+        "title": str(image.get("title") or "")[:240],
+        "alt": str(image.get("alt") or image.get("alt_text") or "")[:500],
+        "caption": str(image.get("caption") or "")[:500],
+        "data": str(data_url or image.get("data") or ""),
+    }
+
+
+def _tiptap_media_image_url(record, stable_id):
+    return reverse("staff_course_builder_asset", args=[record.pk, stable_id])
+
+
+def _tiptap_add_image_to_lesson(state, payload, lesson_id, image):
+    state_lesson = _builder_lesson(state, lesson_id)
+    import_lesson = _payload_lesson(payload, lesson_id)
+    if state_lesson is None or import_lesson is None:
+        return False
+
+    stable_id = str(image["assetUuid"])
+    images = state_lesson.get("images")
+    if not isinstance(images, list):
+        images = []
+    if not any(
+        isinstance(item, dict)
+        and str(item.get("assetUuid") or item.get("id") or "") == stable_id
+        for item in images
+    ):
+        images.append(deepcopy(image))
+    state_lesson["images"] = images
+    if not state_lesson.get("image"):
+        state_lesson["image"] = deepcopy(image)
+
+    content_json = (
+        deepcopy(import_lesson.get("content_json"))
+        if isinstance(import_lesson.get("content_json"), dict)
+        else {}
+    )
+    asset_ids = content_json.get("asset_ids")
+    if not isinstance(asset_ids, list):
+        asset_ids = []
+    if stable_id not in {str(value) for value in asset_ids}:
+        asset_ids.append(stable_id)
+    content_json["asset_ids"] = asset_ids
+
+    figures = content_json.get("figures")
+    if not isinstance(figures, dict):
+        figures = {}
+    existing_figure = figures.get(stable_id)
+    if not isinstance(existing_figure, dict):
+        figures[stable_id] = {
+            "type": "image",
+            "title": image.get("title", ""),
+            "alt": image.get("alt", ""),
+            "caption": image.get("caption", ""),
+        }
+    else:
+        existing_figure.setdefault("type", "image")
+        existing_figure.setdefault("title", image.get("title", ""))
+        existing_figure.setdefault("alt", image.get("alt", ""))
+        existing_figure.setdefault("caption", image.get("caption", ""))
+    content_json["figures"] = figures
+    import_lesson["content_json"] = content_json
+
+    assets = payload.get("assets")
+    if not isinstance(assets, list):
+        assets = []
+    if not any(
+        isinstance(item, dict)
+        and str(item.get("stable_asset_id") or "") == stable_id
+        for item in assets
+    ):
+        payload_asset = image.get("_asset_spec")
+        if isinstance(payload_asset, dict):
+            assets.append(deepcopy(payload_asset))
+    payload["assets"] = assets
+    return True
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def course_builder_tiptap_media_api(request, draft_id):
+    """List, upload and attach image assets using the existing Academy asset store."""
+    _require_tiptap_access(request)
+    editable_statuses = [CourseImport.Status.DRAFT, CourseImport.Status.REJECTED]
+    record = CourseImport.objects.filter(
+        pk=draft_id,
+        status__in=editable_statuses,
+    ).first()
+    if record is None or not (record.payload or {}).get("builder_state"):
+        return JsonResponse({"detail": "That saved draft is unavailable for media editing."}, status=404)
+
+    if request.method == "GET":
+        state = _draft_state(record, request)
+        images_by_id = {}
+        for module in state.get("modules", []):
+            if not isinstance(module, dict):
+                continue
+            for lesson in module.get("lessons", []):
+                if not isinstance(lesson, dict):
+                    continue
+                for raw_image in lesson.get("images", []):
+                    if not isinstance(raw_image, dict):
+                        continue
+                    image = _tiptap_media_image(raw_image)
+                    if image and image["data"]:
+                        images_by_id[image["assetUuid"]] = image
+        for asset in record.assets.all():
+            stable_id = str(asset.stable_asset_id)
+            if stable_id not in images_by_id and asset.file:
+                images_by_id[stable_id] = {
+                    "id": stable_id,
+                    "assetUuid": stable_id,
+                    "name": Path(asset.file.name).name[:240] or "Course image",
+                    "title": "",
+                    "alt": str(asset.alt_text or "")[:500],
+                    "caption": "",
+                    "data": _tiptap_media_image_url(record, stable_id),
+                }
+        response = JsonResponse(
+            {
+                "images": sorted(
+                    images_by_id.values(),
+                    key=lambda item: (item["title"] or item["name"]).casefold(),
+                ),
+                "updated_at": record.updated_at.isoformat(),
+            }
+        )
+        add_never_cache_headers(response)
+        return response
+
+    expected_updated_at = str(request.POST.get("expected_updated_at") or "").strip()
+    lesson_id = str(request.POST.get("lesson_id") or "").strip()
+    requested_asset_id = ""
+    if request.content_type == "application/json":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse({"detail": "The request body must be valid JSON."}, status=400)
+        if not isinstance(body, dict):
+            return JsonResponse({"detail": "The request body must be a JSON object."}, status=400)
+        expected_updated_at = str(body.get("expected_updated_at") or "").strip()
+        lesson_id = str(body.get("lesson_id") or "").strip()
+        requested_asset_id = str(body.get("asset_id") or "").strip()
+
+    if not expected_updated_at:
+        return JsonResponse(
+            {"detail": "Reload the lesson before changing its media; its revision token is missing."},
+            status=400,
+        )
+    if not lesson_id:
+        return JsonResponse({"detail": "Select a lesson before adding an image."}, status=400)
+
+    uploaded = request.FILES.get("file")
+    raw_bytes = b""
+    extension = ""
+    if uploaded is not None:
+        if uploaded.size <= 0 or uploaded.size > _TIPTAP_MAX_IMAGE_BYTES:
+            return JsonResponse(
+                {"detail": "Each image must be larger than 0 bytes and no larger than 10 MB."},
+                status=400,
+            )
+        raw_bytes = uploaded.read()
+        if len(raw_bytes) != uploaded.size:
+            return JsonResponse({"detail": "The image upload could not be read completely."}, status=400)
+        try:
+            with Image.open(BytesIO(raw_bytes)) as source_image:
+                detected_format = str(source_image.format or "").upper()
+                source_image.verify()
+            if detected_format not in _TIPTAP_IMAGE_FORMATS:
+                raise ValueError("Choose a JPEG, PNG or WebP image.")
+            extension, _mime_type = _TIPTAP_IMAGE_FORMATS[detected_format]
+        except (UnidentifiedImageError, OSError, ValueError) as exc:
+            return JsonResponse({"detail": f"The uploaded image is invalid: {exc}"}, status=400)
+
+    staged_file_name = ""
+    staged_storage = None
+    try:
+        with transaction.atomic():
+            record = (
+                CourseImport.objects.select_for_update()
+                .filter(pk=draft_id, status__in=editable_statuses)
+                .first()
+            )
+            if record is None:
+                return JsonResponse({"detail": "That saved draft is no longer editable."}, status=410)
+            actual_updated_at = record.updated_at.isoformat()
+            if actual_updated_at != expected_updated_at:
+                return JsonResponse(
+                    {
+                        "detail": "This course draft changed in another tab. Reload it before changing media.",
+                        "conflict": True,
+                        "latest_updated_at": actual_updated_at,
+                    },
+                    status=409,
+                )
+
+            payload = deepcopy(record.payload) if isinstance(record.payload, dict) else {}
+            state = payload.get("builder_state")
+            if not isinstance(state, dict):
+                return JsonResponse({"detail": "The saved draft has no editable Builder state."}, status=409)
+            if _builder_lesson(state, lesson_id) is None or _payload_lesson(payload, lesson_id) is None:
+                return JsonResponse({"detail": "That lesson no longer exists in this saved draft."}, status=409)
+
+            if uploaded is not None:
+                image_id = str(uuid.uuid4())
+                stable_id = str(
+                    uuid.uuid5(
+                        uuid.NAMESPACE_URL,
+                        f"tradethesis-course:{record.course_slug}:builder/{image_id}",
+                    )
+                )
+                filename = Path(str(uploaded.name or "course-image").replace("\\", "/")).name
+                filename = filename[:200] or "course-image"
+                image_name = Path(filename).stem[:160] or "course-image"
+                staged_asset = CourseImportAsset(
+                    course_import=record,
+                    asset_key=f"builder/{image_id}",
+                    stable_asset_id=stable_id,
+                    alt_text="",
+                    source_path="",
+                    original_url="",
+                    source_error="",
+                )
+                staged_asset.file.save(
+                    image_name + extension,
+                    ContentFile(raw_bytes, name=image_name + extension),
+                    save=False,
+                )
+                staged_storage = staged_asset.file.storage
+                staged_file_name = staged_asset.file.name
+                staged_asset.save()
+                image = {
+                    "id": image_id,
+                    "assetUuid": stable_id,
+                    "assetKey": staged_asset.asset_key,
+                    "name": filename,
+                    "title": "",
+                    "alt": "",
+                    "caption": "",
+                    "data": _tiptap_media_image_url(record, stable_id),
+                    "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                    "_asset_spec": {
+                        "asset_key": staged_asset.asset_key,
+                        "stable_asset_id": stable_id,
+                        "alt_text": "",
+                        "source_path": "",
+                        "original_url": "",
+                        "source_error": "",
+                        "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                    },
+                }
+            else:
+                if not requested_asset_id:
+                    return JsonResponse({"detail": "Choose an image from this draft's media library."}, status=400)
+                try:
+                    parsed_asset_id = str(uuid.UUID(requested_asset_id))
+                except (ValueError, TypeError, AttributeError):
+                    return JsonResponse({"detail": "The selected image reference is invalid."}, status=400)
+
+                existing_image = None
+                for module in state.get("modules", []):
+                    if not isinstance(module, dict):
+                        continue
+                    for lesson in module.get("lessons", []):
+                        if not isinstance(lesson, dict):
+                            continue
+                        for raw_image in lesson.get("images", []):
+                            if not isinstance(raw_image, dict):
+                                continue
+                            stable = str(raw_image.get("assetUuid") or raw_image.get("id") or "")
+                            if stable == parsed_asset_id:
+                                existing_image = deepcopy(raw_image)
+                                break
+                        if existing_image:
+                            break
+                    if existing_image:
+                        break
+                asset_record = record.assets.filter(stable_asset_id=parsed_asset_id).first()
+                if existing_image is None and asset_record is None:
+                    return JsonResponse({"detail": "That image is not part of this saved draft."}, status=404)
+                if existing_image is not None:
+                    image = _tiptap_media_image(
+                        existing_image,
+                        data_url=existing_image.get("data") or _tiptap_media_image_url(record, parsed_asset_id),
+                    )
+                else:
+                    image = {
+                        "id": parsed_asset_id,
+                        "assetUuid": parsed_asset_id,
+                        "name": Path(asset_record.file.name).name[:240] if asset_record.file else "Course image",
+                        "title": "",
+                        "alt": str(asset_record.alt_text or "")[:500],
+                        "caption": "",
+                        "data": _tiptap_media_image_url(record, parsed_asset_id),
+                        "_asset_spec": {
+                            "asset_key": asset_record.asset_key,
+                            "stable_asset_id": parsed_asset_id,
+                            "alt_text": str(asset_record.alt_text or "")[:500],
+                            "source_path": str(asset_record.source_path or ""),
+                            "original_url": str(asset_record.original_url or ""),
+                            "source_error": str(asset_record.source_error or ""),
+                            "sha256": "",
+                        },
+                    }
+
+            image_for_state = deepcopy(image)
+            if isinstance(image.get("_asset_spec"), dict):
+                image_for_state["_asset_spec"] = image["_asset_spec"]
+            if not _tiptap_add_image_to_lesson(state, payload, lesson_id, image_for_state):
+                return JsonResponse({"detail": "The selected lesson could not accept this image."}, status=409)
+            for module in state.get("modules", []):
+                if not isinstance(module, dict):
+                    continue
+                for lesson in module.get("lessons", []):
+                    if not isinstance(lesson, dict):
+                        continue
+                    for item in lesson.get("images", []):
+                        if isinstance(item, dict) and str(item.get("assetUuid") or "") == str(image["assetUuid"]):
+                            item.pop("_asset_spec", None)
+                    if isinstance(lesson.get("image"), dict):
+                        lesson["image"].pop("_asset_spec", None)
+
+            encoded = json.dumps(
+                payload,
+                sort_keys=True,
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            new_content_hash = hashlib.sha256(encoded).hexdigest()
+            duplicate_snapshot = CourseImport.objects.filter(
+                course_slug=record.course_slug,
+                content_hash=new_content_hash,
+            ).exclude(pk=record.pk).exists()
+            if duplicate_snapshot:
+                return JsonResponse(
+                    {"detail": "An identical saved snapshot already exists for this course. Reload before changing media.", "conflict": True},
+                    status=409,
+                )
+            record.payload = payload
+            record.content_hash = new_content_hash
+            if record.status == CourseImport.Status.REJECTED:
+                record.status = CourseImport.Status.DRAFT
+            record.save(update_fields=["payload", "content_hash", "status", "updated_at"])
+            image.pop("_asset_spec", None)
+            response_payload = {
+                "ok": True,
+                "image": image,
+                "updated_at": record.updated_at.isoformat(),
+            }
+    except (OSError, ValueError) as exc:
+        if staged_file_name and staged_storage:
+            with suppress(Exception):
+                staged_storage.delete(staged_file_name)
+        return JsonResponse(
+            {"detail": "The image could not be saved to Academy asset storage: " + str(exc)},
+            status=503,
+        )
+    except Exception:
+        if staged_file_name and staged_storage:
+            with suppress(Exception):
+                staged_storage.delete(staged_file_name)
+        raise
+
+    response = JsonResponse(response_payload, status=201 if uploaded is not None else 200)
     add_never_cache_headers(response)
     return response

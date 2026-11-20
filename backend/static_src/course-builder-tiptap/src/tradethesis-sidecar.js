@@ -90,6 +90,7 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
       title: String(item.title || "").slice(0, 240),
       alt: String(item.alt || item.altText || item.alt_text || "").slice(0, 500),
       caption: String(item.caption || "").slice(0, 500),
+      previewUrl: String(item.data || item.previewUrl || "").slice(0, 1000),
     };
     for (const key of [item.id, item.assetUuid, item.assetId, item.asset_id]) {
       const builderId = safeId(key);
@@ -461,6 +462,7 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
         if (!attrs.alt) attrs.alt = asset.alt || "";
         if (!attrs.title) attrs.title = asset.title || "";
         if (!attrs.assetId) attrs.assetId = asset.id;
+        if (asset.previewUrl) attrs.previewUrl = asset.previewUrl;
       } else if (idFor) {
         diagnostics.push({ nodeType: "image", id: String(idFor), reason: "asset-reference-not-in-sidecar" });
       }

@@ -1,12 +1,17 @@
 import json
 import uuid
+from io import BytesIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
 from .lesson_document import make_lesson_document
-from .models import CourseImport
+from .models import CourseImport, CourseImportAsset, CourseImportVideo
+from .views import _lesson_video_url
 
 User = get_user_model()
 
@@ -148,6 +153,10 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         self.assertContains(response, "course-builder-tiptap.js")
         self.assertContains(response, "Test Markdown import and export")
         self.assertContains(response, "Compatibility adapter")
+        self.assertContains(response, "Upload images")
+        self.assertContains(response, "Image library")
+        self.assertContains(response, "Upload / replace video")
+        self.assertContains(response, "External lesson video link")
         self.assertNotContains(response, "staff_course_builder_api")
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
@@ -401,6 +410,265 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         self.assertIn("?lesson=1.1", save.json()["learner_preview_url"])
         self.assertEqual(preview.status_code, 200)
         self.assertContains(preview, "This is the saved Academy preview body.")
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_draft_media_library_lists_saved_assets_and_can_attach_one_to_a_lesson(self):
+        record, lesson_id = self.create_saved_draft()
+        stable_asset_id = uuid.uuid4()
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/existing-image",
+            stable_asset_id=stable_asset_id,
+            alt_text="Existing course figure",
+            file="academy/course-imports/existing-image.jpg",
+        )
+
+        listing = self.client.get(
+            reverse("staff_course_builder_tiptap_media_api", args=[record.pk])
+        )
+        self.assertEqual(listing.status_code, 200, listing.content)
+        self.assertEqual(listing.json()["images"][0]["assetUuid"], str(stable_asset_id))
+        self.assertIn(
+            reverse("staff_course_builder_asset", args=[record.pk, stable_asset_id]),
+            listing.json()["images"][0]["data"],
+        )
+
+        attached = self.client.post(
+            reverse("staff_course_builder_tiptap_media_api", args=[record.pk]),
+            data=json.dumps({
+                "expected_updated_at": record.updated_at.isoformat(),
+                "lesson_id": lesson_id,
+                "asset_id": str(stable_asset_id),
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(attached.status_code, 200, attached.content)
+        self.assertEqual(attached.json()["image"]["assetUuid"], str(stable_asset_id))
+        record.refresh_from_db()
+        state_lesson = record.payload["builder_state"]["modules"][0]["lessons"][0]
+        payload_lesson = record.payload["modules"][0]["lessons"][0]
+        self.assertTrue(any(
+            item.get("assetUuid") == str(stable_asset_id)
+            for item in state_lesson["images"]
+        ))
+        self.assertIn(str(stable_asset_id), payload_lesson["content_json"]["asset_ids"])
+        self.assertEqual(
+            next(item for item in record.payload["assets"] if item["stable_asset_id"] == str(stable_asset_id))["asset_key"],
+            asset.asset_key,
+        )
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_image_upload_uses_existing_academy_asset_storage_and_returns_preview(self):
+        record, lesson_id = self.create_saved_draft()
+        png = BytesIO()
+        Image.new("RGB", (4, 4), color=(245, 245, 245)).save(png, format="PNG")
+        storage = CourseImportAsset._meta.get_field("file").storage
+        with patch.object(
+            storage,
+            "save",
+            return_value="academy/course-imports/tiptap-upload/test-image.png",
+        ) as storage_save:
+            response = self.client.post(
+                reverse("staff_course_builder_tiptap_media_api", args=[record.pk]),
+                data={
+                    "expected_updated_at": record.updated_at.isoformat(),
+                    "lesson_id": lesson_id,
+                    "file": SimpleUploadedFile(
+                        "test-image.png",
+                        png.getvalue(),
+                        content_type="image/png",
+                    ),
+                },
+            )
+        self.assertEqual(response.status_code, 201, response.content)
+        storage_save.assert_called_once()
+        image = response.json()["image"]
+        self.assertTrue(image["assetUuid"])
+        self.assertIn(
+            reverse("staff_course_builder_asset", args=[record.pk, image["assetUuid"]]),
+            image["data"],
+        )
+        record.refresh_from_db()
+        self.assertEqual(record.assets.count(), 1)
+        self.assertEqual(
+            record.payload["builder_state"]["modules"][0]["lessons"][0]["images"][0]["assetUuid"],
+            image["assetUuid"],
+        )
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_draft_media_api_rejects_invalid_image_upload_without_creating_an_asset(self):
+        record, lesson_id = self.create_saved_draft()
+        response = self.client.post(
+            reverse("staff_course_builder_tiptap_media_api", args=[record.pk]),
+            data={
+                "expected_updated_at": record.updated_at.isoformat(),
+                "lesson_id": lesson_id,
+                "file": SimpleUploadedFile(
+                    "not-an-image.txt",
+                    b"not an image",
+                    content_type="text/plain",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(record.assets.count(), 0)
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_external_video_link_is_saved_to_builder_and_learner_payload(self):
+        record, lesson_id = self.create_saved_draft()
+        external_url = "https://www.youtube.com/watch?v=example123"
+        document = make_lesson_document({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [{"type": "text", "text": "Lesson copy."}],
+            }],
+        })
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_tiptap_lesson_api",
+                args=[record.pk, lesson_id],
+            ),
+            data=json.dumps({
+                "expected_updated_at": record.updated_at.isoformat(),
+                "markdown": "Lesson copy.",
+                "document": document,
+                "external_video_url": external_url,
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record.refresh_from_db()
+        state_lesson = record.payload["builder_state"]["modules"][0]["lessons"][0]
+        payload_lesson = record.payload["modules"][0]["lessons"][0]
+        self.assertEqual(state_lesson["videoUrl"], external_url)
+        self.assertEqual(payload_lesson["content_json"]["external_video_url"], external_url)
+        self.assertNotIn("video_url", payload_lesson["content_json"])
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_external_video_link_rejects_non_http_schemes(self):
+        record, lesson_id = self.create_saved_draft()
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_tiptap_lesson_api",
+                args=[record.pk, lesson_id],
+            ),
+            data=json.dumps({
+                "expected_updated_at": record.updated_at.isoformat(),
+                "markdown": "Lesson copy.",
+                "document": make_lesson_document({"type": "doc", "content": [{"type": "paragraph"}]}),
+                "external_video_url": "javascript:alert(1)",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("HTTP or HTTPS", response.json()["detail"])
+
+    def test_external_url_is_production_safe_and_cannot_bypass_paid_video_protection(self):
+        external_url = "https://www.youtube.com/watch?v=example123"
+        with override_settings(ACADEMY_ALLOW_LEGACY_VIDEO_URLS=False):
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": external_url},
+                    paid_purchase=False,
+                    protected_video=False,
+                ),
+                external_url,
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"video_url": external_url},
+                    paid_purchase=False,
+                    protected_video=False,
+                ),
+                "",
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": external_url},
+                    paid_purchase=True,
+                    protected_video=False,
+                ),
+                "",
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": external_url},
+                    paid_purchase=False,
+                    protected_video=True,
+                ),
+                "",
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": "https://user:pass@example.com/video"},
+                    paid_purchase=False,
+                    protected_video=False,
+                ),
+                "",
+            )
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_protected_video_reference_is_validated_against_private_staging_record(self):
+        record, lesson_id = self.create_saved_draft()
+        video = CourseImportVideo.objects.create(
+            course_import=record,
+            lesson_id=lesson_id,
+            source_file="academy/video-drafts/staged-source.mp4",
+            original_filename="staged-source.mp4",
+            size_bytes=123,
+            uploaded_by=self.admin,
+        )
+        document = make_lesson_document({
+            "type": "doc",
+            "content": [{
+                "type": "videoBlock",
+                "attrs": {"videoId": str(video.pk)},
+            }],
+        })
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_tiptap_lesson_api",
+                args=[record.pk, lesson_id],
+            ),
+            data=json.dumps({
+                "expected_updated_at": record.updated_at.isoformat(),
+                "markdown": "Lesson copy.",
+                "document": document,
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record.refresh_from_db()
+        saved = record.payload["modules"][0]["lessons"][0]["content_json"]["lesson_document"]
+        self.assertEqual(saved["document"]["content"][0]["attrs"]["videoId"], str(video.pk))
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_external_video_link_cannot_replace_an_existing_protected_video(self):
+        record, lesson_id = self.create_saved_draft()
+        CourseImportVideo.objects.create(
+            course_import=record,
+            lesson_id=lesson_id,
+            source_file="academy/video-drafts/protected-source.mp4",
+            original_filename="protected-source.mp4",
+            size_bytes=123,
+            uploaded_by=self.admin,
+        )
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_tiptap_lesson_api",
+                args=[record.pk, lesson_id],
+            ),
+            data=json.dumps({
+                "expected_updated_at": record.updated_at.isoformat(),
+                "markdown": "Lesson copy.",
+                "document": make_lesson_document({"type": "doc", "content": [{"type": "paragraph"}]}),
+                "external_video_url": "https://vimeo.com/123456",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertIn("protected video", response.json()["detail"].lower())
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
     def test_non_admin_cannot_open_editor_or_draft_api(self):

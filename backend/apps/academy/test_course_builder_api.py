@@ -596,6 +596,10 @@ class CourseBuilderApiTests(TestCase):
         )
         saved_lesson = record.payload["modules"][0]["lessons"][0]
         self.assertEqual(
+            saved_lesson["content_json"]["external_video_url"],
+            "https://media.example.test/lesson.mp4",
+        )
+        self.assertEqual(
             saved_lesson["content_json"]["video_url"], "https://media.example.test/lesson.mp4"
         )
         self.assertEqual(saved_lesson["content_json"]["notebook"]["title"], "A useful notebook")
@@ -1624,6 +1628,39 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(hydrated_image["data"], reverse("academy:media-asset", args=[asset.pk]))
         self.assertEqual(hydrated_image["title"], "Resistance test")
         self.assertEqual(hydrated_image["alt"], "Price rejecting resistance")
+
+    def test_published_course_editor_hydrates_explicit_external_video_url(self):
+        from .course_builder_api import _builder_state_from_published_course
+
+        course = Course.objects.create(
+            title="Published External Video Course",
+            slug="published-external-video-course",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=module,
+            title="Lesson One",
+            slug="lesson-one",
+            position=1,
+            is_published=True,
+            content_json={
+                "external_video_url": "https://www.youtube.com/watch?v=example123",
+            },
+        )
+
+        state = _builder_state_from_published_course(course)
+
+        self.assertEqual(
+            state["modules"][0]["lessons"][0]["videoUrl"],
+            "https://www.youtube.com/watch?v=example123",
+        )
 
     def test_builder_question_image_is_saved_as_learner_safe_figure_reference(self):
         from .course_builder_api import _asset_uuid, _build_import_payload

@@ -350,3 +350,74 @@ or removal of the legacy editor is included in this checkpoint.
 The Phase 4 acceptance tests cover draft listing, lesson load, private answer
 key isolation, JSON/Markdown save, preserved sidecars, stale-revision rejection,
 server-side reference validation and the existing Academy learner preview.
+
+
+
+## Phase 5 implementation checkpoint — media integration
+
+Phase 5 is being developed on the separate
+`feature/course-builder-tiptap-phase5-media` branch. It remains an additive,
+staff-only extension; it does not replace the legacy Course Builder or alter
+production deployment configuration.
+
+### Images
+
+- Tiptap uses the existing `CourseImportAsset` model and configured Academy
+  asset storage. It does not introduce a separate media bucket or storage
+  provider.
+- Draft image upload accepts JPEG, PNG and WebP, validates the actual image
+  bytes, and enforces the existing 10 MB per-image limit.
+- The draft media API lists images already attached to the saved draft and
+  allows the editor to attach one to the selected lesson.
+- The editor displays the existing authenticated Academy asset URL while
+  editing. The runtime-only preview URL is stripped from the canonical
+  lesson-document JSON and the Markdown mirror retains the stable
+  `asset://UUID` reference.
+- Upload and attach operations use the same draft revision token as lesson
+  saves; stale media writes are rejected rather than silently overwriting
+  newer draft work.
+
+### Protected lesson videos
+
+- The editor reuses the existing staff Course Builder protected-video upload
+  endpoint and `CourseImportVideo` staging model.
+- Source files continue through the private video storage configuration
+  (Google Drive in the existing staging setup); the Tiptap editor does not
+  expose source paths, manifests, stream keys or encryption material.
+- The upload response includes the stable staged-video ID and updated draft
+  revision so Tiptap can insert the sidecar reference without creating a
+  false stale-save conflict.
+- Tiptap supplies the draft revision token before and after the private upload;
+  a stale upload is rejected and its unattached temporary file is discarded.
+  The token remains optional for the legacy Course Builder endpoint.
+- Protected-video references are validated against the staged record or the
+  published `ProtectedLessonVideo` record, not a browser-supplied status.
+- Encrypted HLS processing remains in the existing approval/publication
+  pipeline. Uploading a file in a draft does not create a public playable URL.
+
+### External video links
+
+- A lesson can store an HTTP/HTTPS external video URL through the Tiptap media
+  controls under the explicit `external_video_url` content key. The legacy
+  `video_url` key remains gated by `ACADEMY_ALLOW_LEGACY_VIDEO_URLS`; the
+  Tiptap path does not enable that compatibility setting.
+- URLs are length-limited and reject unsupported schemes, missing hosts and
+  embedded credentials.
+- A protected video takes precedence over an external video URL. Direct
+  individual-purchase entitlements do not receive the unprotected external
+  URL; authors should upload a protected source for those lessons. Ordinary
+  hyperlinks in lesson text remain supported.
+- The existing Course Builder hydrates the explicit external URL when editing
+  a published lesson and retains both the explicit and legacy content keys on
+  save, so the two editors can coexist during the rollout.
+- External links are not encrypted, watermarked or access-controlled by the
+  Academy protected-video player.
+
+### Phase 5 release boundary
+
+The implementation is not production-ready until backend and Node CI pass,
+the editor is manually exercised against the Bollinger Bands draft, image and
+video delivery are confirmed in an authenticated preview, and stale-revision
+handling is verified in two tabs. The legacy editor remains available
+throughout evaluation. The feature branch is not merged or deployed to the
+main staging or production services as part of this checkpoint.
